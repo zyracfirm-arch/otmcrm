@@ -1,0 +1,46 @@
+<div class="rounded-2xl bg-zinc-950 border border-white/10 p-3.5 space-y-2.5 shadow-lg">
+  <div class="flex items-center justify-between">
+    <span class="font-extrabold text-sm text-white">{{ o.order_number }}</span>
+    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {% if o.order_type == 'DELIVERY' %}bg-amber-500/20 text-amber-300{% else %}bg-emerald-500/20 text-emerald-300{% endif %}">
+      {{ o.get_order_type_display }}
+    </span>
+  </div>
+
+  <div class="text-xs space-y-1 border-y border-white/10 py-2">
+    {% for i in o.items.all %}
+    <div class="flex justify-between font-semibold text-zinc-200">
+      <span>{{ i.quantity }} × {{ i.item_name }}</span>
+      <span>₹{{ i.unit_price|floatformat:0 }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="text-[11px] text-zinc-400 space-y-0.5">
+    <p class="font-bold text-white">{{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="text-amber-400 underline">{{ o.customer_phone }}</a></p>
+    {% if o.delivery_address %}<p class="text-zinc-400 leading-snug">{{ o.delivery_address }}</p>{% endif %}
+    {% if o.coupon_code %}<p class="text-emerald-400 font-semibold">Promo: {{ o.coupon_code }} (-₹{{ o.discount_amount|floatformat:0 }})</p>{% endif %}
+  </div>
+
+  <div class="flex items-center justify-between pt-1">
+    <span class="text-sm font-extrabold text-amber-400">Total: ₹{{ o.total_amount|floatformat:0 }}</span>
+    <span class="text-[10px] text-zinc-500">{{ o.created_at|date:"h:i A" }}</span>
+  </div>
+
+  {% if o.status == 'PREPARING' and o.order_type == 'DELIVERY' %}
+    <div class="pt-2">
+      <select id="rider-{{ o.id }}" class="w-full mb-2 bg-zinc-900 border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+        <option value="">Assign Delivery Boy...</option>
+        {% for r in riders %}
+          <option value="{{ r.id }}">{{ r.username|title }}</option>
+        {% endfor %}
+      </select>
+      <button type="button" data-id="{{ o.id }}" onclick="assignRider(this.dataset.id)" class="w-full py-2.5 rounded-xl font-extrabold text-xs bg-purple-500 text-white active:scale-95 transition">
+        Assign & Dispatch 🛵
+      </button>
+    </div>
+  {% elif next_status %}
+    <button type="button" data-id="{{ o.id }}" data-status="{{ next_status }}" onclick="moveStatus(this.dataset.id, this.dataset.status)" class="w-full py-2.5 rounded-xl font-extrabold text-xs {{ btn_color }} active:scale-95 transition mt-2">
+      {{ next_label }}
+    </button>
+  {% endif %}
+</div>

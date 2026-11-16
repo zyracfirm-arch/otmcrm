@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Orders Inbox — Over The Moon CRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Inter', sans-serif; background: #09090b; color: #f4f4f5; }</style>
+</head>
+<body class="min-h-screen" data-order-count="{{ orders|length }}">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/90 border-b border-white/10 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+        <h1 class="font-extrabold text-base md:text-lg tracking-tight">OTM LIVE ORDERS INBOX</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        {% if is_owner %}
+        <a href="/otm-vault-9921/owner/" class="px-3.5 py-2 rounded-xl bg-amber-500 text-black font-extrabold text-xs">👑 Owner Dashboard & Menu</a>
+        {% endif %}
+        <a href="/otm-vault-9921/logout/" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 text-xs font-semibold">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 4-Column Responsive Kanban Board -->
+  <main class="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+    <!-- Column 1: NEW -->
+    <div class="rounded-2xl bg-zinc-900/60 border border-amber-500/30 p-3 space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-amber-400">🔔 New Orders</span>
+      </div>
+      {% for o in orders %}{% if o.status == 'NEW' %}
+        {% include 'order_card_snippet.html' with o=o next_status='PREPARING' next_label='Start Preparing →' btn_color='bg-amber-500 text-black' %}
+      {% endif %}{% endfor %}
+    </div>
+
+    <!-- Column 2: PREPARING -->
+    <div class="rounded-2xl bg-zinc-900/60 border border-blue-500/30 p-3 space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-blue-400">🔥 Preparing</span>
+      </div>
+      {% for o in orders %}{% if o.status == 'PREPARING' %}
+        {% include 'order_card_snippet.html' with o=o next_status='OUT' next_label='Mark Out for Delivery →' btn_color='bg-blue-500 text-white' %}
+      {% endif %}{% endfor %}
+    </div>
+
+    <!-- Column 3: OUT FOR DELIVERY -->
+    <div class="rounded-2xl bg-zinc-900/60 border border-purple-500/30 p-3 space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-purple-400">🛵 Out / Ready</span>
+      </div>
+      {% for o in orders %}{% if o.status == 'OUT' %}
+        {% include 'order_card_snippet.html' with o=o next_status='DONE' next_label='Complete Order ✓' btn_color='bg-emerald-500 text-black' %}
+      {% endif %}{% endfor %}
+    </div>
+
+    <!-- Column 4: DONE -->
+    <div class="rounded-2xl bg-zinc-900/60 border border-white/10 p-3 space-y-3 opacity-75">
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">✓ Completed Today</span>
+      </div>
+      {% for o in orders %}{% if o.status == 'DONE' %}
+        {% include 'order_card_snippet.html' with o=o next_status='' next_label='' btn_color='' %}
+      {% endif %}{% endfor %}
+    </div>
+
+  </main>
+
+  <script>
+    function getCookie(name) {
+      let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+      return v ? v[2] : null;
+    }
+
+    async function moveStatus(orderId, status) {
+      await fetch(`/otm-vault-9921/order/${orderId}/status/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ status })
+      });
+      window.location.reload();
+    }
+    async function assignRider(orderId) {
+  const riderId = document.getElementById(`rider-${orderId}`).value;
+  if (!riderId) return alert('Please select a delivery boy first.');
+  await fetch(`/otm-vault-9921/order/${orderId}/assign/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+    body: JSON.stringify({ rider_id: riderId })
+  });
+  window.location.reload();
+}
+
+    const currentOrderCount = parseInt(document.body.dataset.orderCount || '0', 10);
+    const prevCount = parseInt(sessionStorage.getItem('otm_order_count') || String(currentOrderCount), 10);
+    if (currentOrderCount > prevCount) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.8);
+        osc.stop(ctx.currentTime + 0.8);
+      } catch (e) {}
+    }
+    sessionStorage.setItem('otm_order_count', String(currentOrderCount));
+
+    setTimeout(() => window.location.reload(), 8000);
+  </script>
+  {% csrf_token %}
+</body>
+</html>

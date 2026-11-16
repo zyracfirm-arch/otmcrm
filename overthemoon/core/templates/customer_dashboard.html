@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders — Over The Moon</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body { background: #09090b; color: #f4f4f5; }</style>
+</head>
+<body class="min-h-screen p-4 max-w-2xl mx-auto">
+
+  <header class="flex items-center justify-between pb-6 border-b border-white/10 mb-6 mt-4">
+    <div>
+      <h1 class="text-xl font-extrabold text-white">Hey, {{ request.user.customer_profile.name }} 👋</h1>
+      <p class="text-xs text-amber-400 mt-1">Total Orders: {{ request.user.customer_profile.total_orders }}</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/" class="px-4 py-2 bg-amber-500 text-black text-xs font-bold rounded-xl">Order Menu</a>
+      <a href="/otm-vault-9921/logout/" class="px-4 py-2 bg-white/10 text-white text-xs font-bold rounded-xl">Logout</a>
+    </div>
+  </header>
+
+  <main class="space-y-4">
+    <h2 class="text-sm font-bold text-zinc-400 uppercase tracking-widest">Order History</h2>
+    
+    {% for o in orders %}
+    <div class="bg-zinc-900 border border-white/10 rounded-2xl p-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
+        <div>
+          <span class="font-extrabold text-white">{{ o.order_number }}</span>
+          <span class="text-[10px] text-zinc-500 ml-2">{{ o.created_at|date:"M d, Y" }}</span>
+        </div>
+        <span class="px-2 py-1 rounded-md text-[10px] font-bold 
+          {% if o.status == 'DONE' %}bg-emerald-500/20 text-emerald-400
+          {% else %}bg-amber-500/20 text-amber-400{% endif %}">
+          {{ o.get_status_display }}
+        </span>
+      </div>
+      
+      <div class="text-xs text-zinc-300 space-y-1 mb-4">
+        {% for item in o.items.all %}
+          <div class="flex justify-between">
+            <span>{{ item.quantity }}x {{ item.item_name }}</span>
+            <span>₹{{ item.unit_price|floatformat:0 }}</span>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <div class="flex items-center justify-between pt-3 border-t border-white/10">
+        <span class="text-sm font-extrabold text-amber-400">Total: ₹{{ o.total_amount|floatformat:0 }}</span>
+        <a href="/track/{{ o.tracking_token }}/" class="text-xs text-blue-400 hover:text-blue-300 font-bold underline">
+          {% if o.status != 'DONE' %}Track Live Order ↗{% else %}View Receipt{% endif %}
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-zinc-500 text-sm text-center py-10">You haven't placed any orders yet!</p>
+    {% endfor %}
+  </main>
+</body>
+</html>

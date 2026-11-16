@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authorize Shop Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
+  <form method="POST" class="w-full max-w-sm rounded-3xl bg-zinc-900 border border-white/10 p-6 space-y-4 shadow-2xl">
+    {% csrf_token %}
+    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xl">🔒</div>
+    <h1 class="text-lg font-extrabold">Authorize Shop System</h1>
+    <p class="text-xs text-zinc-400">Enter the Master Hardware Key to unlock the Over The Moon CRM on this device.</p>
+    <input type="password" name="secret_pin" required placeholder="Enter Master Hardware Key"
+      class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400">
+    <button type="submit" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm">Authorize This Device</button>
+  </form>
+</body>
+</html>

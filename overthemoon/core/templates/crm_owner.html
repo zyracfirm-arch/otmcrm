@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Control Center — Over The Moon</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Inter', sans-serif; background: #09090b; color: #f4f4f5; }</style>
+</head>
+<body class="min-h-screen pb-16">
+
+  <header class="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/90 border-b border-white/10 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="font-extrabold text-lg text-white">👑 UBEDULLAH CHEF — OWNER CRM</h1>
+        <p class="text-xs text-zinc-400">Live Revenue, Menu Control, Coupons & Customer Directory</p>
+      </div>
+      <div class="flex gap-2">
+        <a href="/otm-vault-9921/inbox/" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white">← Kitchen Orders Inbox</a>
+        <a href="/" target="_blank" class="px-4 py-2 rounded-xl bg-amber-500 text-black text-xs font-extrabold">View Live Website ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 space-y-8">
+
+    <!-- 1. Daily Analytics KPI Grid -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5">
+        <p class="text-xs font-semibold uppercase text-zinc-400">Today's Completed Revenue</p>
+        <p class="text-3xl font-extrabold text-amber-400 mt-2">₹{{ daily_revenue|floatformat:0 }}</p>
+      </div>
+      <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5">
+        <p class="text-xs font-semibold uppercase text-zinc-400">Today's Total Orders</p>
+        <p class="text-3xl font-extrabold text-white mt-2">{{ daily_count }}</p>
+      </div>
+      <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5">
+        <p class="text-xs font-semibold uppercase text-zinc-400">Top Selling Items Today</p>
+        <div class="mt-2 space-y-1 text-xs">
+          {% for b in bestsellers %}
+          <div class="flex justify-between"><span class="text-zinc-200 font-semibold">{{ b.item_name }}</span><span class="text-amber-400 font-bold">{{ b.qty }} sold</span></div>
+          {% empty %}<p class="text-zinc-500">No items sold yet today</p>{% endfor %}
+        </div>
+      </div>
+      <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5">
+        <p class="text-xs font-semibold uppercase text-zinc-400">Busiest Hours Today</p>
+        <div class="mt-2 space-y-1 text-xs">
+          {% for h in busiest_hours %}
+          <div class="flex justify-between"><span class="text-zinc-200 font-semibold">{{ h.hour }}:00 - {{ h.hour }}:59</span><span class="text-emerald-400 font-bold">{{ h.count }} orders</span></div>
+          {% empty %}<p class="text-zinc-500">Waiting for today's traffic</p>{% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Menu Manager & Coupon Generator (2-Column Split) -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left: Menu Manager (7 cols) -->
+      <div class="lg:col-span-7 rounded-3xl bg-zinc-900 border border-white/10 p-5 space-y-4">
+        <h2 class="text-base font-extrabold text-white">🍔 Live Menu Manager (Add / Price / Stock Toggle)</h2>
+
+        <!-- Add New Item Form -->
+        <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 bg-zinc-950 p-3 rounded-2xl border border-white/10">
+          <input id="newCat" placeholder="Category (e.g. Burgers)" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white">
+          <input id="newName" placeholder="Item Name *" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white sm:col-span-2">
+          <input id="newPrice" type="number" placeholder="Price ₹ *" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white">
+          <button type="button" onclick="addMenuItem()" class="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs rounded-xl py-2">+ Add Item</button>
+        </div>
+
+        <div class="space-y-2 max-h-96 overflow-y-auto pr-1">
+          {% for item in menu_items %}
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-zinc-950 p-3 rounded-2xl border border-white/5 text-xs">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-amber-400">{{ item.category.name }}</span>
+              <p class="font-bold text-white text-sm">{{ item.name }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="number"
+                value="{{ item.price|floatformat:0 }}"
+                data-id="{{ item.id }}"
+                data-name="{{ item.name }}"
+                onchange="updatePrice(this.dataset.id, this.dataset.name, this.value)"
+                class="w-20 bg-zinc-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-amber-400 font-bold text-xs">
+              <button type="button"
+                data-id="{{ item.id }}"
+                onclick="toggleStock(this.dataset.id)"
+                class="px-3 py-1.5 rounded-xl font-bold {% if item.is_available %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30{% else %}bg-red-500/20 text-red-400 border border-red-500/30{% endif %}">
+                {% if item.is_available %}In Stock{% else %}Sold Out{% endif %}
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Right: Coupon Generator (5 cols) -->
+      <div class="lg:col-span-5 rounded-3xl bg-zinc-900 border border-white/10 p-5 space-y-4">
+        <h2 class="text-base font-extrabold text-white">🎟️ Discount Coupon Generator</h2>
+
+        <div class="space-y-2.5 bg-zinc-950 p-3.5 rounded-2xl border border-white/10 text-xs">
+          <div class="grid grid-cols-2 gap-2">
+            <input id="cpCode" placeholder="Code (e.g. OTM50)" class="uppercase bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white font-bold">
+            <select id="cpType" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white">
+              <option value="FLAT">Flat ₹ Off</option>
+              <option value="PERCENT">Percentage % Off</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input id="cpVal" type="number" placeholder="Discount Value (e.g. 50)" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white">
+            <input id="cpMin" type="number" placeholder="Min Order ₹ (e.g. 299)" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white">
+          </div>
+          <label class="flex items-center gap-2 text-zinc-300 pt-1">
+            <input id="cpFirst" type="checkbox" class="rounded accent-amber-500"> Valid for First-Time Customers Only
+          </label>
+          <button type="button" onclick="createCoupon()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold">+ Launch Coupon Live</button>
+        </div>
+
+        <div class="space-y-2">
+          {% for c in coupons %}
+          <div class="flex items-center justify-between bg-zinc-950 p-3 rounded-2xl border border-white/5 text-xs">
+            <div>
+              <span class="font-extrabold text-amber-400 text-sm">{{ c.code }}</span>
+              <span class="text-zinc-400 ml-2">({% if c.discount_type == 'FLAT' %}₹{{ c.value|floatformat:0 }} OFF{% else %}{{ c.value|floatformat:0 }}% OFF{% endif %} above ₹{{ c.min_order_amount|floatformat:0 }})</span>
+              <p class="text-[11px] text-zinc-500 mt-0.5">Used {{ c.used_count }} times {% if c.first_order_only %}• First Order Only{% endif %}</p>
+            </div>
+            <button type="button"
+              data-id="{{ c.id }}"
+              onclick="toggleCoupon(this.dataset.id)"
+              class="px-3 py-1.5 rounded-xl font-bold {% if c.is_active %}bg-emerald-500/20 text-emerald-300{% else %}bg-zinc-800 text-zinc-500{% endif %}">
+              {% if c.is_active %}Active{% else %}Paused{% endif %}
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 3. Automatic Customer CRM Database -->
+    <section class="rounded-3xl bg-zinc-900 border border-white/10 p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-extrabold text-white">👥 Automatic Customer Database (Sorted by Highest Spend)</h2>
+        <span class="text-xs text-zinc-400">{{ customers|length }} Customers Recorded</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="text-zinc-400 border-b border-white/10 uppercase text-[11px]">
+            <tr>
+              <th class="py-2.5 px-3">Customer Name</th>
+              <th class="py-2.5 px-3">Phone</th>
+              <th class="py-2.5 px-3">Saved Address</th>
+              <th class="py-2.5 px-3">Total Orders</th>
+              <th class="py-2.5 px-3">Lifetime Spend</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            {% for cust in customers %}
+            <tr class="hover:bg-white/5">
+              <td class="py-3 px-3 font-bold text-white">{{ cust.name }}</td>
+              <td class="py-3 px-3 text-amber-400 font-semibold">{{ cust.phone }}</td>
+              <td class="py-3 px-3 text-zinc-400 max-w-xs truncate">{{ cust.address|default:"Pickup Customer" }}</td>
+              <td class="py-3 px-3 font-bold">{{ cust.total_orders }}</td>
+              <td class="py-3 px-3 font-extrabold text-emerald-400">₹{{ cust.total_spent|floatformat:0 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="py-6 text-center text-zinc-500">Customers will appear here automatically as orders arrive.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function getCookie(name) {
+      let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+      return v ? v[2] : null;
+    }
+
+    async function addMenuItem() {
+      const category = document.getElementById('newCat').value || 'Signatures';
+      const name = document.getElementById('newName').value;
+      const price = document.getElementById('newPrice').value;
+      if (!name || !price) return alert('Enter item name and price.');
+      
+      try {
+        const res = await fetch('/otm-vault-9921/menu/save/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ category, name, price })
+        });
+        if (res.ok) window.location.reload();
+        else alert('Failed to add item. Please check your internet connection.');
+      } catch (err) {
+        alert('Network error. Item not added.');
+      }
+    }
+
+    async function updatePrice(id, name, price) {
+      try {
+        const res = await fetch('/otm-vault-9921/menu/save/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ id, name, price })
+        });
+        if (!res.ok) alert(`Failed to save price for ${name}. Please check internet connection.`);
+      } catch (err) {
+        alert("Network error. Price not saved.");
+      }
+    }
+
+    async function toggleStock(id) {
+      try {
+        const res = await fetch(`/otm-vault-9921/menu/${id}/toggle/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        if (res.ok) window.location.reload();
+        else alert('Failed to update stock. Please check your internet connection.');
+      } catch (err) {
+        alert('Network error. Stock not updated.');
+      }
+    }
+
+    async function createCoupon() {
+      const code = document.getElementById('cpCode').value;
+      const discount_type = document.getElementById('cpType').value;
+      const value = document.getElementById('cpVal').value;
+      const min_order_amount = document.getElementById('cpMin').value || 0;
+      const first_order_only = document.getElementById('cpFirst').checked;
+      if (!code || !value) return alert('Enter coupon code and discount value.');
+      
+      try {
+        const res = await fetch('/otm-vault-9921/coupon/create/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ code, discount_type, value, min_order_amount, first_order_only })
+        });
+        if (res.ok) window.location.reload();
+        else alert('Failed to create coupon. Please check your internet connection.');
+      } catch (err) {
+        alert('Network error. Coupon not created.');
+      }
+    }
+
+    async function toggleCoupon(id) {
+      try {
+        const res = await fetch(`/otm-vault-9921/coupon/${id}/toggle/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        if (res.ok) window.location.reload();
+        else alert('Failed to toggle coupon. Please check your internet connection.');
+      } catch (err) {
+        alert('Network error. Coupon not updated.');
+      }
+    }
+  </script>
+  {% csrf_token %}
+</body>
+</html>
