@@ -1,46 +1,92 @@
-<div class="rounded-2xl bg-zinc-950 border border-white/10 p-3.5 space-y-2.5 shadow-lg">
-  <div class="flex items-center justify-between">
-    <span class="font-extrabold text-sm text-white">{{ o.order_number }}</span>
-    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {% if o.order_type == 'DELIVERY' %}bg-amber-500/20 text-amber-300{% else %}bg-emerald-500/20 text-emerald-300{% endif %}">
-      {{ o.get_order_type_display }}
+<!-- Reusable Order Card Snippet (Over The Moon Theme - Zero Emojis) -->
+<div class=" if o.status == 'NEW' %}new-order-card border-2 border-yellow-400/60{% elif o.status == 'PREP' %}border border-sky-500/40{% else %}border border-emerald-500/40{% endif %} rounded-3xl bg-zinc-900 p-5 space-y-3.5 shadow-xl transition">
+  
+  <!-- Header: Order ID, Customer & Type Badge -->
+  <div class="flex justify-between items-start gap-2">
+    <div>
+      <span class="font-black text-white text-base tracking-tight">{{ o.order_number }}</span>
+      <p class="text-xs text-zinc-400 font-semibold mt-0.5">
+        {{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="underline text-yellow-400 hover:text-yellow-300">{{ o.customer_phone }}</a>
+      </p>
+    </div>
+    <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider
+      {% if o.order_type == 'DELIVERY' %}bg-yellow-400 text-black{% else %}bg-white/10 text-white border border-white/10{% endif %}">
+      {{ o.order_type }}
     </span>
   </div>
 
-  <div class="text-xs space-y-1 border-y border-white/10 py-2">
+  <!-- Delivery Address (If Delivery) -->
+  {% if o.delivery_address and o.order_type == 'DELIVERY' %}
+  <div class="text-xs text-zinc-300 bg-zinc-950 p-3 rounded-xl border border-white/5 flex items-start gap-2">
+    <svg class="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+    </svg>
+    <span class="leading-relaxed">{{ o.delivery_address }}</span>
+  </div>
+  {% endif %}
+
+  <!-- Ordered Items List -->
+  <div class="text-xs space-y-1.5 border-y border-white/10 py-3">
     {% for i in o.items.all %}
-    <div class="flex justify-between font-semibold text-zinc-200">
+    <div class="flex justify-between font-extrabold text-white">
       <span>{{ i.quantity }} × {{ i.item_name }}</span>
-      <span>₹{{ i.unit_price|floatformat:0 }}</span>
+      <span class="text-zinc-400">₹{{ i.unit_price|floatformat:0 }}</span>
     </div>
     {% endfor %}
   </div>
 
-  <div class="text-[11px] text-zinc-400 space-y-0.5">
-    <p class="font-bold text-white">{{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="text-amber-400 underline">{{ o.customer_phone }}</a></p>
-    {% if o.delivery_address %}<p class="text-zinc-400 leading-snug">{{ o.delivery_address }}</p>{% endif %}
-    {% if o.coupon_code %}<p class="text-emerald-400 font-semibold">Promo: {{ o.coupon_code }} (-₹{{ o.discount_amount|floatformat:0 }})</p>{% endif %}
-  </div>
-
+  <!-- Footer Actions by Status -->
+  {% if o.status == 'NEW' %}
   <div class="flex items-center justify-between pt-1">
-    <span class="text-sm font-extrabold text-amber-400">Total: ₹{{ o.total_amount|floatformat:0 }}</span>
-    <span class="text-[10px] text-zinc-500">{{ o.created_at|date:"h:i A" }}</span>
-  </div>
-
-  {% if o.status == 'PREPARING' and o.order_type == 'DELIVERY' %}
-    <div class="pt-2">
-      <select id="rider-{{ o.id }}" class="w-full mb-2 bg-zinc-900 border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
-        <option value="">Assign Delivery Boy...</option>
-        {% for r in riders %}
-          <option value="{{ r.id }}">{{ r.username|title }}</option>
-        {% endfor %}
-      </select>
-      <button type="button" data-id="{{ o.id }}" onclick="assignRider(this.dataset.id)" class="w-full py-2.5 rounded-xl font-extrabold text-xs bg-purple-500 text-white active:scale-95 transition">
-        Assign & Dispatch 🛵
+    <span class="text-base font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
+    <div class="flex gap-2">
+      <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'CANCELLED')" class="px-3 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 text-xs font-extrabold transition">
+        Reject
+      </button>
+      <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'PREP')" class="px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black transition">
+        Accept & Cook →
       </button>
     </div>
-  {% elif next_status %}
-    <button type="button" data-id="{{ o.id }}" data-status="{{ next_status }}" onclick="moveStatus(this.dataset.id, this.dataset.status)" class="w-full py-2.5 rounded-xl font-extrabold text-xs {{ btn_color }} active:scale-95 transition mt-2">
-      {{ next_label }}
+  </div>
+
+  {% elif o.status == 'PREP' %}
+  <div class="pt-1 space-y-2.5">
+    {% if o.order_type == 'DELIVERY' %}
+    <select id="rider-select-{{ o.id }}" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white font-semibold outline-none focus:border-sky-400">
+      <option value="">-- Select Delivery Rider --</option>
+      {% for r in riders %}
+      <option value="{{ r.id }}">{{ r.username|title }}</option>
+      {% endfor %}
+    </select>
+    <button type="button" data-id="{{ o.id }}" onclick="dispatchOrder(this.dataset.id)" class="w-full py-2.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition">
+      Assign Rider & Dispatch →
     </button>
+    {% else %}
+    <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'OUT')" class="w-full py-2.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition">
+      Mark Ready for Self-Pickup →
+    </button>
+    {% endif %}
+  </div>
+
+  {% elif o.status == 'OUT' %}
+  <div class="pt-1 space-y-2.5">
+    <div class="flex items-center justify-between">
+      <span class="text-xs text-zinc-400 font-bold">Total Payable</span>
+      <span class="text-base font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
+    </div>
+    {% if o.delivery_boy %}
+    <div class="text-[11px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+      <span>Assigned Rider: {{ o.delivery_boy.username|title }}</span>
+    </div>
+    {% endif %}
+    <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'DONE')" class="w-full py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-black transition">
+      Mark Delivered & Paid ✓
+    </button>
+  </div>
   {% endif %}
+
 </div>

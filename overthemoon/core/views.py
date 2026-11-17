@@ -12,6 +12,9 @@ from .models import Category, MenuItem, Customer, Coupon, Order, OrderItem
 from .security import shop_device_and_login_required
 from django.contrib.auth.models import User
 from django.db import transaction
+from datetime import timedelta
+from django.db.models.functions import TruncDate
+import json
 
 # ==========================================
 # 1. PUBLIC WEBSITE VIEWS (Open to Customers)
@@ -145,14 +148,15 @@ def api_place_order(request):
     })
 
 def track_order(request, token):
-    # Fetch the order securely using the UUID token in the URL
     order = get_object_or_404(Order, tracking_token=token)
     
-    # If the JavaScript tracker is polling for a live update (every 5 seconds)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({'status': order.status, 'status_label': order.get_status_display()})
+        return JsonResponse({
+            'status': order.status,
+            'status_label': order.get_status_display(),
+            'rider_name': order.delivery_boy.username.title() if order.delivery_boy else None
+        })
     
-    # Otherwise, render the full tracking page for the customer
     return render(request, 'track_order.html', {'order': order})
 # ==========================================
 # 2. SHOP DEVICE ACTIVATION & CRM VIEWS
@@ -201,16 +205,17 @@ def crm_login(request):
 @shop_device_and_login_required(owner_only=False)
 def crm_orders_inbox(request):
     today = timezone.localdate()
-    orders = Order.objects.filter(created_at__date=today).exclude(status='CANCELLED').prefetch_related('items').order_by('-created_at')
+    # Active orders for Kanban
+    orders = Order.objects.filter(created_at__date=today).exclude(status__in=['DONE', 'CANCELLED']).prefetch_related('items').order_by('created_at')
+    # History for Kitchen (Today's completed/rejected)
+    history_orders = Order.objects.filter(created_at__date=today, status__in=['DONE', 'CANCELLED']).prefetch_related('items').order_by('-updated_at')
     
-    # Get all staff users who are not owners and not the main 'kitchen' account
     riders = User.objects.filter(is_staff=True, is_superuser=False).exclude(username='kitchen')
-    
     return render(request, 'crm_dashboard.html', {
         'orders': orders,
+        'history_orders': history_orders,
         'riders': riders,
         'is_owner': request.user.is_superuser,
-        'active_tab': 'inbox'
     })
 
 # 2. Add this NEW function to handle assigning riders
@@ -226,13 +231,14 @@ def api_assign_delivery(request, order_id):
         order.save()
     return JsonResponse({'success': True})
 
-# 3. Add this NEW function for the Rider's Mobile Dashboard
 @shop_device_and_login_required(owner_only=False)
 def delivery_dashboard(request):
-    # Only fetch active orders assigned to the logged-in delivery boy
-    active_deliveries = Order.objects.filter(delivery_boy=request.user, status='OUT').order_by('-created_at')
+    active_deliveries = Order.objects.filter(delivery_boy=request.user, status='OUT').prefetch_related('items').order_by('-created_at')
+    history_deliveries = Order.objects.filter(delivery_boy=request.user, status='DONE').prefetch_related('items').order_by('-updated_at')[:50]
+    
     return render(request, 'delivery_dashboard.html', {
-        'orders': active_deliveries
+        'orders': active_deliveries,
+        'history_orders': history_deliveries,
     })
 
 @shop_device_and_login_required(owner_only=False)
@@ -240,40 +246,42 @@ def delivery_dashboard(request):
 def api_update_order_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     new_status = json.loads(request.body).get('status')
-    if new_status in dict(Order.STATUS_CHOICES):
+    
+    # Normalize status keys so 'PREP'/'PREPARING' and 'CANCEL'/'CANCELLED' always work
+    valid_keys = dict(Order.STATUS_CHOICES).keys()
+    if new_status == 'PREP' and 'PREPARING' in valid_keys:
+        new_status = 'PREPARING'
+    elif new_status == 'CANCEL' and 'CANCELLED' in valid_keys:
+        new_status = 'CANCELLED'
+
+    if new_status in valid_keys:
         order.status = new_status
         order.save()
     return JsonResponse({'success': True, 'status': order.status})
 
 @shop_device_and_login_required(owner_only=True)
 def crm_owner_portal(request):
-    """Strictly accessible ONLY by Ubedullah (Owner)."""
-    today = timezone.localdate()
-    todays_orders = Order.objects.filter(created_at__date=today, status='DONE')
+    today = timezone.now()
+    thirty_days_ago = today - timedelta(days=30)
+    
+    # 1. Fetch last 30 days of DONE orders for the interactive Chart & Stats
+    done_orders = Order.objects.filter(status='DONE', created_at__gte=thirty_days_ago).prefetch_related('items')
+    
+    orders_data = []
+    for o in done_orders:
+        orders_data.append({
+            'date': o.created_at.strftime('%Y-%m-%d'),
+            'hour': o.created_at.hour,
+            'amount': float(o.total_amount),
+            'items': [{'name': i.item_name, 'qty': i.quantity} for i in o.items.all()]
+        })
 
-    daily_revenue = todays_orders.aggregate(total=Sum('total_amount'))['total'] or 0
-    daily_count = Order.objects.filter(created_at__date=today).count()
-
-    bestsellers = (
-        OrderItem.objects.filter(order__created_at__date=today)
-        .values('item_name')
-        .annotate(qty=Sum('quantity'))
-        .order_by('-qty')[:5]
-    )
-
-    busiest_hours = (
-        Order.objects.filter(created_at__date=today)
-        .annotate(hour=ExtractHour('created_at'))
-        .values('hour')
-        .annotate(count=Count('id'))
-        .order_by('-count')[:4]
-    )
+    # 2. Fetch full system history for the "All Orders History" tab
+    all_history = Order.objects.all().order_by('-created_at')[:200] # Last 200 for performance
 
     return render(request, 'crm_owner.html', {
-        'daily_revenue': daily_revenue,
-        'daily_count': daily_count,
-        'bestsellers': bestsellers,
-        'busiest_hours': busiest_hours,
+        'orders_json': json.dumps(orders_data),
+        'all_history': all_history,
         'customers': Customer.objects.order_by('-total_spent')[:100],
         'menu_items': MenuItem.objects.select_related('category').all(),
         'categories': Category.objects.all(),
@@ -387,10 +395,9 @@ def api_customer_auth(request):
 
     
 
-# 4. Customer Order History Dashboard
 def customer_dashboard(request):
     if not request.user.is_authenticated or request.user.is_staff:
         return redirect('public_menu')
     
-    orders = Order.objects.filter(customer=request.user.customer_profile).order_by('-created_at')
+    orders = Order.objects.filter(customer=request.user.customer_profile).prefetch_related('items').order_by('-created_at')
     return render(request, 'customer_dashboard.html', {'orders': orders})

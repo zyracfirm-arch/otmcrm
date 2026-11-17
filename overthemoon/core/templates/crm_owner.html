@@ -2,261 +2,482 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Owner Control Center — Over The Moon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Owner Portal & Analytics — Over The Moon</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>body { font-family: 'Inter', sans-serif; background: #09090b; color: #f4f4f5; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #050507; color: #f4f4f5; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .tab-content { display: none; animation: fadeIn 0.25s ease-out; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
-<body class="min-h-screen pb-16">
+<body class="min-h-screen flex flex-col lg:flex-row overflow-hidden">
 
-  <header class="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/90 border-b border-white/10 px-4 py-3">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+  <!-- Responsive Sidebar Navigation -->
+  <aside class="w-full lg:w-72 bg-zinc-950/90 backdrop-blur-2xl border-b lg:border-b-0 lg:border-r border-white/10 shrink-0 flex flex-col z-20">
+    <div class="p-5 border-b border-white/10 flex items-center justify-between lg:block">
       <div>
-        <h1 class="font-extrabold text-lg text-white">👑 UBEDULLAH CHEF — OWNER CRM</h1>
-        <p class="text-xs text-zinc-400">Live Revenue, Menu Control, Coupons & Customer Directory</p>
+        <h1 class="font-black text-lg text-white leading-none tracking-tight">OWNER PORTAL</h1>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-yellow-400 mt-1.5">Chef Ubedulla Mansuri</p>
       </div>
-      <div class="flex gap-2">
-        <a href="/otm-vault-9921/inbox/" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white">← Kitchen Orders Inbox</a>
-        <a href="/" target="_blank" class="px-4 py-2 rounded-xl bg-amber-500 text-black text-xs font-extrabold">View Live Website ↗</a>
+      <a href="{% url 'crm_orders_inbox' %}" class="lg:mt-5 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-black border border-white/10 transition flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>Kitchen Inbox</span>
+      </a>
+    </div>
+
+    <!-- All 5 Sidebar Tabs -->
+    <nav class="p-3 lg:p-4 flex lg:flex-col gap-2 overflow-x-auto no-scrollbar">
+      <button onclick="openTab('tab-analytics', this)" class="tab-btn active shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left bg-yellow-400 text-black shadow-lg shadow-yellow-400/20 flex items-center gap-2.5 transition">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+        <span>Revenue & Analytics</span>
+      </button>
+
+      <button onclick="openTab('tab-customers', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          <span>Customer People ({{ customers|length }})</span>
+        </span>
+      </button>
+
+      <button onclick="openTab('tab-history', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center gap-2.5">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span>All Orders History</span>
+      </button>
+
+      <button onclick="openTab('tab-menu', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center gap-2.5">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        <span>Menu & Stock</span>
+      </button>
+
+      <button onclick="openTab('tab-coupons', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center gap-2.5">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+        <span>Promo Coupons</span>
+      </button>
+    </nav>
+
+    <div class="mt-auto p-4 hidden lg:block border-t border-white/10">
+      <a href="{% url 'crm_logout' %}" class="flex items-center gap-2 text-xs font-black text-red-400 hover:text-red-300">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        <span>Secure Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Workspace Area -->
+  <main class="flex-1 h-[calc(100vh-140px)] lg:h-screen overflow-y-auto p-4 sm:p-8">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: REVENUE ANALYTICS & PEOPLE COUNTER  -->
+    <!-- ========================================== -->
+    <div id="tab-analytics" class="tab-content active space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div>
+          <h2 class="text-xl font-black text-white">Business Performance</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Filter revenue, orders, peak rush hours, and bestsellers by timeframe</p>
+        </div>
+
+        <div class="flex bg-zinc-900 p-1 rounded-xl border border-white/10">
+          <button onclick="filterData(7)" id="flt-7" class="px-4 py-2 rounded-lg text-xs font-black bg-yellow-400 text-black shadow transition">Last 7 Days</button>
+          <button onclick="filterData(15)" id="flt-15" class="px-4 py-2 rounded-lg text-xs font-black text-zinc-400 hover:text-white transition">Last 15 Days</button>
+          <button onclick="filterData(30)" id="flt-30" class="px-4 py-2 rounded-lg text-xs font-black text-zinc-400 hover:text-white transition">Last 30 Days</button>
+        </div>
+      </div>
+
+      <!-- 5 KPI Cards (Includes Total Saved Customers / People) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="rounded-3xl bg-zinc-900 border border-white/10 p-5 shadow-xl relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-1 bg-yellow-400"></div>
+          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Period Revenue</p>
+          <p class="text-2xl sm:text-3xl font-black text-yellow-400 mt-2" id="stat-rev">₹0</p>
+        </div>
+
+        <div class="rounded-3xl bg-zinc-900 border border-white/10 p-5 shadow-xl relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-1 bg-sky-400"></div>
+          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Completed Orders</p>
+          <p class="text-2xl sm:text-3xl font-black text-white mt-2" id="stat-ord">0</p>
+        </div>
+
+        <!-- Total People / Customers Card (Clickable to jump to Customer tab) -->
+        <div onclick="document.querySelectorAll('.tab-btn')[1].click()" class="cursor-pointer rounded-3xl bg-zinc-900 border border-emerald-500/30 hover:border-emerald-400 p-5 shadow-xl relative overflow-hidden transition group">
+          <div class="absolute top-0 left-0 w-full h-1 bg-emerald-400"></div>
+          <div class="flex items-center justify-between">
+            <p class="text-[10px] text-emerald-400 uppercase font-black tracking-widest">Total Customers</p>
+            <svg class="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </div>
+          <p class="text-2xl sm:text-3xl font-black text-white mt-2">{{ customers|length }}</p>
+          <p class="text-[10px] text-zinc-400 font-semibold mt-1">Tap to view customer list</p>
+        </div>
+
+        <div class="rounded-3xl bg-zinc-900 border border-white/10 p-5 shadow-xl">
+          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Bestseller Dish</p>
+          <p class="text-sm sm:text-base font-black text-amber-300 mt-2 truncate" id="stat-best">-</p>
+        </div>
+
+        <div class="rounded-3xl bg-zinc-900 border border-white/10 p-5 shadow-xl">
+          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Peak Rush Hour</p>
+          <p class="text-base sm:text-lg font-black text-white mt-2" id="stat-peak">-</p>
+        </div>
+      </div>
+
+      <!-- Revenue Line Chart -->
+      <div class="rounded-3xl bg-zinc-900 border border-white/10 p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xs font-black uppercase tracking-widest text-zinc-400">Daily Revenue Trendline</h3>
+          <span class="text-[11px] font-bold text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-lg border border-yellow-400/20">Delivered Orders Only</span>
+        </div>
+        <div class="w-full h-72 sm:h-80">
+          <canvas id="revenueChart"></canvas>
+        </div>
       </div>
     </div>
-  </header>
 
-  <main class="max-w-7xl mx-auto p-4 space-y-8">
-
-    <!-- 1. Daily Analytics KPI Grid -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5">
-        <p class="text-xs font-semibold uppercase text-zinc-400">Today's Completed Revenue</p>
-        <p class="text-3xl font-extrabold text-amber-400 mt-2">₹{{ daily_revenue|floatformat:0 }}</p>
-      </div>
-      <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5">
-        <p class="text-xs font-semibold uppercase text-zinc-400">Today's Total Orders</p>
-        <p class="text-3xl font-extrabold text-white mt-2">{{ daily_count }}</p>
-      </div>
-      <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5">
-        <p class="text-xs font-semibold uppercase text-zinc-400">Top Selling Items Today</p>
-        <div class="mt-2 space-y-1 text-xs">
-          {% for b in bestsellers %}
-          <div class="flex justify-between"><span class="text-zinc-200 font-semibold">{{ b.item_name }}</span><span class="text-amber-400 font-bold">{{ b.qty }} sold</span></div>
-          {% empty %}<p class="text-zinc-500">No items sold yet today</p>{% endfor %}
+    <!-- ========================================== -->
+    <!-- TAB 2: CUSTOMER PEOPLE CRM DATABASE        -->
+    <!-- ========================================== -->
+    <div id="tab-customers" class="tab-content space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div>
+          <h2 class="text-xl font-black text-white">Registered Customers & Guests ({{ customers|length }} People)</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Sorted automatically by highest lifetime spending at Over The Moon</p>
         </div>
-      </div>
-      <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5">
-        <p class="text-xs font-semibold uppercase text-zinc-400">Busiest Hours Today</p>
-        <div class="mt-2 space-y-1 text-xs">
-          {% for h in busiest_hours %}
-          <div class="flex justify-between"><span class="text-zinc-200 font-semibold">{{ h.hour }}:00 - {{ h.hour }}:59</span><span class="text-emerald-400 font-bold">{{ h.count }} orders</span></div>
-          {% empty %}<p class="text-zinc-500">Waiting for today's traffic</p>{% endfor %}
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. Menu Manager & Coupon Generator (2-Column Split) -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-      <!-- Left: Menu Manager (7 cols) -->
-      <div class="lg:col-span-7 rounded-3xl bg-zinc-900 border border-white/10 p-5 space-y-4">
-        <h2 class="text-base font-extrabold text-white">🍔 Live Menu Manager (Add / Price / Stock Toggle)</h2>
-
-        <!-- Add New Item Form -->
-        <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 bg-zinc-950 p-3 rounded-2xl border border-white/10">
-          <input id="newCat" placeholder="Category (e.g. Burgers)" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white">
-          <input id="newName" placeholder="Item Name *" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white sm:col-span-2">
-          <input id="newPrice" type="number" placeholder="Price ₹ *" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white">
-          <button type="button" onclick="addMenuItem()" class="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs rounded-xl py-2">+ Add Item</button>
-        </div>
-
-        <div class="space-y-2 max-h-96 overflow-y-auto pr-1">
-          {% for item in menu_items %}
-          <div class="flex flex-wrap items-center justify-between gap-2 bg-zinc-950 p-3 rounded-2xl border border-white/5 text-xs">
-            <div>
-              <span class="text-[10px] uppercase font-bold text-amber-400">{{ item.category.name }}</span>
-              <p class="font-bold text-white text-sm">{{ item.name }}</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <input type="number"
-                value="{{ item.price|floatformat:0 }}"
-                data-id="{{ item.id }}"
-                data-name="{{ item.name }}"
-                onchange="updatePrice(this.dataset.id, this.dataset.name, this.value)"
-                class="w-20 bg-zinc-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-amber-400 font-bold text-xs">
-              <button type="button"
-                data-id="{{ item.id }}"
-                onclick="toggleStock(this.dataset.id)"
-                class="px-3 py-1.5 rounded-xl font-bold {% if item.is_available %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30{% else %}bg-red-500/20 text-red-400 border border-red-500/30{% endif %}">
-                {% if item.is_available %}In Stock{% else %}Sold Out{% endif %}
-              </button>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
+        <input id="custSearchInput" oninput="filterCustomers()" type="text" placeholder="Search by name or phone..." class="w-full sm:w-64 bg-zinc-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
       </div>
 
-      <!-- Right: Coupon Generator (5 cols) -->
-      <div class="lg:col-span-5 rounded-3xl bg-zinc-900 border border-white/10 p-5 space-y-4">
-        <h2 class="text-base font-extrabold text-white">🎟️ Discount Coupon Generator</h2>
-
-        <div class="space-y-2.5 bg-zinc-950 p-3.5 rounded-2xl border border-white/10 text-xs">
-          <div class="grid grid-cols-2 gap-2">
-            <input id="cpCode" placeholder="Code (e.g. OTM50)" class="uppercase bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white font-bold">
-            <select id="cpType" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white">
-              <option value="FLAT">Flat ₹ Off</option>
-              <option value="PERCENT">Percentage % Off</option>
-            </select>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <input id="cpVal" type="number" placeholder="Discount Value (e.g. 50)" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white">
-            <input id="cpMin" type="number" placeholder="Min Order ₹ (e.g. 299)" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white">
-          </div>
-          <label class="flex items-center gap-2 text-zinc-300 pt-1">
-            <input id="cpFirst" type="checkbox" class="rounded accent-amber-500"> Valid for First-Time Customers Only
-          </label>
-          <button type="button" onclick="createCoupon()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold">+ Launch Coupon Live</button>
-        </div>
-
-        <div class="space-y-2">
-          {% for c in coupons %}
-          <div class="flex items-center justify-between bg-zinc-950 p-3 rounded-2xl border border-white/5 text-xs">
-            <div>
-              <span class="font-extrabold text-amber-400 text-sm">{{ c.code }}</span>
-              <span class="text-zinc-400 ml-2">({% if c.discount_type == 'FLAT' %}₹{{ c.value|floatformat:0 }} OFF{% else %}{{ c.value|floatformat:0 }}% OFF{% endif %} above ₹{{ c.min_order_amount|floatformat:0 }})</span>
-              <p class="text-[11px] text-zinc-500 mt-0.5">Used {{ c.used_count }} times {% if c.first_order_only %}• First Order Only{% endif %}</p>
-            </div>
-            <button type="button"
-              data-id="{{ c.id }}"
-              onclick="toggleCoupon(this.dataset.id)"
-              class="px-3 py-1.5 rounded-xl font-bold {% if c.is_active %}bg-emerald-500/20 text-emerald-300{% else %}bg-zinc-800 text-zinc-500{% endif %}">
-              {% if c.is_active %}Active{% else %}Paused{% endif %}
-            </button>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-    </section>
-
-    <!-- 3. Automatic Customer CRM Database -->
-    <section class="rounded-3xl bg-zinc-900 border border-white/10 p-5 space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-base font-extrabold text-white">👥 Automatic Customer Database (Sorted by Highest Spend)</h2>
-        <span class="text-xs text-zinc-400">{{ customers|length }} Customers Recorded</span>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead class="text-zinc-400 border-b border-white/10 uppercase text-[11px]">
+      <div class="rounded-3xl bg-zinc-900 border border-white/10 p-2 sm:p-6 shadow-xl overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+          <thead class="text-xs text-zinc-400 uppercase tracking-widest border-b border-white/10">
             <tr>
-              <th class="py-2.5 px-3">Customer Name</th>
-              <th class="py-2.5 px-3">Phone</th>
-              <th class="py-2.5 px-3">Saved Address</th>
-              <th class="py-2.5 px-3">Total Orders</th>
-              <th class="py-2.5 px-3">Lifetime Spend</th>
+              <th class="px-4 py-3 font-bold">#</th>
+              <th class="px-4 py-3 font-bold">Customer Name</th>
+              <th class="px-4 py-3 font-bold">Mobile Number</th>
+              <th class="px-4 py-3 font-bold">Saved Address</th>
+              <th class="px-4 py-3 font-bold">Total Orders</th>
+              <th class="px-4 py-3 font-bold text-right">Total Spent</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-white/5">
             {% for cust in customers %}
-            <tr class="hover:bg-white/5">
-              <td class="py-3 px-3 font-bold text-white">{{ cust.name }}</td>
-              <td class="py-3 px-3 text-amber-400 font-semibold">{{ cust.phone }}</td>
-              <td class="py-3 px-3 text-zinc-400 max-w-xs truncate">{{ cust.address|default:"Pickup Customer" }}</td>
-              <td class="py-3 px-3 font-bold">{{ cust.total_orders }}</td>
-              <td class="py-3 px-3 font-extrabold text-emerald-400">₹{{ cust.total_spent|floatformat:0 }}</td>
+            <tr class="cust-row hover:bg-white/[0.02] transition" data-search="{{ cust.name|lower }} {{ cust.phone }}">
+              <td class="px-4 py-4 text-xs font-bold text-zinc-500">{{ forloop.counter }}</td>
+              <td class="px-4 py-4 font-black text-white">{{ cust.name }}</td>
+              <td class="px-4 py-4">
+                <a href="tel:{{ cust.phone }}" class="text-yellow-400 font-bold hover:underline">{{ cust.phone }}</a>
+              </td>
+              <td class="px-4 py-4 text-xs text-zinc-400 max-w-xs truncate">{{ cust.address|default:"Self Pickup / Not set" }}</td>
+              <td class="px-4 py-4">
+                <span class="px-2.5 py-1 rounded-lg bg-white/5 text-white font-black text-xs">{{ cust.total_orders }}</span>
+              </td>
+              <td class="px-4 py-4 font-black text-emerald-400 text-right">₹{{ cust.total_spent|floatformat:0 }}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="py-6 text-center text-zinc-500">Customers will appear here automatically as orders arrive.</td></tr>
+            <tr><td colspan="6" class="text-center py-12 text-zinc-500 font-bold text-xs">No customers registered yet.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: ALL ORDERS HISTORY                  -->
+    <!-- ========================================== -->
+    <div id="tab-history" class="tab-content space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div>
+          <h2 class="text-xl font-black text-white">Complete Order History ({{ all_history|length }})</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Every order placed across the shop with live status and payment totals</p>
+        </div>
+      </div>
+
+      <div class="rounded-3xl bg-zinc-900 border border-white/10 p-2 sm:p-6 shadow-xl overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+          <thead class="text-xs text-zinc-400 uppercase tracking-widest border-b border-white/10">
+            <tr>
+              <th class="px-4 py-3 font-bold">Order ID</th>
+              <th class="px-4 py-3 font-bold">Date & Time</th>
+              <th class="px-4 py-3 font-bold">Customer</th>
+              <th class="px-4 py-3 font-bold">Type</th>
+              <th class="px-4 py-3 font-bold">Status</th>
+              <th class="px-4 py-3 font-bold text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            {% for o in all_history %}
+            <tr class="hover:bg-white/[0.02] transition">
+              <td class="px-4 py-4 font-black text-white">{{ o.order_number }}</td>
+              <td class="px-4 py-4 text-zinc-400 font-bold text-xs">{{ o.created_at|date:"d M Y, h:i A" }}</td>
+              <td class="px-4 py-4 font-bold text-zinc-200">{{ o.customer_name }} <span class="text-xs text-zinc-500">({{ o.customer_phone }})</span></td>
+              <td class="px-4 py-4 text-xs font-bold text-zinc-400">{{ o.order_type }}</td>
+              <td class="px-4 py-4">
+                <span class="px-2.5 py-1 text-[10px] font-black uppercase rounded-lg tracking-wider
+                  {% if o.status == 'DONE' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30
+                  {% elif o.status == 'CANCELLED' %}bg-red-500/15 text-red-400 border border-red-500/30
+                  {% else %}bg-yellow-400/15 text-yellow-400 border border-yellow-400/30{% endif %}">
+                  {{ o.get_status_display }}
+                </span>
+              </td>
+              <td class="px-4 py-4 font-black text-yellow-400 text-right">₹{{ o.total_amount|floatformat:0 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center py-12 text-zinc-500 font-bold text-xs">No orders in database.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: MENU & STOCK CONTROL                -->
+    <!-- ========================================== -->
+    <div id="tab-menu" class="tab-content space-y-6">
+      <h2 class="text-xl font-black text-white border-b border-white/10 pb-4">Menu & Instant Stock Editor</h2>
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <!-- Add Dish Form -->
+        <div class="xl:col-span-4 rounded-3xl bg-zinc-900 border border-white/10 p-6 shadow-xl h-fit space-y-3.5">
+          <h3 class="text-sm font-black text-yellow-400 uppercase tracking-wider">Add New Dish</h3>
+          <input id="itemCategory" list="categoryList" placeholder="Category (e.g. Veg Burger)" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <datalist id="categoryList">{% for c in categories %}<option value="{{ c.name }}">{% endfor %}</datalist>
+          <input id="itemName" placeholder="Dish Name" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <input id="itemPrice" type="number" placeholder="Price in ₹" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <input id="itemImage" placeholder="Image URL (optional)" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <textarea id="itemDesc" rows="2" placeholder="Ingredients / Description" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none"></textarea>
+          <label class="flex items-center gap-2 text-xs text-zinc-300 font-bold cursor-pointer">
+            <input id="itemBest" type="checkbox" class="w-4 h-4 accent-yellow-400"> Mark as Bestseller
+          </label>
+          <button type="button" onclick="saveMenuItem()" class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition">+ Save to Live Menu</button>
+        </div>
+
+        <!-- Live Stock List -->
+        <div class="xl:col-span-8 rounded-3xl bg-zinc-900 border border-white/10 p-6 shadow-xl">
+          <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+            {% for item in menu_items %}
+            <div class="rounded-2xl bg-zinc-950 border border-white/5 p-4 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <span class="text-[10px] uppercase font-black tracking-widest text-yellow-400">{{ item.category.name }}</span>
+                <h4 class="font-extrabold text-white text-sm mt-0.5">{{ item.name }}</h4>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <input id="price-{{ item.id }}" type="number" value="{{ item.price|floatformat:0 }}" class="w-20 bg-zinc-900 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-white font-bold text-center">
+                <button type="button" data-id="{{ item.id }}" data-name="{{ item.name }}" onclick="updateItemPrice(this.dataset.id, this.dataset.name)" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition">Save ₹</button>
+                <button type="button" data-id="{{ item.id }}" onclick="toggleStock(this.dataset.id)"
+                  class="px-4 py-2 rounded-xl text-xs font-black transition {% if item.is_available %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% else %}bg-red-500/15 text-red-400 border border-red-500/30{% endif %}">
+                  {% if item.is_available %}In Stock{% else %}Sold Out{% endif %}
+                </button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: PROMO COUPONS                       -->
+    <!-- ========================================== -->
+    <div id="tab-coupons" class="tab-content space-y-6">
+      <h2 class="text-xl font-black text-white border-b border-white/10 pb-4">Promo Coupons & Offers</h2>
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <div class="xl:col-span-5 rounded-3xl bg-zinc-900 border border-white/10 p-6 shadow-xl h-fit space-y-3.5">
+          <h3 class="text-sm font-black text-yellow-400 uppercase tracking-wider">Create Promo Code</h3>
+          <input id="cpCode" placeholder="Code (e.g. OTM50)" class="w-full uppercase bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:border-yellow-400 outline-none">
+          <div class="grid grid-cols-2 gap-3">
+            <select id="cpType" class="bg-zinc-950 border border-white/10 rounded-xl px-3 py-3 text-sm text-white outline-none">
+              <option value="FLAT">Flat ₹ Off</option>
+              <option value="PERCENT">Percent % Off</option>
+            </select>
+            <input id="cpValue" type="number" placeholder="Value (e.g. 50)" class="bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <input id="cpMin" type="number" value="199" placeholder="Min Order ₹" class="bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+            <input id="cpMax" type="number" value="100" placeholder="Max Cap ₹" class="bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          </div>
+          <label class="flex items-center gap-2 text-xs text-zinc-300 font-bold cursor-pointer">
+            <input id="cpFirst" type="checkbox" class="w-4 h-4 accent-yellow-400"> Valid on First Order Only
+          </label>
+          <button type="button" onclick="createCoupon()" class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition">+ Launch Coupon</button>
+        </div>
+
+        <div class="xl:col-span-7 space-y-3">
+          {% for c in coupons %}
+          <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h4 class="font-black text-lg text-yellow-400 tracking-wide">{{ c.code }}</h4>
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-white/5 text-zinc-300">Used {{ c.used_count }} times</span>
+              </div>
+              <p class="text-xs font-medium text-zinc-400 mt-1">
+                {% if c.discount_type == 'FLAT' %}₹{{ c.value|floatformat:0 }} FLAT OFF{% else %}{{ c.value|floatformat:0 }}% OFF (up to ₹{{ c.max_discount|floatformat:0 }}){% endif %} on orders above ₹{{ c.min_order_amount|floatformat:0 }}
+              </p>
+            </div>
+            <button type="button" data-id="{{ c.id }}" onclick="toggleCoupon(this.dataset.id)"
+              class="px-4 py-2 rounded-xl text-xs font-black transition {% if c.is_active %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% else %}bg-zinc-800 text-zinc-500 border border-white/10{% endif %}">
+              {% if c.is_active %}Active Live{% else %}Paused{% endif %}
+            </button>
+          </div>
+          {% empty %}
+          <div class="rounded-2xl bg-zinc-900/50 border border-white/5 p-10 text-center text-xs text-zinc-500 font-bold">No promo coupons created yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
 
   </main>
 
   <script>
-    function getCookie(name) {
-      let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-      return v ? v[2] : null;
+    function getCookie(name) { let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)'); return v ? v[2] : null; }
+
+    function openTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.className = "tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center gap-2.5";
+      });
+      document.getElementById(tabId).classList.add('active');
+      btn.className = "tab-btn active shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left bg-yellow-400 text-black shadow-lg shadow-yellow-400/20 flex items-center gap-2.5 transition";
     }
 
-    async function addMenuItem() {
-      const category = document.getElementById('newCat').value || 'Signatures';
-      const name = document.getElementById('newName').value;
-      const price = document.getElementById('newPrice').value;
-      if (!name || !price) return alert('Enter item name and price.');
-      
-      try {
-        const res = await fetch('/otm-vault-9921/menu/save/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-          body: JSON.stringify({ category, name, price })
-        });
-        if (res.ok) window.location.reload();
-        else alert('Failed to add item. Please check your internet connection.');
-      } catch (err) {
-        alert('Network error. Item not added.');
+    function filterCustomers() {
+      const q = document.getElementById('custSearchInput').value.toLowerCase();
+      document.querySelectorAll('.cust-row').forEach(row => {
+        row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+      });
+    }
+
+    const rawData = JSON.parse('{{ orders_json|escapejs|default:"[]" }}');
+    let chartInstance = null;
+
+    function filterData(days) {
+      [7, 15, 30].forEach(d => {
+        document.getElementById(`flt-${d}`).className = d === days
+          ? "px-4 py-2 rounded-lg text-xs font-black bg-yellow-400 text-black shadow transition"
+          : "px-4 py-2 rounded-lg text-xs font-black text-zinc-400 hover:text-white transition";
+      });
+
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+
+      const filtered = rawData.filter(o => new Date(o.date) >= cutoff);
+
+      let revenue = 0;
+      let orderCount = filtered.length;
+      let itemCounts = {};
+      let hourCounts = {};
+      let dailySales = {};
+
+      filtered.forEach(o => {
+        revenue += o.amount;
+        o.items.forEach(i => { itemCounts[i.name] = (itemCounts[i.name] || 0) + i.qty; });
+        hourCounts[o.hour] = (hourCounts[o.hour] || 0) + 1;
+        dailySales[o.date] = (dailySales[o.date] || 0) + o.amount;
+      });
+
+      let bestItem = "No sales yet";
+      let maxQty = 0;
+      for (const [name, qty] of Object.entries(itemCounts)) {
+        if (qty > maxQty) { maxQty = qty; bestItem = name; }
       }
-    }
 
-    async function updatePrice(id, name, price) {
-      try {
-        const res = await fetch('/otm-vault-9921/menu/save/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-          body: JSON.stringify({ id, name, price })
-        });
-        if (!res.ok) alert(`Failed to save price for ${name}. Please check internet connection.`);
-      } catch (err) {
-        alert("Network error. Price not saved.");
+      let peakHour = "No rush data";
+      let maxOrders = 0;
+      for (const [hour, count] of Object.entries(hourCounts)) {
+        if (count > maxOrders) {
+          maxOrders = count;
+          let h = parseInt(hour);
+          let ampm = h >= 12 ? 'PM' : 'AM';
+          let dispH = h % 12 || 12;
+          peakHour = `${dispH}:00 ${ampm} (${count} orders)`;
+        }
       }
+
+      document.getElementById('stat-rev').innerText = `₹${revenue.toLocaleString('en-IN')}`;
+      document.getElementById('stat-ord').innerText = orderCount;
+      document.getElementById('stat-best').innerText = maxQty > 0 ? `${bestItem} (${maxQty})` : 'No sales yet';
+      document.getElementById('stat-peak').innerText = peakHour;
+
+      const dates = Object.keys(dailySales).sort();
+      const amounts = dates.map(d => dailySales[d]);
+
+      if (chartInstance) chartInstance.destroy();
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+
+      let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+      gradient.addColorStop(0, 'rgba(250, 204, 21, 0.4)');
+      gradient.addColorStop(1, 'rgba(250, 204, 21, 0.0)');
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates.length ? dates : ['No Data'],
+          datasets: [{
+            label: 'Revenue (₹)',
+            data: amounts.length ? amounts : [0],
+            borderColor: '#FACC15',
+            backgroundColor: gradient,
+            borderWidth: 3,
+            pointBackgroundColor: '#050507',
+            pointBorderColor: '#FACC15',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#71717A', font: { family: 'Inter', weight: 'bold' } } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false }, ticks: { color: '#71717A', font: { family: 'Inter', weight: 'bold' }, callback: v => '₹' + v } }
+          }
+        }
+      });
     }
 
-    async function toggleStock(id) {
-      try {
-        const res = await fetch(`/otm-vault-9921/menu/${id}/toggle/`, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': getCookie('csrftoken') }
-        });
-        if (res.ok) window.location.reload();
-        else alert('Failed to update stock. Please check your internet connection.');
-      } catch (err) {
-        alert('Network error. Stock not updated.');
-      }
-    }
+    window.onload = () => filterData(7);
 
+    async function toggleStock(itemId) {
+      await fetch(`/otm-vault-9921/menu/${itemId}/toggle/`, { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
+      window.location.reload();
+    }
+    async function updateItemPrice(itemId, itemName) {
+      const newPrice = document.getElementById(`price-${itemId}`).value;
+      await fetch('/otm-vault-9921/menu/save/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ id: itemId, name: itemName, price: newPrice }) });
+      window.location.reload();
+    }
+    async function saveMenuItem() {
+      const payload = {
+        category: document.getElementById('itemCategory').value || 'Signatures',
+        name: document.getElementById('itemName').value,
+        price: document.getElementById('itemPrice').value,
+        image_url: document.getElementById('itemImage').value,
+        description: document.getElementById('itemDesc').value,
+        is_bestseller: document.getElementById('itemBest').checked
+      };
+      if (!payload.name || !payload.price) return alert('Enter dish name and price.');
+      await fetch('/otm-vault-9921/menu/save/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify(payload) });
+      window.location.reload();
+    }
     async function createCoupon() {
-      const code = document.getElementById('cpCode').value;
-      const discount_type = document.getElementById('cpType').value;
-      const value = document.getElementById('cpVal').value;
-      const min_order_amount = document.getElementById('cpMin').value || 0;
-      const first_order_only = document.getElementById('cpFirst').checked;
-      if (!code || !value) return alert('Enter coupon code and discount value.');
-      
-      try {
-        const res = await fetch('/otm-vault-9921/coupon/create/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-          body: JSON.stringify({ code, discount_type, value, min_order_amount, first_order_only })
-        });
-        if (res.ok) window.location.reload();
-        else alert('Failed to create coupon. Please check your internet connection.');
-      } catch (err) {
-        alert('Network error. Coupon not created.');
-      }
+      const payload = {
+        code: document.getElementById('cpCode').value,
+        discount_type: document.getElementById('cpType').value,
+        value: document.getElementById('cpValue').value,
+        min_order_amount: document.getElementById('cpMin').value || 0,
+        max_discount: document.getElementById('cpMax').value || 100,
+        first_order_only: document.getElementById('cpFirst').checked
+      };
+      if (!payload.code || !payload.value) return alert('Enter coupon code and discount value.');
+      await fetch('/otm-vault-9921/coupon/create/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify(payload) });
+      window.location.reload();
     }
-
-    async function toggleCoupon(id) {
-      try {
-        const res = await fetch(`/otm-vault-9921/coupon/${id}/toggle/`, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': getCookie('csrftoken') }
-        });
-        if (res.ok) window.location.reload();
-        else alert('Failed to toggle coupon. Please check your internet connection.');
-      } catch (err) {
-        alert('Network error. Coupon not updated.');
-      }
+    async function toggleCoupon(couponId) {
+      await fetch(`/otm-vault-9921/coupon/${couponId}/toggle/`, { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
+      window.location.reload();
     }
   </script>
   {% csrf_token %}
