@@ -3,169 +3,516 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Owner Portal & Analytics — Over The Moon</title>
+  <title>Owner Command & Analytics — Over The Moon</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background: #050507; color: #f4f4f5; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #08080A; color: #f4f4f5; -webkit-font-smoothing: antialiased; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .tab-content { display: none; animation: fadeIn 0.25s ease-out; }
+    .apple-glass { background: rgba(14, 14, 18, 0.92); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); }
+    .apple-card { background: #111115; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 14px 30px -12px rgba(0, 0, 0, 0.7); }
+    .tab-content { display: none; animation: fadeIn 0.2s ease-out; }
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
-<body class="min-h-screen flex flex-col lg:flex-row overflow-hidden">
+<body class="min-h-screen flex flex-col lg:flex-row lg:overflow-hidden selection:bg-yellow-400 selection:text-black">
+
+  <!-- Reusable Brand + FSSAI Veg & Non-Veg SVG Symbols -->
+  <svg class="hidden" aria-hidden="true">
+    <symbol id="otm-astronaut" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="28" fill="#FACC15"/>
+      <rect x="16" y="38" width="12" height="22" rx="6" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+      <rect x="92" y="38" width="12" height="22" rx="6" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+      <circle cx="60" cy="46" r="34" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4.5"/>
+      <ellipse cx="60" cy="47" rx="26" ry="22" fill="#1E1B4B"/>
+      <path d="M40 36 C47 29, 60 29, 68 33" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.9"/>
+      <circle cx="75" cy="49" r="3.5" fill="#FFFFFF" opacity="0.9"/>
+      <circle cx="71" cy="57" r="2" fill="#FFFFFF" opacity="0.9"/>
+      <path d="M35 76 C35 66, 85 66, 85 76 L90 100 C90 106, 30 106, 30 100 Z" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+      <rect x="20" y="86" width="18" height="24" rx="9" fill="#E2E8F0" stroke="#1E1B4B" stroke-width="4"/>
+      <rect x="82" y="86" width="18" height="24" rx="9" fill="#E2E8F0" stroke="#1E1B4B" stroke-width="4"/>
+      <path d="M38 72 C38 57, 82 57, 82 72 Z" fill="#F59E0B" stroke="#1E1B4B" stroke-width="3.5"/>
+      <path d="M36 74 Q48 79 60 74 Q72 79 84 74" stroke="#22C55E" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+      <polygon points="42,76 60,82 78,76" fill="#FACC15"/>
+      <rect x="38" y="77" width="44" height="7" rx="3.5" fill="#78350F" stroke="#1E1B4B" stroke-width="3"/>
+      <rect x="40" y="84" width="40" height="7" rx="3.5" fill="#F59E0B" stroke="#1E1B4B" stroke-width="3.5"/>
+      <circle cx="40" cy="76" r="8.5" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="3.5"/>
+      <circle cx="80" cy="76" r="8.5" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="3.5"/>
+    </symbol>
+
+    <symbol id="veg-mark" viewBox="0 0 24 24">
+      <rect x="2" y="2" width="20" height="20" rx="4" fill="#08080A" stroke="#22C55E" stroke-width="2.3"/>
+      <circle cx="12" cy="12" r="5" fill="#22C55E"/>
+    </symbol>
+
+    <symbol id="nonveg-mark" viewBox="0 0 24 24">
+      <rect x="2" y="2" width="20" height="20" rx="4" fill="#08080A" stroke="#EF4444" stroke-width="2.3"/>
+      <polygon points="12,6.5 17.5,16.5 6.5,16.5" fill="#EF4444"/>
+    </symbol>
+  </svg>
 
   <!-- Responsive Sidebar Navigation -->
-  <aside class="w-full lg:w-72 bg-zinc-950/90 backdrop-blur-2xl border-b lg:border-b-0 lg:border-r border-white/10 shrink-0 flex flex-col z-20">
-    <div class="p-5 border-b border-white/10 flex items-center justify-between lg:block">
-      <div>
-        <h1 class="font-black text-lg text-white leading-none tracking-tight">OWNER PORTAL</h1>
-        <p class="text-[10px] font-bold uppercase tracking-widest text-yellow-400 mt-1.5">Chef Ubedulla Mansuri</p>
+  <aside class="w-full lg:w-72 apple-glass border-b lg:border-b-0 lg:border-r border-white/[0.08] shrink-0 flex flex-col z-20">
+    
+    <!-- Top Brand & Quick Links -->
+    <div class="p-5 border-b border-white/[0.08] flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl overflow-hidden border border-yellow-400/50 shrink-0">
+            <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
+          </div>
+          <div>
+            <h1 class="font-black text-base sm:text-lg text-white leading-none tracking-tight">OWNER VAULT</h1>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-yellow-400 mt-1">Chef Ubedulla Mansuri</p>
+          </div>
+        </div>
+        <a href="{% url 'crm_logout' %}" class="lg:hidden p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20" title="Logout">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </a>
       </div>
-      <a href="{% url 'crm_orders_inbox' %}" class="lg:mt-5 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-black border border-white/10 transition flex items-center justify-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-        <span>Kitchen Inbox</span>
-      </a>
+
+      <div class="grid grid-cols-2 gap-2">
+        <a href="{% url 'crm_orders_inbox' %}" class="px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 text-xs font-extrabold border border-white/[0.08] transition flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+          <span>Kitchen Live</span>
+        </a>
+        <a href="{% url 'public_menu' %}" target="_blank" class="px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 text-xs font-extrabold border border-white/[0.08] transition flex items-center justify-center gap-1.5">
+          <span>Storefront</span>
+          <svg class="w-3.5 h-3.5 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+      </div>
     </div>
 
     <!-- All 5 Sidebar Tabs -->
     <nav class="p-3 lg:p-4 flex lg:flex-col gap-2 overflow-x-auto no-scrollbar">
-      <button onclick="openTab('tab-analytics', this)" class="tab-btn active shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left bg-yellow-400 text-black shadow-lg shadow-yellow-400/20 flex items-center gap-2.5 transition">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
-        <span>Revenue & Analytics</span>
-      </button>
-
-      <button onclick="openTab('tab-customers', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+      <button type="button" id="nav-btn-analytics" onclick="openTab('tab-analytics', this)" class="tab-btn active shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-black text-left bg-yellow-400 text-black flex items-center justify-between gap-2.5 transition">
         <span class="flex items-center gap-2.5">
-          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-          <span>Customer People ({{ customers|length }})</span>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+          <span>Revenue & Analytics</span>
         </span>
       </button>
 
-      <button onclick="openTab('tab-history', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center gap-2.5">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        <span>All Orders History</span>
+      <button type="button" id="nav-btn-history" onclick="openTab('tab-history', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span>All Orders History</span>
+        </span>
+        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-white/10 text-zinc-200" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-white/10 text-zinc-200">{{ all_history|length }}</span>
       </button>
 
-      <button onclick="openTab('tab-menu', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center gap-2.5">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-        <span>Menu & Stock</span>
+      <button type="button" id="nav-btn-customers" onclick="openTab('tab-customers', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span>Customer People</span>
+        </span>
+        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-emerald-500/15 text-emerald-400" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-emerald-500/15 text-emerald-400">{{ customers|length }}</span>
       </button>
 
-      <button onclick="openTab('tab-coupons', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center gap-2.5">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-        <span>Promo Coupons</span>
+      <button type="button" id="nav-btn-menu" onclick="openTab('tab-menu', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+          <span>Menu & Stock</span>
+        </span>
+        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-white/10 text-zinc-200" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-white/10 text-zinc-200">{{ menu_items|length }}</span>
+      </button>
+
+      <button type="button" id="nav-btn-coupons" onclick="openTab('tab-coupons', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+          <span>Promo Coupons</span>
+        </span>
+        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-yellow-400/15 text-yellow-400" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-yellow-400/15 text-yellow-400">{{ coupons|length }}</span>
       </button>
     </nav>
 
-    <div class="mt-auto p-4 hidden lg:block border-t border-white/10">
-      <a href="{% url 'crm_logout' %}" class="flex items-center gap-2 text-xs font-black text-red-400 hover:text-red-300">
+    <!-- Bottom Sidebar Logout & ZYRAC Credit -->
+    <div class="mt-auto p-4 hidden lg:flex flex-col gap-3 border-t border-white/[0.08]">
+      <a href="{% url 'crm_logout' %}" class="w-full py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 flex items-center justify-center gap-2 text-xs font-black text-red-400 transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-        <span>Secure Logout</span>
+        <span>Sign Out</span>
+      </a>
+      <a href="https://www.instagram.com/zyrac__/" target="_blank" rel="noopener noreferrer" class="text-center text-[10px] font-bold text-zinc-500 hover:text-yellow-400 transition">
+        Made by <strong class="text-zinc-300">ZYRAC</strong> • @zyrac__
       </a>
     </div>
   </aside>
 
   <!-- Main Workspace Area -->
-  <main class="flex-1 h-[calc(100vh-140px)] lg:h-screen overflow-y-auto p-4 sm:p-8">
+  <main class="flex-1 lg:h-screen overflow-y-auto p-4 sm:p-8 space-y-6">
 
-    <!-- ========================================== -->
-    <!-- TAB 1: REVENUE ANALYTICS & PEOPLE COUNTER  -->
-    <!-- ========================================== -->
+    <!-- ========================================================= -->
+    <!-- TAB 1: REVENUE ANALYTICS + VEG vs NON-VEG SALES SPLIT     -->
+    <!-- ========================================================= -->
     <div id="tab-analytics" class="tab-content active space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
         <div>
-          <h2 class="text-xl font-black text-white">Business Performance</h2>
-          <p class="text-xs text-zinc-400 mt-0.5">Filter revenue, orders, peak rush hours, and bestsellers by timeframe</p>
+          <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Business Performance & Analytics</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Filter revenue, Veg vs. Non-Veg sales split, rush hours, and top-selling burgers</p>
         </div>
 
-        <div class="flex bg-zinc-900 p-1 rounded-xl border border-white/10">
-          <button onclick="filterData(7)" id="flt-7" class="px-4 py-2 rounded-lg text-xs font-black bg-yellow-400 text-black shadow transition">Last 7 Days</button>
-          <button onclick="filterData(15)" id="flt-15" class="px-4 py-2 rounded-lg text-xs font-black text-zinc-400 hover:text-white transition">Last 15 Days</button>
-          <button onclick="filterData(30)" id="flt-30" class="px-4 py-2 rounded-lg text-xs font-black text-zinc-400 hover:text-white transition">Last 30 Days</button>
+        <div class="flex bg-[#09090C] p-1 rounded-xl border border-white/[0.08]">
+          <button type="button" onclick="filterData(7)" id="flt-7" class="px-4 py-2 rounded-lg text-xs font-black bg-yellow-400 text-black transition">Last 7 Days</button>
+          <button type="button" onclick="filterData(15)" id="flt-15" class="px-4 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition">Last 15 Days</button>
+          <button type="button" onclick="filterData(30)" id="flt-30" class="px-4 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition">Last 30 Days</button>
         </div>
       </div>
 
-      <!-- 5 KPI Cards (Includes Total Saved Customers / People) -->
+      <!-- 5 KPI Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="rounded-3xl bg-zinc-900 border border-white/10 p-5 shadow-xl relative overflow-hidden">
+        <div class="apple-card rounded-2xl p-5 relative overflow-hidden">
           <div class="absolute top-0 left-0 w-full h-1 bg-yellow-400"></div>
           <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Period Revenue</p>
           <p class="text-2xl sm:text-3xl font-black text-yellow-400 mt-2" id="stat-rev">₹0</p>
+          <p class="text-[10px] text-zinc-500 font-semibold mt-1" id="stat-aov">Avg Order: ₹0</p>
         </div>
 
-        <div class="rounded-3xl bg-zinc-900 border border-white/10 p-5 shadow-xl relative overflow-hidden">
+        <div onclick="document.getElementById('nav-btn-history').click()" class="cursor-pointer apple-card hover:border-sky-400/50 rounded-2xl p-5 relative overflow-hidden transition group">
           <div class="absolute top-0 left-0 w-full h-1 bg-sky-400"></div>
-          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Completed Orders</p>
+          <div class="flex items-center justify-between">
+            <p class="text-[10px] text-sky-400 uppercase font-black tracking-widest">Delivered Orders</p>
+            <svg class="w-4 h-4 text-sky-400 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </div>
           <p class="text-2xl sm:text-3xl font-black text-white mt-2" id="stat-ord">0</p>
+          <p class="text-[10px] text-zinc-400 font-semibold mt-1">All-Time Total: {{ all_history|length }}</p>
         </div>
 
-        <!-- Total People / Customers Card (Clickable to jump to Customer tab) -->
-        <div onclick="document.querySelectorAll('.tab-btn')[1].click()" class="cursor-pointer rounded-3xl bg-zinc-900 border border-emerald-500/30 hover:border-emerald-400 p-5 shadow-xl relative overflow-hidden transition group">
+        <div onclick="document.getElementById('nav-btn-customers').click()" class="cursor-pointer apple-card hover:border-emerald-400/50 rounded-2xl p-5 relative overflow-hidden transition group">
           <div class="absolute top-0 left-0 w-full h-1 bg-emerald-400"></div>
           <div class="flex items-center justify-between">
-            <p class="text-[10px] text-emerald-400 uppercase font-black tracking-widest">Total Customers</p>
+            <p class="text-[10px] text-emerald-400 uppercase font-black tracking-widest">Customer People</p>
             <svg class="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </div>
           <p class="text-2xl sm:text-3xl font-black text-white mt-2">{{ customers|length }}</p>
-          <p class="text-[10px] text-zinc-400 font-semibold mt-1">Tap to view customer list</p>
+          <p class="text-[10px] text-yellow-400 font-bold mt-1">{{ premium_count }} OTM Premium (₹5k+)</p>
         </div>
 
-        <div class="rounded-3xl bg-zinc-900 border border-white/10 p-5 shadow-xl">
-          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Bestseller Dish</p>
+        <div class="apple-card rounded-2xl p-5">
+          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">#1 Bestseller Dish</p>
           <p class="text-sm sm:text-base font-black text-amber-300 mt-2 truncate" id="stat-best">-</p>
+          <p class="text-[10px] text-zinc-500 font-semibold mt-1">Most ordered item in period</p>
         </div>
 
-        <div class="rounded-3xl bg-zinc-900 border border-white/10 p-5 shadow-xl">
+        <div class="apple-card rounded-2xl p-5">
           <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Peak Rush Hour</p>
           <p class="text-base sm:text-lg font-black text-white mt-2" id="stat-peak">-</p>
+          <p class="text-[10px] text-zinc-500 font-semibold mt-1">Busiest kitchen window</p>
         </div>
       </div>
 
-      <!-- Revenue Line Chart -->
-      <div class="rounded-3xl bg-zinc-900 border border-white/10 p-6 shadow-xl">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xs font-black uppercase tracking-widest text-zinc-400">Daily Revenue Trendline</h3>
-          <span class="text-[11px] font-bold text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-lg border border-yellow-400/20">Delivered Orders Only</span>
+      <!-- Veg vs. Non-Veg Sales Split Bar -->
+      <div class="apple-card rounded-2xl p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div class="flex items-center gap-4 text-xs font-extrabold">
+            <span class="inline-flex items-center gap-1.5 text-emerald-400">
+              <svg class="w-3.5 h-3.5"><use href="#veg-mark"/></svg>
+              <span>Pure Veg Sales: <strong id="vegRevLabel" class="text-white">₹0</strong> (<span id="vegPctLabel">0%</span>)</span>
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-red-400">
+              <svg class="w-3.5 h-3.5"><use href="#nonveg-mark"/></svg>
+              <span>Non-Veg Sales: <strong id="nonvegRevLabel" class="text-white">₹0</strong> (<span id="nonvegPctLabel">0%</span>)</span>
+            </span>
+          </div>
+          <span class="text-[11px] font-semibold text-zinc-500">Item-level dietary breakdown</span>
         </div>
-        <div class="w-full h-72 sm:h-80">
-          <canvas id="revenueChart"></canvas>
+        <div class="w-full h-2.5 bg-[#09090C] rounded-full overflow-hidden flex border border-white/[0.06]">
+          <div id="vegSplitBar" class="h-full bg-emerald-400 transition-all duration-500" style="width: 50%;"></div>
+          <div id="nonvegSplitBar" class="h-full bg-red-400 transition-all duration-500" style="width: 50%;"></div>
+        </div>
+      </div>
+
+      <!-- Chart + Top 5 Bestsellers Leaderboard Grid -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div class="xl:col-span-8 apple-card rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xs font-black uppercase tracking-widest text-zinc-400">Daily Revenue Trendline</h3>
+            <span class="text-[11px] font-bold text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-lg border border-yellow-400/20">Delivered Orders</span>
+          </div>
+          <div class="w-full h-72 sm:h-80">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Top 5 Bestselling Dishes Leaderboard -->
+        <div class="xl:col-span-4 apple-card rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <h3 class="text-xs font-black uppercase tracking-widest text-yellow-400 mb-4">Top Selling Dishes Leaderboard</h3>
+            <div id="topDishesList" class="space-y-3"></div>
+          </div>
+          <button type="button" onclick="document.getElementById('nav-btn-history').click()" class="mt-6 w-full py-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-extrabold text-white transition flex items-center justify-center gap-2">
+            <span>Inspect Full Order Archive ({{ all_history|length }})</span>
+            <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 2: CUSTOMER PEOPLE CRM DATABASE        -->
-    <!-- ========================================== -->
-    <div id="tab-customers" class="tab-content space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
-        <div>
-          <h2 class="text-xl font-black text-white">Registered Customers & Guests ({{ customers|length }} People)</h2>
-          <p class="text-xs text-zinc-400 mt-0.5">Sorted automatically by highest lifetime spending at Over The Moon</p>
+    <!-- ========================================================= -->
+    <!-- TAB 2: ALL ORDERS HISTORY (WITH VEG & NON-VEG VISIBILITY) -->
+    <!-- ========================================================= -->
+    <div id="tab-history" class="tab-content space-y-5">
+      
+      <div class="apple-card rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-black text-white">Complete Global Order History</h2>
+            <p class="text-xs text-zinc-400 mt-0.5">Inspect every Pure Veg, Non-Veg, or Mixed order with full item breakdown</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="px-4 py-2 rounded-xl bg-[#09090C] border border-white/[0.08] text-right">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Matching Orders</p>
+              <p id="ownerHistCount" class="text-base font-black text-white">{{ all_history|length }}</p>
+            </div>
+            <div class="px-4 py-2 rounded-xl bg-[#09090C] border border-emerald-500/20 text-right">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Filtered Revenue</p>
+              <p id="ownerHistRevenue" class="text-base font-black text-yellow-400">₹0</p>
+            </div>
+          </div>
         </div>
-        <input id="custSearchInput" oninput="filterCustomers()" type="text" placeholder="Search by name or phone..." class="w-full sm:w-64 bg-zinc-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-3 border-t border-white/[0.08]">
+          <div class="lg:col-span-4 relative">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input id="ownerHistSearch" oninput="applyOwnerHistoryFilters()" type="text" placeholder="Search Order ID, Customer, Phone, Dish, Rider..."
+              class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:border-yellow-400 outline-none transition">
+            <button id="clearOwnerHistBtn" type="button" onclick="resetOwnerHistoryFilters()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <div class="lg:col-span-3 flex items-center gap-2">
+            <input id="ownerHistDate" onchange="applyOwnerHistoryFilters()" type="date"
+              class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-bold text-zinc-200 focus:border-yellow-400 outline-none transition">
+            <button type="button" onclick="toggleOwnerTodayDate()" class="shrink-0 px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-[11px] font-black text-yellow-400 transition">
+              Today
+            </button>
+          </div>
+
+          <div class="lg:col-span-5 flex items-center gap-1 overflow-x-auto no-scrollbar bg-[#09090C] p-1 rounded-xl border border-white/[0.08]">
+            <button type="button" onclick="setOwnerHistFilter('ALL', this)" class="own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition whitespace-nowrap">All</button>
+            <button type="button" onclick="setOwnerHistFilter('VEG_ONLY', this)" class="own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap">Pure Veg</button>
+            <button type="button" onclick="setOwnerHistFilter('HAS_NONVEG', this)" class="own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-red-400 hover:text-red-300 transition whitespace-nowrap">Non-Veg</button>
+            <button type="button" onclick="setOwnerHistFilter('LIVE', this)" class="own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition whitespace-nowrap">Live</button>
+            <button type="button" onclick="setOwnerHistFilter('DONE', this)" class="own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition whitespace-nowrap">Delivered</button>
+            <button type="button" onclick="setOwnerHistFilter('CANCELLED', this)" class="own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition whitespace-nowrap">Cancelled</button>
+          </div>
+        </div>
       </div>
 
-      <div class="rounded-3xl bg-zinc-900 border border-white/10 p-2 sm:p-6 shadow-xl overflow-x-auto">
+      <!-- Detailed Order History Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {% for o in all_history %}
+        <div class="owner-hist-row apple-card rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-white/20 transition"
+             data-status="{{ o.status }}"
+             data-type="{{ o.order_type }}"
+             data-date="{{ o.created_at|date:'Y-m-d' }}"
+             data-amount="{{ o.total_amount }}"
+             data-diets="{% for i in o.items.all %}{% if i.is_veg %}VEG {% else %}NONVEG {% endif %}{% endfor %}"
+             data-search="{{ o.order_number|lower }} {{ o.customer_name|lower }} {{ o.customer_phone }} {{ o.order_type|lower }} {% if o.delivery_boy %}{{ o.delivery_boy.username|lower }}{% endif %} {% for i in o.items.all %}{{ i.item_name|lower }} {% endfor %}">
+          
+          <div>
+            <div class="flex items-start justify-between gap-2 pb-3 border-b border-white/[0.07]">
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <a href="{% url 'track_order' o.tracking_token %}" target="_blank" class="font-black text-white hover:text-yellow-400 text-base tracking-tight transition">
+                    {{ o.order_number }}
+                  </a>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-white/[0.07] text-zinc-200">{{ o.order_type }}</span>
+                  {% if o.customer and o.customer.total_spent >= 5000 %}
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-yellow-400 text-black text-[9px] font-black uppercase">
+                    <svg class="w-2.5 h-2.5"><use href="#otm-astronaut"/></svg>
+                    <span>Premium</span>
+                  </span>
+                  {% endif %}
+                </div>
+                <p class="text-[11px] text-zinc-400 font-semibold mt-1">{{ o.created_at|date:"d M Y, h:i A" }}</p>
+              </div>
+
+              <span class="px-2.5 py-1 text-[10px] font-extrabold uppercase rounded-lg tracking-wider
+                {% if o.status == 'DONE' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30
+                {% elif o.status == 'CANCELLED' %}bg-red-500/15 text-red-400 border border-red-500/30
+                {% else %}bg-yellow-400 text-black{% endif %}">
+                {{ o.get_status_display }}
+              </span>
+            </div>
+
+            <div class="mt-3 space-y-1 text-xs">
+              <p class="font-extrabold text-zinc-200">
+                {{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="text-yellow-400 hover:underline">{{ o.customer_phone }}</a>
+              </p>
+              {% if o.delivery_address and o.order_type == 'DELIVERY' %}
+              <p class="text-[11px] text-zinc-400 line-clamp-1">{{ o.delivery_address }}</p>
+              {% endif %}
+              {% if o.delivery_boy %}
+              <p class="text-[11px] text-emerald-400 font-bold">Assigned Rider: {{ o.delivery_boy.username|title }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Ordered Items With Veg & Non-Veg Badges -->
+            <div class="mt-3 p-3 rounded-xl bg-[#09090C] border border-white/[0.06] text-xs text-zinc-200 space-y-1.5 font-semibold">
+              {% for i in o.items.all %}
+              <div class="flex items-center justify-between gap-2">
+                <span class="flex items-center gap-2 min-w-0">
+                  {% if i.is_veg %}
+                  <svg class="w-3.5 h-3.5 shrink-0" title="Pure Veg"><use href="#veg-mark"/></svg>
+                  {% else %}
+                  <svg class="w-3.5 h-3.5 shrink-0" title="Non-Veg"><use href="#nonveg-mark"/></svg>
+                  {% endif %}
+                  <span class="truncate"><strong class="text-yellow-400 font-black">{{ i.quantity }}×</strong> {{ i.item_name }}</span>
+                </span>
+                <span class="text-zinc-500 shrink-0">₹{{ i.unit_price|floatformat:0 }}</span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-white/[0.07] flex items-center justify-between">
+            <a href="{% url 'track_order' o.tracking_token %}" target="_blank" class="text-[11px] font-bold text-zinc-400 hover:text-white underline">
+              Open Receipt →
+            </a>
+            <div class="text-right">
+              {% if o.coupon_code %}
+              <span class="block text-[10px] font-bold text-emerald-400">{{ o.coupon_code }} (-₹{{ o.discount_amount|floatformat:0 }})</span>
+              {% endif %}
+              <span class="font-black text-yellow-400 text-lg">₹{{ o.total_amount|floatformat:0 }}</span>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-16 apple-card rounded-2xl text-xs font-bold text-zinc-500">
+          No orders in database yet.
+        </div>
+        {% endfor %}
+      </div>
+
+      <div id="ownerNoMatchBox" class="hidden text-center py-16 apple-card rounded-2xl">
+        <p class="text-sm font-black text-white">No Orders Match Your Current Filter</p>
+        <button type="button" onclick="resetOwnerHistoryFilters()" class="mt-4 px-5 py-2.5 rounded-xl bg-yellow-400 text-black text-xs font-black">
+          Reset Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB 3: CUSTOMER PEOPLE CRM (PREMIUM / NORMAL / NEW TIERS) -->
+    <!-- ========================================================= -->
+    <div id="tab-customers" class="tab-content space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+        <div>
+          <h2 class="text-xl font-black text-white">Customer People & Member Tiers ({{ customers|length }} People)</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">OTM Premium (₹5,000+ spent) • Normal Members (2+ orders) • New Members (First-time guests)</p>
+        </div>
+        <input id="custSearchInput" oninput="filterCustomers()" type="text" placeholder="Search by name, phone, tier, or address..." class="w-full sm:w-72 bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
+      </div>
+
+      <!-- 3 Interactive Member Tier Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div onclick="setCustTierFilter('PREMIUM', document.getElementById('tier-pill-PREMIUM'))" class="cursor-pointer apple-card border-yellow-400/35 hover:border-yellow-400 rounded-2xl p-5 flex items-center justify-between transition">
+          <div>
+            <span class="text-[10px] font-black uppercase tracking-widest text-yellow-400 block">OTM Astronaut Premium</span>
+            <p class="text-2xl sm:text-3xl font-black text-white mt-1">{{ premium_count }}</p>
+            <p class="text-[11px] font-semibold text-zinc-400 mt-1">Lifetime spend ₹5,000+</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl overflow-hidden border-2 border-yellow-400 shrink-0 shadow-[0_0_16px_rgba(250,204,21,0.3)]">
+            <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
+          </div>
+        </div>
+
+        <div onclick="setCustTierFilter('NORMAL', document.getElementById('tier-pill-NORMAL'))" class="cursor-pointer apple-card hover:border-sky-400/50 rounded-2xl p-5 flex items-center justify-between transition">
+          <div>
+            <span class="text-[10px] font-black uppercase tracking-widest text-sky-400 block">Normal Members</span>
+            <p class="text-2xl sm:text-3xl font-black text-white mt-1">{{ normal_count }}</p>
+            <p class="text-[11px] font-semibold text-zinc-400 mt-1">Repeat customers (2+ orders)</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+          </div>
+        </div>
+
+        <div onclick="setCustTierFilter('NEW', document.getElementById('tier-pill-NEW'))" class="cursor-pointer apple-card hover:border-emerald-400/50 rounded-2xl p-5 flex items-center justify-between transition">
+          <div>
+            <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400 block">New Members</span>
+            <p class="text-2xl sm:text-3xl font-black text-white mt-1">{{ new_member_count }}</p>
+            <p class="text-[11px] font-semibold text-zinc-400 mt-1">First-time guests (0–1 order)</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Member Tier Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-[#09090C] p-1.5 rounded-xl border border-white/[0.08] w-fit max-w-full">
+        <button type="button" id="tier-pill-ALL"
+          data-default="cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition whitespace-nowrap flex items-center gap-1.5"
+          onclick="setCustTierFilter('ALL', this)"
+          class="cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-black bg-yellow-400 text-black transition whitespace-nowrap flex items-center gap-1.5">
+          <span>All People ({{ customers|length }})</span>
+        </button>
+
+        <button type="button" id="tier-pill-PREMIUM"
+          data-default="cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-yellow-400 hover:text-yellow-300 transition whitespace-nowrap flex items-center gap-1.5"
+          onclick="setCustTierFilter('PREMIUM', this)"
+          class="cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-yellow-400 hover:text-yellow-300 transition whitespace-nowrap flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 rounded-sm"><use href="#otm-astronaut"/></svg>
+          <span>OTM Premium ({{ premium_count }})</span>
+        </button>
+
+        <button type="button" id="tier-pill-NORMAL"
+          data-default="cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-sky-400 hover:text-sky-300 transition whitespace-nowrap flex items-center gap-1.5"
+          onclick="setCustTierFilter('NORMAL', this)"
+          class="cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-sky-400 hover:text-sky-300 transition whitespace-nowrap flex items-center gap-1.5">
+          <span>Normal Member ({{ normal_count }})</span>
+        </button>
+
+        <button type="button" id="tier-pill-NEW"
+          data-default="cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap flex items-center gap-1.5"
+          onclick="setCustTierFilter('NEW', this)"
+          class="cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap flex items-center gap-1.5">
+          <span>New Member ({{ new_member_count }})</span>
+        </button>
+      </div>
+
+      <!-- Customer People Table -->
+      <div class="apple-card rounded-2xl p-2 sm:p-6 overflow-x-auto">
         <table class="w-full text-left text-sm whitespace-nowrap">
-          <thead class="text-xs text-zinc-400 uppercase tracking-widest border-b border-white/10">
+          <thead class="text-xs text-zinc-400 uppercase tracking-widest border-b border-white/[0.08]">
             <tr>
               <th class="px-4 py-3 font-bold">#</th>
               <th class="px-4 py-3 font-bold">Customer Name</th>
+              <th class="px-4 py-3 font-bold">Member Tier</th>
               <th class="px-4 py-3 font-bold">Mobile Number</th>
               <th class="px-4 py-3 font-bold">Saved Address</th>
               <th class="px-4 py-3 font-bold">Total Orders</th>
               <th class="px-4 py-3 font-bold text-right">Total Spent</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-white/5">
+          <tbody class="divide-y divide-white/[0.05]">
             {% for cust in customers %}
-            <tr class="cust-row hover:bg-white/[0.02] transition" data-search="{{ cust.name|lower }} {{ cust.phone }}">
+            <tr class="cust-row hover:bg-white/[0.02] transition"
+                data-tier="{% if cust.total_spent >= 5000 %}PREMIUM{% elif cust.total_orders >= 2 %}NORMAL{% else %}NEW{% endif %}"
+                data-search="{{ cust.name|lower }} {{ cust.phone }} {{ cust.address|lower }} {% if cust.total_spent >= 5000 %}premium otm{% elif cust.total_orders >= 2 %}normal regular{% else %}new{% endif %}">
               <td class="px-4 py-4 text-xs font-bold text-zinc-500">{{ forloop.counter }}</td>
               <td class="px-4 py-4 font-black text-white">{{ cust.name }}</td>
+              <td class="px-4 py-4">
+                {% if cust.total_spent >= 5000 %}
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-yellow-400 text-black text-[11px] font-black uppercase tracking-wide shadow-sm">
+                  <svg class="w-3.5 h-3.5 rounded-sm"><use href="#otm-astronaut"/></svg>
+                  <span>OTM Premium</span>
+                </span>
+                {% elif cust.total_orders >= 2 %}
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-sky-500/15 text-sky-400 border border-sky-500/30 text-[11px] font-extrabold uppercase tracking-wide">
+                  Normal Member
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-extrabold uppercase tracking-wide">
+                  New Member
+                </span>
+                {% endif %}
+              </td>
               <td class="px-4 py-4">
                 <a href="tel:{{ cust.phone }}" class="text-yellow-400 font-bold hover:underline">{{ cust.phone }}</a>
               </td>
@@ -173,99 +520,116 @@
               <td class="px-4 py-4">
                 <span class="px-2.5 py-1 rounded-lg bg-white/5 text-white font-black text-xs">{{ cust.total_orders }}</span>
               </td>
-              <td class="px-4 py-4 font-black text-emerald-400 text-right">₹{{ cust.total_spent|floatformat:0 }}</td>
+              <td class="px-4 py-4 font-black {% if cust.total_spent >= 5000 %}text-yellow-400{% else %}text-emerald-400{% endif %} text-right">
+                ₹{{ cust.total_spent|floatformat:0 }}
+              </td>
             </tr>
             {% empty %}
-            <tr><td colspan="6" class="text-center py-12 text-zinc-500 font-bold text-xs">No customers registered yet.</td></tr>
+            <tr><td colspan="7" class="text-center py-12 text-zinc-500 font-bold text-xs">No customers registered yet.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 3: ALL ORDERS HISTORY                  -->
-    <!-- ========================================== -->
-    <div id="tab-history" class="tab-content space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+    <!-- ========================================================= -->
+    <!-- TAB 4: MENU & STOCK CONTROL (WITH VEG & NON-VEG CONTROLS) -->
+    <!-- ========================================================= -->
+    <div id="tab-menu" class="tab-content space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
         <div>
-          <h2 class="text-xl font-black text-white">Complete Order History ({{ all_history|length }})</h2>
-          <p class="text-xs text-zinc-400 mt-0.5">Every order placed across the shop with live status and payment totals</p>
+          <h2 class="text-xl font-black text-white">Menu & Instant Stock Editor ({{ menu_items|length }} Dishes)</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Add Pure Veg or Non-Veg dishes, edit prices, switch Veg/Non-Veg tags, or toggle stock</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <div class="flex bg-[#09090C] p-1 rounded-xl border border-white/[0.08]">
+            <button type="button" onclick="setMenuDietFilter('ALL', this)" class="menu-diet-btn px-3 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition">All</button>
+            <button type="button" onclick="setMenuDietFilter('VEG', this)" class="menu-diet-btn px-3 py-1.5 rounded-lg text-[11px] font-bold text-emerald-400 transition">Pure Veg</button>
+            <button type="button" onclick="setMenuDietFilter('NONVEG', this)" class="menu-diet-btn px-3 py-1.5 rounded-lg text-[11px] font-bold text-red-400 transition">Non-Veg</button>
+          </div>
+          <input id="menuSearchInput" oninput="filterOwnerMenu()" type="text" placeholder="Search dish or category..." class="flex-1 sm:w-56 bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-2 text-xs text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
         </div>
       </div>
 
-      <div class="rounded-3xl bg-zinc-900 border border-white/10 p-2 sm:p-6 shadow-xl overflow-x-auto">
-        <table class="w-full text-left text-sm whitespace-nowrap">
-          <thead class="text-xs text-zinc-400 uppercase tracking-widest border-b border-white/10">
-            <tr>
-              <th class="px-4 py-3 font-bold">Order ID</th>
-              <th class="px-4 py-3 font-bold">Date & Time</th>
-              <th class="px-4 py-3 font-bold">Customer</th>
-              <th class="px-4 py-3 font-bold">Type</th>
-              <th class="px-4 py-3 font-bold">Status</th>
-              <th class="px-4 py-3 font-bold text-right">Amount</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-white/5">
-            {% for o in all_history %}
-            <tr class="hover:bg-white/[0.02] transition">
-              <td class="px-4 py-4 font-black text-white">{{ o.order_number }}</td>
-              <td class="px-4 py-4 text-zinc-400 font-bold text-xs">{{ o.created_at|date:"d M Y, h:i A" }}</td>
-              <td class="px-4 py-4 font-bold text-zinc-200">{{ o.customer_name }} <span class="text-xs text-zinc-500">({{ o.customer_phone }})</span></td>
-              <td class="px-4 py-4 text-xs font-bold text-zinc-400">{{ o.order_type }}</td>
-              <td class="px-4 py-4">
-                <span class="px-2.5 py-1 text-[10px] font-black uppercase rounded-lg tracking-wider
-                  {% if o.status == 'DONE' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30
-                  {% elif o.status == 'CANCELLED' %}bg-red-500/15 text-red-400 border border-red-500/30
-                  {% else %}bg-yellow-400/15 text-yellow-400 border border-yellow-400/30{% endif %}">
-                  {{ o.get_status_display }}
-                </span>
-              </td>
-              <td class="px-4 py-4 font-black text-yellow-400 text-right">₹{{ o.total_amount|floatformat:0 }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="6" class="text-center py-12 text-zinc-500 font-bold text-xs">No orders in database.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- TAB 4: MENU & STOCK CONTROL                -->
-    <!-- ========================================== -->
-    <div id="tab-menu" class="tab-content space-y-6">
-      <h2 class="text-xl font-black text-white border-b border-white/10 pb-4">Menu & Instant Stock Editor</h2>
       <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        <!-- Add Dish Form -->
-        <div class="xl:col-span-4 rounded-3xl bg-zinc-900 border border-white/10 p-6 shadow-xl h-fit space-y-3.5">
+        <!-- Add New Dish Form (With Pure Veg / Non-Veg Selector) -->
+        <div class="xl:col-span-4 apple-card rounded-2xl p-6 h-fit space-y-3.5">
           <h3 class="text-sm font-black text-yellow-400 uppercase tracking-wider">Add New Dish</h3>
-          <input id="itemCategory" list="categoryList" placeholder="Category (e.g. Veg Burger)" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          
+          <div>
+            <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">Dietary Classification</label>
+            <div class="grid grid-cols-2 gap-2 p-1 bg-[#09090C] rounded-xl border border-white/[0.08]">
+              <label class="cursor-pointer">
+                <input type="radio" name="newItemDiet" value="true" checked class="peer hidden">
+                <div class="py-2 px-3 rounded-lg text-xs font-extrabold text-zinc-400 peer-checked:bg-emerald-500/15 peer-checked:text-emerald-300 peer-checked:border peer-checked:border-emerald-500/40 flex items-center justify-center gap-1.5 transition">
+                  <svg class="w-3.5 h-3.5"><use href="#veg-mark"/></svg>
+                  <span>Pure Veg</span>
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="newItemDiet" value="false" class="peer hidden">
+                <div class="py-2 px-3 rounded-lg text-xs font-extrabold text-zinc-400 peer-checked:bg-red-500/15 peer-checked:text-red-300 peer-checked:border peer-checked:border-red-500/40 flex items-center justify-center gap-1.5 transition">
+                  <svg class="w-3.5 h-3.5"><use href="#nonveg-mark"/></svg>
+                  <span>Non-Veg</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <input id="itemCategory" list="categoryList" placeholder="Category (e.g. Chicken Burgers, Veg Burgers)" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
           <datalist id="categoryList">{% for c in categories %}<option value="{{ c.name }}">{% endfor %}</datalist>
-          <input id="itemName" placeholder="Dish Name" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
-          <input id="itemPrice" type="number" placeholder="Price in ₹" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
-          <input id="itemImage" placeholder="Image URL (optional)" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
-          <textarea id="itemDesc" rows="2" placeholder="Ingredients / Description" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none"></textarea>
+          <input id="itemName" placeholder="Dish Name" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <input id="itemPrice" type="number" placeholder="Price in ₹" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <input id="itemImage" placeholder="Image URL (optional)" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <textarea id="itemDesc" rows="2" placeholder="Ingredients / Description" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none"></textarea>
           <label class="flex items-center gap-2 text-xs text-zinc-300 font-bold cursor-pointer">
-            <input id="itemBest" type="checkbox" class="w-4 h-4 accent-yellow-400"> Mark as Bestseller
+            <input id="itemBest" type="checkbox" class="w-4 h-4 accent-yellow-400"> Mark as Most Ordered
           </label>
           <button type="button" onclick="saveMenuItem()" class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition">+ Save to Live Menu</button>
         </div>
 
         <!-- Live Stock List -->
-        <div class="xl:col-span-8 rounded-3xl bg-zinc-900 border border-white/10 p-6 shadow-xl">
-          <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+        <div class="xl:col-span-8 apple-card rounded-2xl p-6">
+          <div class="space-y-3 max-h-[650px] overflow-y-auto pr-2 no-scrollbar">
             {% for item in menu_items %}
-            <div class="rounded-2xl bg-zinc-950 border border-white/5 p-4 flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <span class="text-[10px] uppercase font-black tracking-widest text-yellow-400">{{ item.category.name }}</span>
-                <h4 class="font-extrabold text-white text-sm mt-0.5">{{ item.name }}</h4>
+            <div class="owner-menu-row rounded-2xl bg-[#09090C] border border-white/[0.06] p-4 flex flex-wrap items-center justify-between gap-4"
+                 data-diet="{% if item.is_veg %}VEG{% else %}NONVEG{% endif %}"
+                 data-search="{{ item.name|lower }} {{ item.category.name|lower }}">
+              
+              <div class="flex items-start gap-3 min-w-0">
+                {% if item.is_veg %}
+                <svg class="w-4 h-4 shrink-0 mt-1" title="Pure Veg"><use href="#veg-mark"/></svg>
+                {% else %}
+                <svg class="w-4 h-4 shrink-0 mt-1" title="Non-Veg"><use href="#nonveg-mark"/></svg>
+                {% endif %}
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] uppercase font-black tracking-widest text-yellow-400">{{ item.category.name }}</span>
+                    <span class="text-[10px] font-bold {% if item.is_veg %}text-emerald-400{% else %}text-red-400{% endif %}">
+                      • {% if item.is_veg %}Pure Veg{% else %}Non-Veg{% endif %}
+                    </span>
+                  </div>
+                  <h4 class="font-extrabold text-white text-sm mt-0.5">{{ item.name }}</h4>
+                </div>
               </div>
-              <div class="flex items-center gap-2.5">
+
+              <div class="flex items-center gap-2 flex-wrap ml-auto">
+                <button type="button"
+                  data-id="{{ item.id }}"
+                  data-name="{{ item.name }}"
+                  data-price="{{ item.price|floatformat:0 }}"
+                  data-nextveg="{% if item.is_veg %}false{% else %}true{% endif %}"
+                  onclick="toggleItemDiet(this.dataset.id, this.dataset.name, this.dataset.price, this.dataset.nextveg === 'true')"
+                  class="px-2.5 py-2 rounded-xl text-[11px] font-extrabold border transition {% if item.is_veg %}bg-emerald-500/10 text-emerald-400 border-emerald-500/25 hover:bg-emerald-500/20{% else %}bg-red-500/10 text-red-400 border-red-500/25 hover:bg-red-500/20{% endif %}"
+                  title="Click to switch Veg / Non-Veg">
+                  {% if item.is_veg %}Veg{% else %}Non-Veg{% endif %}
+                </button>
+
                 <input id="price-{{ item.id }}" type="number" value="{{ item.price|floatformat:0 }}" class="w-20 bg-zinc-900 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-white font-bold text-center">
                 <button type="button" data-id="{{ item.id }}" data-name="{{ item.name }}" onclick="updateItemPrice(this.dataset.id, this.dataset.name)" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition">Save ₹</button>
                 <button type="button" data-id="{{ item.id }}" onclick="toggleStock(this.dataset.id)"
-                  class="px-4 py-2 rounded-xl text-xs font-black transition {% if item.is_available %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% else %}bg-red-500/15 text-red-400 border border-red-500/30{% endif %}">
+                  class="px-3.5 py-2 rounded-xl text-xs font-black transition {% if item.is_available %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% else %}bg-red-500/15 text-red-400 border border-red-500/30{% endif %}">
                   {% if item.is_available %}In Stock{% else %}Sold Out{% endif %}
                 </button>
               </div>
@@ -276,25 +640,25 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 5: PROMO COUPONS                       -->
-    <!-- ========================================== -->
+    <!-- ========================================================= -->
+    <!-- TAB 5: PROMO COUPONS                                      -->
+    <!-- ========================================================= -->
     <div id="tab-coupons" class="tab-content space-y-6">
-      <h2 class="text-xl font-black text-white border-b border-white/10 pb-4">Promo Coupons & Offers</h2>
+      <h2 class="text-xl font-black text-white border-b border-white/[0.08] pb-4">Promo Coupons & Live Offers ({{ coupons|length }})</h2>
       <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        <div class="xl:col-span-5 rounded-3xl bg-zinc-900 border border-white/10 p-6 shadow-xl h-fit space-y-3.5">
+        <div class="xl:col-span-5 apple-card rounded-2xl p-6 h-fit space-y-3.5">
           <h3 class="text-sm font-black text-yellow-400 uppercase tracking-wider">Create Promo Code</h3>
-          <input id="cpCode" placeholder="Code (e.g. OTM50)" class="w-full uppercase bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:border-yellow-400 outline-none">
+          <input id="cpCode" placeholder="Code (e.g. OTM50)" class="w-full uppercase bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm font-bold text-white focus:border-yellow-400 outline-none">
           <div class="grid grid-cols-2 gap-3">
-            <select id="cpType" class="bg-zinc-950 border border-white/10 rounded-xl px-3 py-3 text-sm text-white outline-none">
+            <select id="cpType" class="bg-[#09090C] border border-white/[0.08] rounded-xl px-3 py-3 text-sm text-white outline-none">
               <option value="FLAT">Flat ₹ Off</option>
               <option value="PERCENT">Percent % Off</option>
             </select>
-            <input id="cpValue" type="number" placeholder="Value (e.g. 50)" class="bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+            <input id="cpValue" type="number" placeholder="Value (e.g. 50)" class="bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
           </div>
           <div class="grid grid-cols-2 gap-3">
-            <input id="cpMin" type="number" value="199" placeholder="Min Order ₹" class="bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
-            <input id="cpMax" type="number" value="100" placeholder="Max Cap ₹" class="bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+            <input id="cpMin" type="number" value="199" placeholder="Min Order ₹" class="bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+            <input id="cpMax" type="number" value="100" placeholder="Max Cap ₹" class="bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
           </div>
           <label class="flex items-center gap-2 text-xs text-zinc-300 font-bold cursor-pointer">
             <input id="cpFirst" type="checkbox" class="w-4 h-4 accent-yellow-400"> Valid on First Order Only
@@ -304,7 +668,7 @@
 
         <div class="xl:col-span-7 space-y-3">
           {% for c in coupons %}
-          <div class="rounded-2xl bg-zinc-900 border border-white/10 p-5 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+          <div class="apple-card rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
             <div>
               <div class="flex items-center gap-2.5">
                 <h4 class="font-black text-lg text-yellow-400 tracking-wide">{{ c.code }}</h4>
@@ -320,7 +684,7 @@
             </button>
           </div>
           {% empty %}
-          <div class="rounded-2xl bg-zinc-900/50 border border-white/5 p-10 text-center text-xs text-zinc-500 font-bold">No promo coupons created yet.</div>
+          <div class="rounded-2xl bg-[#111115] border border-white/[0.08] p-10 text-center text-xs text-zinc-500 font-bold">No promo coupons created yet.</div>
           {% endfor %}
         </div>
       </div>
@@ -329,32 +693,155 @@
   </main>
 
   <script>
-    function getCookie(name) { let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)'); return v ? v[2] : null; }
+    const TODAY_STR = "{{ today_str }}";
+    let ownerHistFilter = 'ALL';
+    let menuDietFilter = 'ALL';
+    let custTierFilter = 'ALL';
+
+    function getCookie(name) {
+      let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+      return v ? v[2] : null;
+    }
 
     function openTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => {
-        b.className = "tab-btn shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center gap-2.5";
+        b.className = "tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5";
+        const badge = b.querySelector('.tab-count');
+        if (badge && badge.dataset.default) {
+          badge.className = badge.dataset.default;
+        }
       });
+
       document.getElementById(tabId).classList.add('active');
-      btn.className = "tab-btn active shrink-0 px-4 py-3 rounded-xl text-sm font-bold text-left bg-yellow-400 text-black shadow-lg shadow-yellow-400/20 flex items-center gap-2.5 transition";
+      btn.className = "tab-btn active shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-black text-left bg-yellow-400 text-black flex items-center justify-between gap-2.5 transition";
+      
+      const activeBadge = btn.querySelector('.tab-count');
+      if (activeBadge) {
+        activeBadge.className = "tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-black/15 text-black";
+      }
+
+      if (tabId === 'tab-history') applyOwnerHistoryFilters();
+    }
+
+   // Customer Member Tier & Search Filtering (OTM Premium / Normal / New)
+    function setCustTierFilter(tier, btn) {
+      custTierFilter = tier;
+      document.querySelectorAll('.cust-tier-btn').forEach(b => {
+        if (b.dataset.default) {
+          b.className = b.dataset.default;
+        }
+      });
+      if (btn) {
+        btn.className = "cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-black bg-yellow-400 text-black transition whitespace-nowrap flex items-center gap-1.5";
+      }
+      filterCustomers();
     }
 
     function filterCustomers() {
-      const q = document.getElementById('custSearchInput').value.toLowerCase();
+      const q = document.getElementById('custSearchInput').value.toLowerCase().trim();
       document.querySelectorAll('.cust-row').forEach(row => {
-        row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+        const matchTier = (custTierFilter === 'ALL') || (row.dataset.tier === custTierFilter);
+        const matchSearch = row.dataset.search.includes(q);
+        row.style.display = (matchTier && matchSearch) ? '' : 'none';
       });
     }
 
+    // Menu Dietary & Search Filters
+    function setMenuDietFilter(diet, btn) {
+      menuDietFilter = diet;
+      document.querySelectorAll('.menu-diet-btn').forEach(b => {
+        b.className = "menu-diet-btn px-3 py-1.5 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition";
+      });
+      btn.className = "menu-diet-btn px-3 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition";
+      filterOwnerMenu();
+    }
+
+    function filterOwnerMenu() {
+      const q = document.getElementById('menuSearchInput').value.toLowerCase().trim();
+      document.querySelectorAll('.owner-menu-row').forEach(row => {
+        const matchDiet = (menuDietFilter === 'ALL') || (row.dataset.diet === menuDietFilter);
+        const matchSearch = row.dataset.search.includes(q);
+        row.style.display = (matchDiet && matchSearch) ? 'flex' : 'none';
+      });
+    }
+
+    // All-Orders History Filters
+    function setOwnerHistFilter(flt, btn) {
+      ownerHistFilter = flt;
+      document.querySelectorAll('.own-flt-btn').forEach(b => {
+        b.className = "own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition whitespace-nowrap";
+      });
+      btn.className = "own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition whitespace-nowrap";
+      applyOwnerHistoryFilters();
+    }
+
+    function toggleOwnerTodayDate() {
+      const dt = document.getElementById('ownerHistDate');
+      dt.value = (dt.value === TODAY_STR) ? '' : TODAY_STR;
+      applyOwnerHistoryFilters();
+    }
+
+    function resetOwnerHistoryFilters() {
+      document.getElementById('ownerHistSearch').value = '';
+      document.getElementById('ownerHistDate').value = '';
+      const firstBtn = document.querySelector('.own-flt-btn');
+      if (firstBtn) setOwnerHistFilter('ALL', firstBtn);
+      else applyOwnerHistoryFilters();
+    }
+
+    function applyOwnerHistoryFilters() {
+      const q = document.getElementById('ownerHistSearch').value.toLowerCase().trim();
+      const dt = document.getElementById('ownerHistDate').value;
+      document.getElementById('clearOwnerHistBtn').classList.toggle('hidden', !q && !dt && ownerHistFilter === 'ALL');
+
+      let visible = 0;
+      let deliveredSum = 0;
+
+      document.querySelectorAll('.owner-hist-row').forEach(card => {
+        const status = card.dataset.status;
+        const date = card.dataset.date;
+        const diets = card.dataset.diets || '';
+        const search = card.dataset.search;
+        const amount = parseFloat(card.dataset.amount || 0);
+
+        const matchQ = !q || search.includes(q);
+        const matchD = !dt || date === dt;
+
+        let matchFlt = true;
+        if (ownerHistFilter === 'VEG_ONLY') {
+          matchFlt = diets.includes('VEG') && !diets.includes('NONVEG');
+        } else if (ownerHistFilter === 'HAS_NONVEG') {
+          matchFlt = diets.includes('NONVEG');
+        } else if (ownerHistFilter === 'LIVE') {
+          matchFlt = (status !== 'DONE' && status !== 'CANCELLED');
+        } else if (ownerHistFilter === 'DONE' || ownerHistFilter === 'CANCELLED') {
+          matchFlt = (status === ownerHistFilter);
+        }
+
+        if (matchQ && matchD && matchFlt) {
+          card.style.display = 'flex';
+          visible++;
+          if (status === 'DONE') deliveredSum += amount;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      document.getElementById('ownerHistCount').textContent = visible;
+      document.getElementById('ownerHistRevenue').textContent = `₹${Math.round(deliveredSum).toLocaleString('en-IN')}`;
+      document.getElementById('ownerNoMatchBox').classList.toggle('hidden', visible > 0 || document.querySelectorAll('.owner-hist-row').length === 0);
+    }
+
+    // Revenue Chart + Veg/Non-Veg Split + Top Dishes Leaderboard
     const rawData = JSON.parse('{{ orders_json|escapejs|default:"[]" }}');
     let chartInstance = null;
 
     function filterData(days) {
       [7, 15, 30].forEach(d => {
         document.getElementById(`flt-${d}`).className = d === days
-          ? "px-4 py-2 rounded-lg text-xs font-black bg-yellow-400 text-black shadow transition"
-          : "px-4 py-2 rounded-lg text-xs font-black text-zinc-400 hover:text-white transition";
+          ? "px-4 py-2 rounded-lg text-xs font-black bg-yellow-400 text-black transition"
+          : "px-4 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition";
       });
 
       const cutoff = new Date();
@@ -364,21 +851,63 @@
 
       let revenue = 0;
       let orderCount = filtered.length;
-      let itemCounts = {};
+      let vegRev = 0;
+      let nonvegRev = 0;
+      let itemStats = {};
       let hourCounts = {};
       let dailySales = {};
 
       filtered.forEach(o => {
         revenue += o.amount;
-        o.items.forEach(i => { itemCounts[i.name] = (itemCounts[i.name] || 0) + i.qty; });
+        o.items.forEach(i => {
+          const lineTotal = (i.price || 0) * (i.qty || 1);
+          if (i.is_veg === false) nonvegRev += lineTotal;
+          else vegRev += lineTotal;
+
+          if (!itemStats[i.name]) itemStats[i.name] = { qty: 0, is_veg: i.is_veg !== false };
+          itemStats[i.name].qty += i.qty;
+        });
         hourCounts[o.hour] = (hourCounts[o.hour] || 0) + 1;
         dailySales[o.date] = (dailySales[o.date] || 0) + o.amount;
       });
 
-      let bestItem = "No sales yet";
-      let maxQty = 0;
-      for (const [name, qty] of Object.entries(itemCounts)) {
-        if (qty > maxQty) { maxQty = qty; bestItem = name; }
+      const totalItemRev = vegRev + nonvegRev;
+      const vegPct = totalItemRev > 0 ? Math.round((vegRev / totalItemRev) * 100) : 50;
+      const nonvegPct = totalItemRev > 0 ? (100 - vegPct) : 50;
+
+      document.getElementById('vegRevLabel').textContent = `₹${Math.round(vegRev).toLocaleString('en-IN')}`;
+      document.getElementById('nonvegRevLabel').textContent = `₹${Math.round(nonvegRev).toLocaleString('en-IN')}`;
+      document.getElementById('vegPctLabel').textContent = `${vegPct}%`;
+      document.getElementById('nonvegPctLabel').textContent = `${nonvegPct}%`;
+      document.getElementById('vegSplitBar').style.width = `${vegPct}%`;
+      document.getElementById('nonvegSplitBar').style.width = `${nonvegPct}%`;
+
+      const sortedItems = Object.entries(itemStats).sort((a, b) => b[1].qty - a[1].qty);
+      const bestItem = sortedItems.length ? `${sortedItems[0][0]} (${sortedItems[0][1].qty})` : 'No sales yet';
+
+      const topListEl = document.getElementById('topDishesList');
+      if (sortedItems.length === 0) {
+        topListEl.innerHTML = `<div class="text-xs font-bold text-zinc-500 py-8 text-center">No completed dish sales in this timeframe yet.</div>`;
+      } else {
+        const topFive = sortedItems.slice(0, 5);
+        const maxVal = topFive[0][1].qty || 1;
+        topListEl.innerHTML = topFive.map(([name, info], idx) => {
+          const pct = Math.max(Math.round((info.qty / maxVal) * 100), 12);
+          const iconRef = info.is_veg ? '#veg-mark' : '#nonveg-mark';
+          return `
+            <div class="space-y-1.5">
+              <div class="flex justify-between items-center text-xs font-extrabold gap-2">
+                <span class="text-white truncate flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 shrink-0"><use href="${iconRef}"/></svg>
+                  <span class="truncate">${idx + 1}. ${name}</span>
+                </span>
+                <span class="text-yellow-400 shrink-0">${info.qty} sold</span>
+              </div>
+              <div class="w-full h-2 bg-[#09090C] rounded-full overflow-hidden">
+                <div class="h-full ${info.is_veg ? 'bg-emerald-400' : 'bg-red-400'} rounded-full" style="width:${pct}%"></div>
+              </div>
+            </div>`;
+        }).join('');
       }
 
       let peakHour = "No rush data";
@@ -393,9 +922,11 @@
         }
       }
 
-      document.getElementById('stat-rev').innerText = `₹${revenue.toLocaleString('en-IN')}`;
+      const avgOrder = orderCount > 0 ? Math.round(revenue / orderCount) : 0;
+      document.getElementById('stat-rev').innerText = `₹${Math.round(revenue).toLocaleString('en-IN')}`;
+      document.getElementById('stat-aov').innerText = `Avg Order Value: ₹${avgOrder}`;
       document.getElementById('stat-ord').innerText = orderCount;
-      document.getElementById('stat-best').innerText = maxQty > 0 ? `${bestItem} (${maxQty})` : 'No sales yet';
+      document.getElementById('stat-best').innerText = bestItem;
       document.getElementById('stat-peak').innerText = peakHour;
 
       const dates = Object.keys(dailySales).sort();
@@ -405,7 +936,7 @@
       const ctx = document.getElementById('revenueChart').getContext('2d');
 
       let gradient = ctx.createLinearGradient(0, 0, 0, 300);
-      gradient.addColorStop(0, 'rgba(250, 204, 21, 0.4)');
+      gradient.addColorStop(0, 'rgba(250, 204, 21, 0.35)');
       gradient.addColorStop(1, 'rgba(250, 204, 21, 0.0)');
 
       chartInstance = new Chart(ctx, {
@@ -418,7 +949,7 @@
             borderColor: '#FACC15',
             backgroundColor: gradient,
             borderWidth: 3,
-            pointBackgroundColor: '#050507',
+            pointBackgroundColor: '#08080A',
             pointBorderColor: '#FACC15',
             pointBorderWidth: 2,
             pointRadius: 4,
@@ -438,30 +969,47 @@
       });
     }
 
-    window.onload = () => filterData(7);
+    window.addEventListener('DOMContentLoaded', () => {
+      filterData(7);
+      applyOwnerHistoryFilters();
+    });
 
     async function toggleStock(itemId) {
       await fetch(`/otm-vault-9921/menu/${itemId}/toggle/`, { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
       window.location.reload();
     }
+
+    async function toggleItemDiet(itemId, itemName, itemPrice, nextIsVeg) {
+      await fetch('/otm-vault-9921/menu/save/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ id: itemId, name: itemName, price: itemPrice, is_veg: nextIsVeg })
+      });
+      window.location.reload();
+    }
+
     async function updateItemPrice(itemId, itemName) {
       const newPrice = document.getElementById(`price-${itemId}`).value;
       await fetch('/otm-vault-9921/menu/save/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ id: itemId, name: itemName, price: newPrice }) });
       window.location.reload();
     }
+
     async function saveMenuItem() {
+      const dietRadio = document.querySelector('input[name="newItemDiet"]:checked');
       const payload = {
         category: document.getElementById('itemCategory').value || 'Signatures',
         name: document.getElementById('itemName').value,
         price: document.getElementById('itemPrice').value,
         image_url: document.getElementById('itemImage').value,
         description: document.getElementById('itemDesc').value,
+        is_veg: dietRadio ? (dietRadio.value === 'true') : true,
         is_bestseller: document.getElementById('itemBest').checked
       };
       if (!payload.name || !payload.price) return alert('Enter dish name and price.');
       await fetch('/otm-vault-9921/menu/save/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify(payload) });
       window.location.reload();
     }
+
     async function createCoupon() {
       const payload = {
         code: document.getElementById('cpCode').value,
@@ -475,6 +1023,7 @@
       await fetch('/otm-vault-9921/coupon/create/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify(payload) });
       window.location.reload();
     }
+
     async function toggleCoupon(couponId) {
       await fetch(`/otm-vault-9921/coupon/${couponId}/toggle/`, { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
       window.location.reload();

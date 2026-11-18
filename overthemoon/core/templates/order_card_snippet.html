@@ -1,92 +1,145 @@
-<!-- Reusable Order Card Snippet (Over The Moon Theme - Zero Emojis) -->
-<div class=" if o.status == 'NEW' %}new-order-card border-2 border-yellow-400/60{% elif o.status == 'PREP' %}border border-sky-500/40{% else %}border border-emerald-500/40{% endif %} rounded-3xl bg-zinc-900 p-5 space-y-3.5 shadow-xl transition">
-  
-  <!-- Header: Order ID, Customer & Type Badge -->
-  <div class="flex justify-between items-start gap-2">
-    <div>
-      <span class="font-black text-white text-base tracking-tight">{{ o.order_number }}</span>
-      <p class="text-xs text-zinc-400 font-semibold mt-0.5">
-        {{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="underline text-yellow-400 hover:text-yellow-300">{{ o.customer_phone }}</a>
+<div class="order-ticket rounded-2xl p-4 sm:p-5 relative overflow-hidden transition-all duration-200
+  {% if o.status == 'NEW' %}new-order-card bg-[#111115] border border-yellow-400/50 shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_14px_30px_-12px_rgba(250,204,21,0.12)]
+  {% elif o.status == 'PREP' %}prep-order-card bg-[#111115] border border-sky-400/40 shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_14px_30px_-12px_rgba(0,0,0,0.75)]
+  {% elif o.status == 'OUT' %}out-order-card bg-[#111115] border border-emerald-400/40 shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_14px_30px_-12px_rgba(0,0,0,0.75)]
+  {% else %}bg-[#111115] border border-white/[0.08] shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset]{% endif %}"
+  data-has-veg="{% for i in o.items.all %}{% if i.is_veg %}1{% endif %}{% endfor %}"
+  data-has-nonveg="{% for i in o.items.all %}{% if not i.is_veg %}1{% endif %}{% endfor %}">
+
+  <!-- Left Status Color Rail -->
+  <div class="absolute top-0 left-0 w-1.5 h-full
+    {% if o.status == 'NEW' %}bg-yellow-400
+    {% elif o.status == 'PREP' %}bg-sky-400
+    {% elif o.status == 'OUT' %}bg-emerald-400
+    {% elif o.status == 'DONE' %}bg-emerald-500/50
+    {% else %}bg-red-500/50{% endif %}">
+  </div>
+
+  <!-- Top Row: Order ID, Timestamp, Guest & Order Type -->
+  <div class="flex items-start justify-between gap-3 pl-2 pb-3 border-b border-white/[0.07]">
+    <div class="min-w-0">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="font-black text-white text-base tracking-tight">{{ o.order_number }}</span>
+        <span class="text-[11px] font-medium text-zinc-500">{{ o.created_at|date:"h:i A" }}</span>
+      </div>
+      <p class="text-xs font-bold text-zinc-200 mt-1 truncate">
+        {{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="text-yellow-400 hover:underline">{{ o.customer_phone }}</a>
       </p>
     </div>
-    <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider
-      {% if o.order_type == 'DELIVERY' %}bg-yellow-400 text-black{% else %}bg-white/10 text-white border border-white/10{% endif %}">
-      {{ o.order_type }}
-    </span>
+
+    <div class="flex flex-col items-end gap-1 shrink-0">
+      <span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide
+        {% if o.order_type == 'DELIVERY' %}bg-yellow-400 text-black{% else %}bg-white/[0.08] text-zinc-200 border border-white/10{% endif %}">
+        {{ o.order_type }}
+      </span>
+      <span class="text-sm font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
+    </div>
   </div>
 
-  <!-- Delivery Address (If Delivery) -->
+  <!-- Mixed Veg + Non-Veg Separation Banner (Shown dynamically if order has both) -->
+  <div class="mixed-bag-alert hidden mt-3 ml-2 px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-400/40 flex items-center gap-2 text-[11px] font-extrabold text-amber-300">
+    <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+    <span>MIXED ORDER: Pack Veg & Non-Veg in Separate Bags</span>
+  </div>
+
+  <!-- Delivery Address (Shown only for Home Delivery) -->
   {% if o.delivery_address and o.order_type == 'DELIVERY' %}
-  <div class="text-xs text-zinc-300 bg-zinc-950 p-3 rounded-xl border border-white/5 flex items-start gap-2">
-    <svg class="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-      <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+  <div class="mt-3 ml-2 p-2.5 rounded-xl bg-[#09090C] border border-white/[0.06] flex items-start gap-2 text-xs text-zinc-300">
+    <svg class="w-3.5 h-3.5 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
     </svg>
-    <span class="leading-relaxed">{{ o.delivery_address }}</span>
+    <span class="font-medium leading-snug line-clamp-2">{{ o.delivery_address }}</span>
   </div>
   {% endif %}
 
-  <!-- Ordered Items List -->
-  <div class="text-xs space-y-1.5 border-y border-white/10 py-3">
+  <!-- Kitchen Ticket Items Well with Veg/Non-Veg Dietary Markers -->
+  <div class="mt-3 ml-2 p-3 rounded-xl bg-[#09090C] border border-white/[0.06] space-y-2 text-xs">
     {% for i in o.items.all %}
-    <div class="flex justify-between font-extrabold text-white">
-      <span>{{ i.quantity }} × {{ i.item_name }}</span>
-      <span class="text-zinc-400">₹{{ i.unit_price|floatformat:0 }}</span>
+    <div class="flex items-center justify-between gap-2">
+      <span class="font-bold text-white flex items-center gap-2">
+        {% if i.is_veg %}
+        <span class="w-3.5 h-3.5 rounded-[3px] border border-emerald-400 flex items-center justify-center shrink-0" title="Pure Veg">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        </span>
+        {% else %}
+        <span class="w-3.5 h-3.5 rounded-[3px] border border-red-400 flex items-center justify-center shrink-0" title="Non-Veg">
+          <span class="w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-b-[6px] border-b-red-400"></span>
+        </span>
+        {% endif %}
+        <span><strong class="text-yellow-400 font-black mr-1">{{ i.quantity }}×</strong>{{ i.item_name }}</span>
+      </span>
+      <span class="text-[11px] font-semibold text-zinc-500 shrink-0">₹{{ i.unit_price|floatformat:0 }}</span>
     </div>
     {% endfor %}
+
+    {% if o.coupon_code %}
+    <div class="pt-1.5 mt-1.5 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-bold text-emerald-400">
+      <span>Promo Applied: {{ o.coupon_code }}</span>
+      <span>-₹{{ o.discount_amount|floatformat:0 }}</span>
+    </div>
+    {% endif %}
   </div>
 
-  <!-- Footer Actions by Status -->
-  {% if o.status == 'NEW' %}
-  <div class="flex items-center justify-between pt-1">
-    <span class="text-base font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
-    <div class="flex gap-2">
-      <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'CANCELLED')" class="px-3 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 text-xs font-extrabold transition">
-        Reject
+  <!-- Stage-Specific Action Controls -->
+  <div class="mt-3.5 pl-2">
+    {% if o.status == 'NEW' %}
+    <div class="grid grid-cols-2 gap-2">
+      <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'CANCELLED')"
+        class="py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 text-xs font-extrabold transition">
+        Decline
       </button>
-      <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'PREP')" class="px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black transition">
-        Accept & Cook →
+      <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'PREP')"
+        class="py-2.5 px-3 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black shadow-sm transition active:scale-[0.98] flex items-center justify-center gap-1.5">
+        <span>Accept & Grill</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
       </button>
     </div>
-  </div>
 
-  {% elif o.status == 'PREP' %}
-  <div class="pt-1 space-y-2.5">
-    {% if o.order_type == 'DELIVERY' %}
-    <select id="rider-select-{{ o.id }}" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white font-semibold outline-none focus:border-sky-400">
-      <option value="">-- Select Delivery Rider --</option>
-      {% for r in riders %}
-      <option value="{{ r.id }}">{{ r.username|title }}</option>
-      {% endfor %}
-    </select>
-    <button type="button" data-id="{{ o.id }}" onclick="dispatchOrder(this.dataset.id)" class="w-full py-2.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition">
-      Assign Rider & Dispatch →
-    </button>
+    {% elif o.status == 'PREP' %}
+    <div class="space-y-2">
+      {% if o.order_type == 'DELIVERY' %}
+      <select id="rider-select-{{ o.id }}" class="w-full bg-[#09090C] border border-white/[0.09] focus:border-sky-400 rounded-xl px-3 py-2.5 text-xs font-bold text-white outline-none transition">
+        <option value="">-- Choose Delivery Rider --</option>
+        {% for r in riders %}<option value="{{ r.id }}">{{ r.username|title }}</option>{% endfor %}
+      </select>
+      <button type="button" data-id="{{ o.id }}" onclick="dispatchOrder(this.dataset.id)"
+        class="w-full py-2.5 px-3 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition active:scale-[0.98] flex items-center justify-center gap-1.5">
+        <span>Assign Rider & Send Out</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+      </button>
+      {% else %}
+      <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'OUT')"
+        class="w-full py-2.5 px-3 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition active:scale-[0.98] flex items-center justify-center gap-1.5">
+        <span>Ready at Counter</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+      </button>
+      {% endif %}
+    </div>
+
+    {% elif o.status == 'OUT' %}
+    <div class="space-y-2.5">
+      {% if o.delivery_boy %}
+      <div class="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-bold text-emerald-400 inline-flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        <span>Rider: {{ o.delivery_boy.username|title }}</span>
+      </div>
+      {% endif %}
+      <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'DONE')"
+        class="w-full py-2.5 px-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-black transition active:scale-[0.98] flex items-center justify-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+        <span>Complete & Collect Cash</span>
+      </button>
+    </div>
+
     {% else %}
-    <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'OUT')" class="w-full py-2.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition">
-      Mark Ready for Self-Pickup →
-    </button>
-    {% endif %}
-  </div>
-
-  {% elif o.status == 'OUT' %}
-  <div class="pt-1 space-y-2.5">
-    <div class="flex items-center justify-between">
-      <span class="text-xs text-zinc-400 font-bold">Total Payable</span>
-      <span class="text-base font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
-    </div>
-    {% if o.delivery_boy %}
-    <div class="text-[11px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-      </svg>
-      <span>Assigned Rider: {{ o.delivery_boy.username|title }}</span>
+    <div class="flex items-center justify-between text-[11px] font-semibold text-zinc-500 pt-1">
+      <span>Updated {{ o.updated_at|date:"d M, h:i A" }}</span>
+      <span class="px-2 py-0.5 rounded font-bold uppercase {% if o.status == 'DONE' %}bg-emerald-500/10 text-emerald-400{% else %}bg-red-500/10 text-red-400{% endif %}">
+        {{ o.get_status_display }}
+      </span>
     </div>
     {% endif %}
-    <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'DONE')" class="w-full py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-black transition">
-      Mark Delivered & Paid ✓
-    </button>
   </div>
-  {% endif %}
 
 </div>

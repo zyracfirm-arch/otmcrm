@@ -1,46 +1,60 @@
 import json
-from decimal import Decimal
+from datetime import timedelta
+from decimal import Decimal, InvalidOperation
+
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
-from django.db.models import Sum, Count
-from django.db.models.functions import ExtractHour
-from django.http import JsonResponse, Http404
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.views.decorators.http import require_POST
-from .models import Category, MenuItem, Customer, Coupon, Order, OrderItem
-from .security import shop_device_and_login_required
 from django.contrib.auth.models import User
 from django.db import transaction
-from datetime import timedelta
-from django.db.models.functions import TruncDate
-import json
+from django.http import JsonResponse, Http404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from .models import Category, MenuItem, Customer, Coupon, Order, OrderItem
+from .security import shop_device_and_login_required
+
 
 # ==========================================
 # 1. PUBLIC WEBSITE VIEWS (Open to Customers)
 # ==========================================
 def public_menu(request):
     categories = Category.objects.prefetch_related('items').all()
-    active_coupons = Coupon.objects.filter(is_active=True)
+    coupons = Coupon.objects.filter(is_active=True)
+    veg_count = MenuItem.objects.filter(is_veg=True, is_available=True).count()
+    nonveg_count = MenuItem.objects.filter(is_veg=False, is_available=True).count()
+
     return render(request, 'public_menu.html', {
         'categories': categories,
-        'coupons': active_coupons,
+        'coupons': coupons,
+        'veg_count': veg_count,
+        'nonveg_count': nonveg_count,
     })
+
 
 @require_POST
 def api_validate_coupon(request):
-    data = json.loads(request.body)
-    code = data.get('code', '').strip().upper()
-    subtotal = Decimal(str(data.get('subtotal', 0)))
-    phone = data.get('phone', '').strip()
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'valid': False, 'message': 'Invalid request.'}, status=400)
+
+    code = (data.get('code') or '').strip().upper()
+    try:
+        subtotal = Decimal(str(data.get('subtotal', 0)))
+    except (InvalidOperation, TypeError, ValueError):
+        subtotal = Decimal('0.00')
+
+    phone = (data.get('phone') or '').strip()
 
     try:
-        coupon = Coupon.objects.get(code=code, is_active=True)
+        coupon = Coupon.objects.get(code__iexact=code, is_active=True)
     except Coupon.DoesNotExist:
         return JsonResponse({'valid': False, 'message': 'Invalid or expired coupon code.'})
 
     if subtotal < coupon.min_order_amount:
-        return JsonResponse({'valid': False, 'message': f'Minimum order of ₹{coupon.min_order_amount} required.'})
+        return JsonResponse({'valid': False, 'message': f'Minimum order of ₹{coupon.min_order_amount:.0f} required.'})
 
     if coupon.first_order_only and phone:
         if Customer.objects.filter(phone=phone, total_orders__gt=0).exists():
@@ -49,7 +63,7 @@ def api_validate_coupon(request):
     if coupon.discount_type == 'FLAT':
         discount = coupon.value
     else:
-        discount = min((subtotal * coupon.value) / Decimal('100'), coupon.max_discount)
+        discount = min((subtotal * coupon.value) / Decimal('100.00'), coupon.max_discount)
 
     discount = min(discount, subtotal)
     return JsonResponse({
@@ -57,98 +71,136 @@ def api_validate_coupon(request):
         'code': coupon.code,
         'discount': float(discount),
         'final_total': float(subtotal - discount),
-        'message': f'₹{discount} discount applied!'
+        'message': f'₹{discount:.0f} discount applied!'
     })
+
 
 @require_POST
 def api_place_order(request):
-    # 1. Enforce Customer Login (Blocks unauthenticated users and staff)
     if not request.user.is_authenticated or request.user.is_staff:
-        return JsonResponse({'error': 'AUTH_REQUIRED'}, status=401)
+        return JsonResponse({
+            'success': False,
+            'auth_required': True,
+            'error': 'Please sign in as a customer first.'
+        })
 
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid request payload.'}, status=400)
+
     cart = data.get('cart', [])
     if not cart:
-        return JsonResponse({'error': 'Cart is empty'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Your tray is empty.'}, status=400)
 
-    address = data.get('address', '').strip()
     order_type = data.get('order_type', 'DELIVERY')
-    coupon_code = data.get('coupon_code', '').strip().upper()
+    if order_type not in ('DELIVERY', 'PICKUP'):
+        order_type = 'DELIVERY'
 
-    # 2. Calculate true subtotal from database prices (Prevents frontend tampering)
-    subtotal = Decimal('0.00')
-    verified_items = []
-    for entry in cart:
-        item = get_object_or_404(MenuItem, id=entry['id'], is_available=True)
-        qty = int(entry['qty'])
-        if qty > 0:
-            subtotal += item.price * qty
-            verified_items.append((item, qty))
+    address = (data.get('address') or '').strip()
+    coupon_code = (data.get('coupon_code') or '').strip().upper()
 
-    # 3. Re-verify coupon securely on the server
-    discount = Decimal('0.00')
-    customer_profile = request.user.customer_profile
+    if order_type == 'DELIVERY' and not address:
+        return JsonResponse({'success': False, 'error': 'Please enter your delivery address.'}, status=400)
 
-    if coupon_code:
-        coupon = Coupon.objects.filter(code=coupon_code, is_active=True).first()
-        if coupon and subtotal >= coupon.min_order_amount:
-            # Enforce First-Order-Only rule
-            if not (coupon.first_order_only and customer_profile.total_orders > 0):
-                if coupon.discount_type == 'FLAT':
-                    discount = coupon.value
-                else:
-                    discount = min((subtotal * coupon.value) / 100, coupon.max_discount)
-                
-                # Increment coupon usage count
-                coupon.used_count += 1
-                coupon.save()
-
-    total_amount = max(subtotal - discount, Decimal('0.00'))
-
-    # 4. Atomic Database Transaction
-    # Locks the database for exact milliseconds to prevent collisions and broken data
     with transaction.atomic():
-        # Update Customer CRM record
-        if address:
-            customer_profile.address = address
-        customer_profile.total_orders += 1
-        
-        # SQLite Fix: Safely convert float to Decimal before adding new amount
-        customer_profile.total_spent = Decimal(str(customer_profile.total_spent)) + total_amount
-        customer_profile.save()
-
-        # Create the Order
-        # (The secure OTM-YYMMDD-HHMMSS-RANDOM order_number generates automatically in models.py)
-        order = Order.objects.create(
-            customer=customer_profile,
-            customer_name=customer_profile.name,
-            customer_phone=customer_profile.phone,
-            delivery_address=customer_profile.address,
-            order_type=order_type,
-            subtotal=subtotal,
-            coupon_code=coupon_code if discount > 0 else '',
-            discount_amount=discount,
-            total_amount=total_amount
-        )
-
-        # Create Order Items
-        for item, qty in verified_items:
-            OrderItem.objects.create(
-                order=order,
-                item_name=item.name,
-                unit_price=item.price,
-                quantity=qty
+        customer = getattr(request.user, 'customer_profile', None)
+        if not customer:
+            customer, _ = Customer.objects.get_or_create(
+                user=request.user,
+                defaults={
+                    'phone': request.user.username,
+                    'name': request.user.first_name or 'Guest'
+                }
             )
 
-    # 5. Return success and auto-redirect to live tracker
+        if address and order_type == 'DELIVERY':
+            customer.address = address
+            customer.save(update_fields=['address'])
+
+        # Validate cart items (supports Pure Veg, Non-Veg, and Mixed orders)
+        validated_items = []
+        subtotal = Decimal('0.00')
+
+        for entry in cart:
+            item_id = entry.get('id')
+            try:
+                qty = int(entry.get('qty', 1))
+            except (TypeError, ValueError):
+                qty = 1
+
+            if qty <= 0:
+                continue
+
+            db_item = MenuItem.objects.filter(id=item_id, is_available=True).first()
+            if not db_item:
+                return JsonResponse(
+                    {'success': False, 'error': f"Item '{entry.get('name', 'Selected item')}' is currently sold out."},
+                    status=400
+                )
+
+            subtotal += db_item.price * qty
+            validated_items.append((db_item, qty))
+
+        if not validated_items:
+            return JsonResponse({'success': False, 'error': 'No valid available items in tray.'}, status=400)
+
+        # Validate & apply Promo Coupon if provided
+        discount_amount = Decimal('0.00')
+        applied_code = ''
+        if coupon_code:
+            coupon = Coupon.objects.select_for_update().filter(code__iexact=coupon_code, is_active=True).first()
+            if coupon and subtotal >= coupon.min_order_amount:
+                if not (coupon.first_order_only and customer.total_orders > 0):
+                    if coupon.discount_type == 'FLAT':
+                        discount_amount = min(coupon.value, subtotal)
+                    else:
+                        raw_disc = (subtotal * coupon.value) / Decimal('100.00')
+                        discount_amount = min(raw_disc, coupon.max_discount, subtotal)
+                    applied_code = coupon.code
+                    coupon.used_count += 1
+                    coupon.save(update_fields=['used_count'])
+
+        total_amount = max(subtotal - discount_amount, Decimal('0.00'))
+
+        # Create Order
+        order = Order.objects.create(
+            customer=customer,
+            customer_name=customer.name,
+            customer_phone=customer.phone,
+            delivery_address=address if order_type == 'DELIVERY' else 'Self Pickup at Khamasa Counter',
+            order_type=order_type,
+            subtotal=subtotal,
+            discount_amount=discount_amount,
+            total_amount=total_amount,
+            coupon_code=applied_code,
+            status='NEW',
+        )
+
+        # Create OrderItems matching core/models.py fields
+        for db_item, qty in validated_items:
+            OrderItem.objects.create(
+                order=order,
+                item_name=db_item.name,
+                unit_price=db_item.price,
+                quantity=qty,
+                is_veg=db_item.is_veg,
+            )
+
+        # Update Customer CRM lifetime metrics
+        customer.total_orders += 1
+        customer.total_spent += total_amount
+        customer.save(update_fields=['total_orders', 'total_spent', 'last_order_at'])
+
     return JsonResponse({
         'success': True,
         'order_number': order.order_number,
-        'tracking_url': f'/track/{order.tracking_token}/'
+        'tracking_url': reverse('track_order', args=[order.tracking_token]),
     })
 
+
 def track_order(request, token):
-    order = get_object_or_404(Order, tracking_token=token)
+    order = get_object_or_404(Order.objects.prefetch_related('items'), tracking_token=token)
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
@@ -158,16 +210,17 @@ def track_order(request, token):
         })
     
     return render(request, 'track_order.html', {'order': order})
+
+
 # ==========================================
 # 2. SHOP DEVICE ACTIVATION & CRM VIEWS
 # ==========================================
 def activate_shop_device(request):
     """One-time URL opened ONLY on the Shop PC/Tablet & Owner's Phone to authorize the device."""
     if request.method == 'POST':
-        pin = request.POST.get('secret_pin')
+        pin = (request.POST.get('secret_pin') or '').strip()
         if pin == settings.SHOP_DEVICE_SECRET:
             response = redirect('crm_login')
-            # Sets a 1-year encrypted hardware cookie on the shop system
             response.set_signed_cookie(
                 'otm_shop_device',
                 settings.SHOP_DEVICE_SECRET,
@@ -179,6 +232,7 @@ def activate_shop_device(request):
             return response
     return render(request, 'device_activate.html')
 
+
 def crm_login(request):
     device_token = request.get_signed_cookie('otm_shop_device', default=None, salt='zyrac_lock')
     if device_token != settings.SHOP_DEVICE_SECRET:
@@ -186,177 +240,255 @@ def crm_login(request):
 
     error = None
     if request.method == 'POST':
-        u = request.POST.get('username')
-        p = request.POST.get('password')
+        u = (request.POST.get('username') or '').strip()
+        p = request.POST.get('password') or ''
         user = authenticate(request, username=u, password=p)
         if user and user.is_staff:
             login(request, user)
-            
-            # ROUTING LOGIC: Owners and Kitchen go to Inbox, Riders go to Delivery Dashboard
             if user.is_superuser or user.username == 'kitchen':
                 return redirect('crm_orders_inbox')
-            else:
-                return redirect('delivery_dashboard')
+            return redirect('delivery_dashboard')
                 
         error = "Invalid staff credentials"
     return render(request, 'crm_login.html', {'error': error})
 
-# 1. Update your existing crm_orders_inbox to pass the 'riders' list to the template
+
 @shop_device_and_login_required(owner_only=False)
 def crm_orders_inbox(request):
     today = timezone.localdate()
-    # Active orders for Kanban
-    orders = Order.objects.filter(created_at__date=today).exclude(status__in=['DONE', 'CANCELLED']).prefetch_related('items').order_by('created_at')
-    # History for Kitchen (Today's completed/rejected)
-    history_orders = Order.objects.filter(created_at__date=today, status__in=['DONE', 'CANCELLED']).prefetch_related('items').order_by('-updated_at')
-    
+    orders = Order.objects.exclude(status__in=['DONE', 'CANCELLED']).select_related('delivery_boy').prefetch_related('items').order_by('created_at')
+    history_orders = Order.objects.filter(status__in=['DONE', 'CANCELLED']).select_related('delivery_boy').prefetch_related('items').order_by('-updated_at')[:500]
     riders = User.objects.filter(is_staff=True, is_superuser=False).exclude(username='kitchen')
+
     return render(request, 'crm_dashboard.html', {
         'orders': orders,
         'history_orders': history_orders,
+        'today_str': today.strftime('%Y-%m-%d'),
         'riders': riders,
         'is_owner': request.user.is_superuser,
     })
 
-# 2. Add this NEW function to handle assigning riders
+
 @shop_device_and_login_required(owner_only=False)
 @require_POST
 def api_assign_delivery(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    rider_id = json.loads(request.body).get('rider_id')
+    try:
+        rider_id = json.loads(request.body).get('rider_id')
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid payload'}, status=400)
+
     if rider_id:
-        rider = get_object_or_404(User, id=rider_id)
+        rider = get_object_or_404(User, id=rider_id, is_staff=True)
         order.delivery_boy = rider
-        order.status = 'OUT' # Automatically moves to Out for Delivery column
-        order.save()
+        order.status = 'OUT'
+        order.save(update_fields=['delivery_boy', 'status', 'updated_at'])
     return JsonResponse({'success': True})
+
 
 @shop_device_and_login_required(owner_only=False)
 def delivery_dashboard(request):
-    active_deliveries = Order.objects.filter(delivery_boy=request.user, status='OUT').prefetch_related('items').order_by('-created_at')
-    history_deliveries = Order.objects.filter(delivery_boy=request.user, status='DONE').prefetch_related('items').order_by('-updated_at')[:50]
-    
+    orders = Order.objects.filter(
+        delivery_boy=request.user,
+        status='OUT'
+    ).prefetch_related('items').order_by('-updated_at')
+
+    history_orders = Order.objects.filter(
+        delivery_boy=request.user,
+        status='DONE'
+    ).prefetch_related('items').order_by('-updated_at')[:100]
+
     return render(request, 'delivery_dashboard.html', {
-        'orders': active_deliveries,
-        'history_orders': history_deliveries,
+        'orders': orders,
+        'history_orders': history_orders,
     })
+
 
 @shop_device_and_login_required(owner_only=False)
 @require_POST
 def api_update_order_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    new_status = json.loads(request.body).get('status')
+    try:
+        new_status = json.loads(request.body).get('status')
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid payload'}, status=400)
     
-    # Normalize status keys so 'PREP'/'PREPARING' and 'CANCEL'/'CANCELLED' always work
     valid_keys = dict(Order.STATUS_CHOICES).keys()
-    if new_status == 'PREP' and 'PREPARING' in valid_keys:
-        new_status = 'PREPARING'
+    if new_status == 'PREPARING' and 'PREP' in valid_keys:
+        new_status = 'PREP'
     elif new_status == 'CANCEL' and 'CANCELLED' in valid_keys:
         new_status = 'CANCELLED'
 
     if new_status in valid_keys:
         order.status = new_status
-        order.save()
+        order.save(update_fields=['status', 'updated_at'])
     return JsonResponse({'success': True, 'status': order.status})
+
 
 @shop_device_and_login_required(owner_only=True)
 def crm_owner_portal(request):
     today = timezone.now()
+    today_date = timezone.localdate()
     thirty_days_ago = today - timedelta(days=30)
     
-    # 1. Fetch last 30 days of DONE orders for the interactive Chart & Stats
-    done_orders = Order.objects.filter(status='DONE', created_at__gte=thirty_days_ago).prefetch_related('items')
+    done_orders = Order.objects.filter(
+        status='DONE',
+        created_at__gte=thirty_days_ago
+    ).prefetch_related('items')
     
     orders_data = []
     for o in done_orders:
         orders_data.append({
-            'date': o.created_at.strftime('%Y-%m-%d'),
-            'hour': o.created_at.hour,
+            'date': timezone.localtime(o.created_at).strftime('%Y-%m-%d'),
+            'hour': timezone.localtime(o.created_at).hour,
             'amount': float(o.total_amount),
-            'items': [{'name': i.item_name, 'qty': i.quantity} for i in o.items.all()]
+            'items': [
+                {
+                    'name': i.item_name,
+                    'qty': i.quantity,
+                    'price': float(i.unit_price),
+                    'is_veg': getattr(i, 'is_veg', True),
+                }
+                for i in o.items.all()
+            ]
         })
 
-    # 2. Fetch full system history for the "All Orders History" tab
-    all_history = Order.objects.all().order_by('-created_at')[:200] # Last 200 for performance
+    all_history = Order.objects.select_related('delivery_boy', 'customer').prefetch_related('items').order_by('-created_at')[:1000]
+    customers = Customer.objects.order_by('-total_spent', '-total_orders')
+
+    premium_count = Customer.objects.filter(total_spent__gte=Decimal('5000.00')).count()
+    normal_count = Customer.objects.filter(total_spent__lt=Decimal('5000.00'), total_orders__gte=2).count()
+    new_member_count = Customer.objects.filter(total_spent__lt=Decimal('5000.00'), total_orders__lte=1).count()
 
     return render(request, 'crm_owner.html', {
         'orders_json': json.dumps(orders_data),
         'all_history': all_history,
-        'customers': Customer.objects.order_by('-total_spent')[:100],
+        'today_str': today_date.strftime('%Y-%m-%d'),
+        'customers': customers,
+        'premium_count': premium_count,
+        'normal_count': normal_count,
+        'new_member_count': new_member_count,
         'menu_items': MenuItem.objects.select_related('category').all(),
         'categories': Category.objects.all(),
         'coupons': Coupon.objects.all(),
     })
+
 
 @shop_device_and_login_required(owner_only=True)
 @require_POST
 def api_toggle_menu_item(request, item_id):
     item = get_object_or_404(MenuItem, id=item_id)
     item.is_available = not item.is_available
-    item.save()
+    item.save(update_fields=['is_available'])
     return JsonResponse({'success': True, 'is_available': item.is_available})
-
 
 
 @shop_device_and_login_required(owner_only=True)
 @require_POST
 def api_save_menu_item(request):
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid payload'}, status=400)
+
     item_id = data.get('id')
     if item_id:
         item = get_object_or_404(MenuItem, id=item_id)
-        item.price = Decimal(str(data.get('price', item.price)))
-        item.name = data.get('name', item.name)
+        if 'name' in data and str(data['name']).strip():
+            item.name = str(data['name']).strip()
+        if 'price' in data and str(data['price']).strip():
+            try:
+                item.price = Decimal(str(data['price']))
+            except (InvalidOperation, TypeError, ValueError):
+                return JsonResponse({'success': False, 'error': 'Invalid price'}, status=400)
+        if 'is_veg' in data:
+            item.is_veg = bool(data['is_veg'])
         item.save()
-    else:
-        cat_name = data.get('category', 'Signatures').strip()
-        category, _ = Category.objects.get_or_create(name=cat_name)
-        MenuItem.objects.create(
-            category=category,
-            name=data['name'].strip(),
-            description=data.get('description', '').strip(),
-            price=Decimal(str(data['price'])),
-            image_url=data.get('image_url', '').strip(),
-            is_bestseller=bool(data.get('is_bestseller', False))
-        )
+        return JsonResponse({'success': True})
+
+    name = (data.get('name') or '').strip()
+    if not name or not str(data.get('price', '')).strip():
+        return JsonResponse({'success': False, 'error': 'Dish name and price are required'}, status=400)
+
+    try:
+        price = Decimal(str(data['price']))
+    except (InvalidOperation, TypeError, ValueError):
+        return JsonResponse({'success': False, 'error': 'Invalid price format'}, status=400)
+
+    cat_name = (data.get('category') or 'Signatures').strip() or 'Signatures'
+    category, _ = Category.objects.get_or_create(name=cat_name)
+    MenuItem.objects.create(
+        category=category,
+        name=name,
+        price=price,
+        description=(data.get('description') or '').strip(),
+        image_url=(data.get('image_url') or '').strip(),
+        is_veg=bool(data.get('is_veg', True)),
+        is_bestseller=bool(data.get('is_bestseller', False)),
+    )
     return JsonResponse({'success': True})
+
 
 @shop_device_and_login_required(owner_only=True)
 @require_POST
 def api_create_coupon(request):
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid payload'}, status=400)
+
+    code = (data.get('code') or '').strip().upper()
+    if not code:
+        return JsonResponse({'success': False, 'error': 'Coupon code is required'}, status=400)
+
+    try:
+        val = Decimal(str(data['value']))
+        min_amt = Decimal(str(data.get('min_order_amount', 0) or 0))
+        max_disc = Decimal(str(data.get('max_discount', 100) or 100))
+    except (InvalidOperation, TypeError, ValueError, KeyError):
+        return JsonResponse({'success': False, 'error': 'Invalid numeric coupon values'}, status=400)
+
     Coupon.objects.update_or_create(
-        code=data['code'].strip().upper(),
+        code=code,
         defaults={
             'discount_type': data.get('discount_type', 'FLAT'),
-            'value': Decimal(str(data['value'])),
-            'min_order_amount': Decimal(str(data.get('min_order_amount', 0))),
-            'max_discount': Decimal(str(data.get('max_discount', 100))),
+            'value': val,
+            'min_order_amount': min_amt,
+            'max_discount': max_disc,
             'first_order_only': bool(data.get('first_order_only', False)),
             'is_active': True
         }
     )
     return JsonResponse({'success': True})
 
+
 @shop_device_and_login_required(owner_only=True)
 @require_POST
 def api_toggle_coupon(request, coupon_id):
     coupon = get_object_or_404(Coupon, id=coupon_id)
     coupon.is_active = not coupon.is_active
-    coupon.save()
+    coupon.save(update_fields=['is_active'])
     return JsonResponse({'success': True, 'is_active': coupon.is_active})
 
+
 def crm_logout(request):
+    was_staff = request.user.is_authenticated and request.user.is_staff
     logout(request)
-    return redirect('crm_login')
+    if was_staff:
+        return redirect('crm_login')
+    return redirect('public_menu')
 
 
 @require_POST
 def api_customer_auth(request):
-    data = json.loads(request.body)
-    phone = data.get('phone', '').strip()
-    pin = data.get('pin', '').strip()
-    name = data.get('name', '').strip()
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
+
+    phone = (data.get('phone') or '').strip()
+    pin = (data.get('pin') or '').strip()
+    name = (data.get('name') or '').strip()
     action = data.get('action')
 
     if not phone or not pin:
@@ -366,38 +498,43 @@ def api_customer_auth(request):
         if User.objects.filter(username=phone).exists():
             return JsonResponse({'success': False, 'error': 'Number already registered. Please login.'})
         
-        # Create User & link to existing guest Customer Profile (or create new one)
         with transaction.atomic():
             user = User.objects.create_user(username=phone, password=pin)
-            
-            # Check if this phone number already exists from a previous guest order
             customer = Customer.objects.filter(phone=phone).first()
             if customer:
-                # Link the new secure user account to their old order history!
                 customer.user = user
                 if name:
-                    customer.name = name  # Update to their newly provided name
+                    customer.name = name
                 customer.save()
                 login(request, user)
                 return JsonResponse({'success': True, 'name': customer.name})
             else:
-                # Completely new customer
-                Customer.objects.create(user=user, phone=phone, name=name)
+                guest_name = name or 'Guest'
+                Customer.objects.create(user=user, phone=phone, name=guest_name)
                 login(request, user)
-                return JsonResponse({'success': True, 'name': name})
+                return JsonResponse({'success': True, 'name': guest_name})
 
     elif action == 'login':
         user = authenticate(request, username=phone, password=pin)
-        if user is not None:
+        if user is not None and not user.is_staff:
             login(request, user)
-            return JsonResponse({'success': True, 'name': user.customer_profile.name})
+            customer, _ = Customer.objects.get_or_create(
+                user=user,
+                defaults={'phone': phone, 'name': user.first_name or 'Guest'}
+            )
+            return JsonResponse({'success': True, 'name': customer.name})
         return JsonResponse({'success': False, 'error': 'Invalid Phone Number or PIN.'})
 
-    
+    return JsonResponse({'success': False, 'error': 'Invalid authentication action.'}, status=400)
+
 
 def customer_dashboard(request):
     if not request.user.is_authenticated or request.user.is_staff:
         return redirect('public_menu')
-    
-    orders = Order.objects.filter(customer=request.user.customer_profile).prefetch_related('items').order_by('-created_at')
+
+    customer, _ = Customer.objects.get_or_create(
+        user=request.user,
+        defaults={'phone': request.user.username, 'name': request.user.first_name or 'Guest'}
+    )
+    orders = Order.objects.filter(customer=customer).prefetch_related('items').order_by('-created_at')
     return render(request, 'customer_dashboard.html', {'orders': orders})

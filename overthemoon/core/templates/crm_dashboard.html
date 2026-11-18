@@ -7,147 +7,247 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background: #050507; color: #f4f4f5; }
+    :root {
+      --bg-canvas: #08080A;
+      --bg-surface: #111115;
+      --bg-well: #09090C;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(255, 255, 255, 0.13);
+      --brand-gold: #FACC15;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-canvas);
+      color: #F4F4F5;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.011em;
+    }
+
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .nav-surface {
+      background: rgba(11, 11, 14, 0.92);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .swimlane-shell {
+      background: #0D0D11;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset, 0 20px 40px -15px rgba(0, 0, 0, 0.75);
+    }
+
+    .qsr-ticket {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.07) inset, 0 10px 25px -10px rgba(0, 0, 0, 0.7);
+      transition: border-color 0.18s ease, transform 0.18s ease;
+    }
+
+    .qsr-well {
+      background: var(--bg-well);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
     .lane-content:empty::after {
-      content: "Waiting for orders...";
+      content: "No active tickets in this queue";
       display: flex;
       align-items: center;
       justify-content: center;
       height: 120px;
-      margin-top: 24px;
+      margin-top: 16px;
       font-size: 0.75rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #52525b;
-      border: 2px dashed rgba(255, 255, 255, 0.06);
-      border-radius: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #52525B;
+      border: 1.5px dashed rgba(255, 255, 255, 0.07);
+      border-radius: 1rem;
     }
   </style>
 </head>
-<body class="min-h-screen lg:h-screen flex flex-col lg:overflow-hidden">
+<body class="min-h-screen lg:h-screen flex flex-col lg:overflow-hidden selection:bg-yellow-400 selection:text-black">
 
-  <!-- Top CRM Navigation Header -->
-  <header class="sticky top-0 shrink-0 z-30 backdrop-blur-2xl bg-zinc-950/90 border-b border-white/10 px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xl">
-    
-    <!-- Left Brand & Live Status -->
-    <div class="flex items-center gap-3.5">
-      <div class="w-10 h-10 rounded-2xl bg-yellow-400 text-black flex items-center justify-center shadow-lg shadow-yellow-400/20 shrink-0">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-      </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="font-black text-base sm:text-lg text-white leading-none tracking-tight">OTM KITCHEN COMMAND</h1>
-          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-black text-emerald-400 uppercase">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Live
-          </span>
+  <!-- Reusable Brand + FSSAI Pure Veg & Non-Veg SVG Symbols -->
+  <svg class="hidden" aria-hidden="true">
+    <symbol id="otm-astronaut" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="28" fill="#FACC15"/>
+      <rect x="16" y="38" width="12" height="22" rx="6" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+      <rect x="92" y="38" width="12" height="22" rx="6" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+      <circle cx="60" cy="46" r="34" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4.5"/>
+      <ellipse cx="60" cy="47" rx="26" ry="22" fill="#1E1B4B"/>
+      <path d="M40 36 C47 29, 60 29, 68 33" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.9"/>
+      <circle cx="75" cy="49" r="3.5" fill="#FFFFFF" opacity="0.9"/>
+      <circle cx="71" cy="57" r="2" fill="#FFFFFF" opacity="0.9"/>
+      <path d="M35 76 C35 66, 85 66, 85 76 L90 100 C90 106, 30 106, 30 100 Z" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+      <rect x="20" y="86" width="18" height="24" rx="9" fill="#E2E8F0" stroke="#1E1B4B" stroke-width="4"/>
+      <rect x="82" y="86" width="18" height="24" rx="9" fill="#E2E8F0" stroke="#1E1B4B" stroke-width="4"/>
+      <path d="M38 72 C38 57, 82 57, 82 72 Z" fill="#F59E0B" stroke="#1E1B4B" stroke-width="3.5"/>
+      <path d="M36 74 Q48 79 60 74 Q72 79 84 74" stroke="#22C55E" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+      <polygon points="42,76 60,82 78,76" fill="#FACC15"/>
+      <rect x="38" y="77" width="44" height="7" rx="3.5" fill="#78350F" stroke="#1E1B4B" stroke-width="3"/>
+      <rect x="40" y="84" width="40" height="7" rx="3.5" fill="#F59E0B" stroke="#1E1B4B" stroke-width="3.5"/>
+      <circle cx="40" cy="76" r="8.5" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="3.5"/>
+      <circle cx="80" cy="76" r="8.5" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="3.5"/>
+    </symbol>
+
+    <symbol id="veg-mark" viewBox="0 0 24 24">
+      <rect x="2" y="2" width="20" height="20" rx="4" fill="#08080A" stroke="#22C55E" stroke-width="2.3"/>
+      <circle cx="12" cy="12" r="5" fill="#22C55E"/>
+    </symbol>
+
+    <symbol id="nonveg-mark" viewBox="0 0 24 24">
+      <rect x="2" y="2" width="20" height="20" rx="4" fill="#08080A" stroke="#EF4444" stroke-width="2.3"/>
+      <polygon points="12,6.5 17.5,16.5 6.5,16.5" fill="#EF4444"/>
+    </symbol>
+  </svg>
+
+  <!-- Sticky Kitchen Header -->
+  <header class="sticky top-0 shrink-0 z-30 nav-surface px-4 sm:px-6 py-3">
+    <div class="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Left Brand & Live Status -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-yellow-400/50">
+          <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
         </div>
-        <p class="text-[10px] font-bold uppercase tracking-widest text-yellow-400 mt-1">Chef Ubedulla Mansuri • Active Queue ({{ orders|length }})</p>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-black text-sm sm:text-base text-white leading-none tracking-tight">KITCHEN DISPLAY SYSTEM</h1>
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-bold text-emerald-400 uppercase">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Live
+            </span>
+          </div>
+          <p class="text-[11px] font-medium text-zinc-400 mt-1">
+            Chef Ubedulla Mansuri • <strong class="text-yellow-400">{{ orders|length }} Active</strong> • Separate Veg & Non-Veg Grills
+          </p>
+        </div>
+      </div>
+
+      <!-- Center Segmented Tabs (Live Kitchen Board vs All Orders Archive) -->
+      <div class="flex bg-[#09090C] p-1 rounded-xl border border-white/[0.08] order-3 lg:order-2 w-full lg:w-auto">
+        <button type="button" onclick="switchView('kanban')" id="tab-kanban" class="flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs font-extrabold bg-yellow-400 text-black transition flex items-center justify-center gap-2">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+          <span>Live Orders ({{ orders|length }})</span>
+        </button>
+        <button type="button" onclick="switchView('history')" id="tab-history" class="flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-2">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>All Orders History ({{ history_orders|length }})</span>
+        </button>
+      </div>
+
+      <!-- Right Station Filter & Quick Actions -->
+      <div class="flex items-center gap-2 order-2 lg:order-3">
+        <!-- 1-Tap Kitchen Grill Filter -->
+        <div id="kanbanDietBar" class="hidden sm:flex bg-[#09090C] p-1 rounded-xl border border-white/[0.08]">
+          <button type="button" onclick="setKanbanDiet('ALL', this)" class="k-diet-btn px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-white/15 text-white transition">All</button>
+          <button type="button" onclick="setKanbanDiet('VEG', this)" class="k-diet-btn px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition flex items-center gap-1">
+            <svg class="w-3 h-3"><use href="#veg-mark"/></svg><span>Veg</span>
+          </button>
+          <button type="button" onclick="setKanbanDiet('NONVEG', this)" class="k-diet-btn px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-red-400 hover:text-red-300 transition flex items-center gap-1">
+            <svg class="w-3 h-3"><use href="#nonveg-mark"/></svg><span>Non-Veg</span>
+          </button>
+        </div>
+
+        <button type="button" onclick="window.location.reload()" class="p-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 border border-white/[0.08] transition" title="Refresh Board">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+
+        {% if is_owner or request.user.is_superuser %}
+        <a href="{% url 'crm_owner_portal' %}" class="px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-white text-xs font-extrabold border border-white/[0.08] transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+          <span class="hidden sm:inline">Owner</span>
+        </a>
+        {% endif %}
+
+        <a href="{% url 'crm_logout' %}" class="p-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition border border-red-500/20" title="Sign Out">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </a>
       </div>
     </div>
-
-    <!-- Center Segmented Tabs (Live Board vs Today's History) -->
-    <div class="flex bg-zinc-900 p-1 rounded-2xl border border-white/10 order-3 sm:order-2 w-full sm:w-auto">
-      <button type="button" onclick="switchView('kanban')" id="tab-kanban" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black bg-yellow-400 text-black shadow transition flex items-center justify-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
-        <span>Live Board ({{ orders|length }})</span>
-      </button>
-      <button type="button" onclick="switchView('history')" id="tab-history" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black text-zinc-400 hover:text-white transition flex items-center justify-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <span>Today's History ({{ history_orders|length }})</span>
-      </button>
-    </div>
-
-    <!-- Right Quick Actions -->
-    <nav class="flex items-center gap-2 text-xs font-extrabold order-2 sm:order-3">
-      <button type="button" onclick="window.location.reload()" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 transition" title="Refresh Now">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-      </button>
-      {% if is_owner or request.user.is_superuser %}
-      <a href="{% url 'crm_owner_portal' %}" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white transition border border-white/10 flex items-center gap-1.5">
-        <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        <span class="hidden sm:inline">Owner Portal</span>
-      </a>
-      {% endif %}
-      <a href="{% url 'crm_logout' %}" class="p-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition border border-red-500/20" title="Logout">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-      </a>
-    </nav>
   </header>
 
-  <!-- Main Workspace -->
+  <!-- Main Kitchen Workspace -->
   <main class="flex-1 lg:overflow-hidden p-4 sm:p-6">
 
     <!-- ========================================== -->
-    <!-- VIEW 1: 3-COLUMN SWIMLANE KANBAN BOARD     -->
+    <!-- VIEW 1: 3-COLUMN LIVE KITCHEN KANBAN BOARD -->
     <!-- ========================================== -->
-    <div id="view-kanban" class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full max-w-[1800px] mx-auto">
+    <div id="view-kanban" class="grid grid-cols-1 lg:grid-cols-3 gap-5 h-full max-w-[1800px] mx-auto">
 
       <!-- SWIMLANE 1: NEW INCOMING (status == 'NEW') -->
-      <div class="flex flex-col lg:h-full bg-zinc-900/50 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl">
-        <div class="shrink-0 px-5 py-4 bg-yellow-400/10 border-b border-yellow-400/20 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-yellow-400 text-black flex items-center justify-center shadow-lg shadow-yellow-400/20">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-            </div>
-            <h2 class="text-xs sm:text-sm font-black uppercase tracking-widest text-yellow-400">1. New Received</h2>
+      <div class="swimlane-shell flex flex-col lg:h-full rounded-2xl overflow-hidden">
+        <div class="shrink-0 px-4 py-3.5 bg-yellow-400/[0.07] border-b border-yellow-400/20 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-yellow-400">1. New Orders</h2>
           </div>
-          <span id="badge-new" class="px-3 py-1 rounded-full text-xs font-black bg-yellow-400 text-black">0</span>
+          <span id="badge-new" class="px-2.5 py-0.5 rounded-md text-xs font-black bg-yellow-400 text-black">0</span>
         </div>
 
-        <div id="lane-new" class="lane-content flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+        <div id="lane-new" class="lane-content flex-1 overflow-y-auto p-3.5 space-y-3.5 no-scrollbar">
           {% for o in orders %}{% if o.status == 'NEW' %}
-          <div class="new-order-card bg-zinc-950/90 border-2 border-yellow-400/50 hover:border-yellow-400 p-5 rounded-3xl shadow-xl relative overflow-hidden transition">
+          <div class="new-order-card k-ticket qsr-ticket border-yellow-400/45 p-4 sm:p-5 rounded-2xl relative overflow-hidden"
+               data-diets="{% for i in o.items.all %}{% if i.is_veg %}VEG {% else %}NONVEG {% endif %}{% endfor %}">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-yellow-400"></div>
 
-            <!-- Order Header -->
-            <div class="flex justify-between items-start gap-2 pl-2">
+            <!-- Ticket Header -->
+            <div class="flex justify-between items-start gap-2 pl-2 pb-3 border-b border-white/[0.07]">
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="font-black text-white text-base sm:text-lg tracking-tight">{{ o.order_number }}</span>
-                  <span class="text-[10px] font-bold text-zinc-500">{{ o.created_at|date:"h:i A" }}</span>
+                  <span class="font-black text-white text-base tracking-tight">{{ o.order_number }}</span>
+                  <span class="text-[11px] font-medium text-zinc-500">{{ o.created_at|date:"h:i A" }}</span>
                 </div>
-                <p class="text-xs text-zinc-300 font-bold mt-1">
-                  {{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="text-yellow-400 underline">{{ o.customer_phone }}</a>
+                <p class="text-xs text-zinc-200 font-bold mt-1">
+                  {{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="text-yellow-400 hover:underline">{{ o.customer_phone }}</a>
                 </p>
               </div>
-              <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider {% if o.order_type == 'DELIVERY' %}bg-yellow-400 text-black{% else %}bg-white/10 text-white border border-white/10{% endif %}">
-                {{ o.order_type }}
-              </span>
+              <div class="flex flex-col items-end gap-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase {% if o.order_type == 'DELIVERY' %}bg-yellow-400 text-black{% else %}bg-white/10 text-white{% endif %}">
+                  {{ o.order_type }}
+                </span>
+                <span class="text-sm font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
+              </div>
             </div>
 
-            <!-- Delivery Address -->
+            <!-- Auto-Injected Mixed Veg + Non-Veg Warning Banner -->
+            <div class="mixed-alert hidden mt-2.5 ml-2 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/35 text-[11px] font-extrabold text-amber-300 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+              <span>MIXED ORDER: Pack Veg & Non-Veg in Separate Bags</span>
+            </div>
+
             {% if o.delivery_address and o.order_type == 'DELIVERY' %}
-            <div class="mt-3 ml-2 p-3 rounded-2xl bg-zinc-900 border border-white/5 flex items-start gap-2 text-xs text-zinc-300">
-              <svg class="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              <span class="font-semibold leading-relaxed">{{ o.delivery_address }}</span>
+            <div class="mt-2.5 ml-2 p-2.5 rounded-xl qsr-well flex items-start gap-2 text-xs text-zinc-300">
+              <svg class="w-3.5 h-3.5 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+              <span class="font-medium leading-snug">{{ o.delivery_address }}</span>
             </div>
             {% endif %}
 
-            <!-- Ordered Items -->
-            <div class="text-xs sm:text-sm space-y-1.5 border-y border-white/10 py-3 my-3.5 pl-2">
+            <!-- Items Well With Veg/Non-Veg Marks -->
+            <div class="mt-2.5 ml-2 p-3 rounded-xl qsr-well text-xs sm:text-sm space-y-1.5">
               {% for i in o.items.all %}
-              <div class="flex justify-between font-black text-white">
-                <span>{{ i.quantity }} × {{ i.item_name }}</span>
-                <span class="text-zinc-400 font-bold">₹{{ i.unit_price|floatformat:0 }}</span>
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-white flex items-center gap-2">
+                  {% if i.is_veg %}
+                  <svg class="w-3.5 h-3.5 shrink-0" title="Pure Veg"><use href="#veg-mark"/></svg>
+                  {% else %}
+                  <svg class="w-3.5 h-3.5 shrink-0" title="Non-Veg"><use href="#nonveg-mark"/></svg>
+                  {% endif %}
+                  <span><strong class="text-yellow-400 font-black">{{ i.quantity }}×</strong> {{ i.item_name }}</span>
+                </span>
+                <span class="text-zinc-500 text-xs font-semibold">₹{{ i.unit_price|floatformat:0 }}</span>
               </div>
               {% endfor %}
             </div>
 
-            <!-- Total & Action Buttons -->
-            <div class="flex items-center justify-between pl-2 mb-3">
-              <span class="text-xs font-bold text-zinc-400">Total Bill {% if o.coupon_code %}({{ o.coupon_code }}){% endif %}</span>
-              <span class="text-lg font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2.5 pl-2">
-              <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'CANCELLED')" class="py-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 text-xs font-black transition">
-                Reject Order
+            <div class="grid grid-cols-2 gap-2 pl-2 mt-3.5">
+              <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'CANCELLED')" class="py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 text-xs font-extrabold transition">
+                Decline
               </button>
-              <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'PREP')" class="py-3 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black shadow-lg shadow-yellow-400/20 transition active:scale-95">
-                Accept & Cook →
+              <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'PREP')" class="py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black transition active:scale-[0.98]">
+                Accept & Grill →
               </button>
             </div>
           </div>
@@ -155,51 +255,62 @@
         </div>
       </div>
 
-      <!-- SWIMLANE 2: PREPARING IN KITCHEN (status == 'PREP') -->
-      <div class="flex flex-col lg:h-full bg-zinc-900/50 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl">
-        <div class="shrink-0 px-5 py-4 bg-sky-500/10 border-b border-sky-500/20 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-sky-400 text-black flex items-center justify-center shadow-lg shadow-sky-400/20">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>
-            </div>
-            <h2 class="text-xs sm:text-sm font-black uppercase tracking-widest text-sky-400">2. Preparing</h2>
+      <!-- SWIMLANE 2: ON THE GRILL / PREPARING (status == 'PREP') -->
+      <div class="swimlane-shell flex flex-col lg:h-full rounded-2xl overflow-hidden">
+        <div class="shrink-0 px-4 py-3.5 bg-sky-400/[0.07] border-b border-sky-400/20 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400">2. On The Grill</h2>
           </div>
-          <span id="badge-prep" class="px-3 py-1 rounded-full text-xs font-black bg-sky-400 text-black">0</span>
+          <span id="badge-prep" class="px-2.5 py-0.5 rounded-md text-xs font-black bg-sky-400 text-black">0</span>
         </div>
 
-        <div id="lane-prep" class="lane-content flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+        <div id="lane-prep" class="lane-content flex-1 overflow-y-auto p-3.5 space-y-3.5 no-scrollbar">
           {% for o in orders %}{% if o.status == 'PREP' %}
-          <div class="prep-order-card bg-zinc-950/90 border border-sky-500/40 hover:border-sky-400 p-5 rounded-3xl shadow-xl relative overflow-hidden transition">
+          <div class="prep-order-card k-ticket qsr-ticket border-sky-400/35 p-4 sm:p-5 rounded-2xl relative overflow-hidden"
+               data-diets="{% for i in o.items.all %}{% if i.is_veg %}VEG {% else %}NONVEG {% endif %}{% endfor %}">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-sky-400"></div>
 
-            <div class="flex justify-between items-start gap-2 pl-2">
+            <div class="flex justify-between items-start gap-2 pl-2 pb-3 border-b border-white/[0.07]">
               <div>
-                <span class="font-black text-white text-base sm:text-lg tracking-tight">{{ o.order_number }}</span>
-                <p class="text-xs text-zinc-400 font-bold mt-0.5">{{ o.customer_name }} • {{ o.customer_phone }}</p>
+                <span class="font-black text-white text-base tracking-tight">{{ o.order_number }}</span>
+                <p class="text-xs text-zinc-400 font-semibold mt-0.5">{{ o.customer_name }} • {{ o.customer_phone }}</p>
               </div>
-              <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-white/10 text-white">{{ o.order_type }}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-white/10 text-white">{{ o.order_type }}</span>
             </div>
 
-            <div class="text-xs sm:text-sm space-y-1.5 border-y border-white/10 py-3 my-3.5 pl-2">
+            <div class="mixed-alert hidden mt-2.5 ml-2 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/35 text-[11px] font-extrabold text-amber-300 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+              <span>MIXED ORDER: Separate Veg & Non-Veg Bags</span>
+            </div>
+
+            <div class="mt-2.5 ml-2 p-3 rounded-xl qsr-well text-xs sm:text-sm space-y-1.5">
               {% for i in o.items.all %}
-              <div class="flex justify-between font-extrabold text-zinc-200">
-                <span>{{ i.quantity }} × {{ i.item_name }}</span>
+              <div class="flex items-center justify-between gap-2 font-bold text-zinc-100">
+                <span class="flex items-center gap-2">
+                  {% if i.is_veg %}
+                  <svg class="w-3.5 h-3.5 shrink-0"><use href="#veg-mark"/></svg>
+                  {% else %}
+                  <svg class="w-3.5 h-3.5 shrink-0"><use href="#nonveg-mark"/></svg>
+                  {% endif %}
+                  <span><strong class="text-sky-400 font-black">{{ i.quantity }}×</strong> {{ i.item_name }}</span>
+                </span>
               </div>
               {% endfor %}
             </div>
 
-            <div class="pl-2 space-y-2.5">
+            <div class="pl-2 mt-3.5 space-y-2">
               {% if o.order_type == 'DELIVERY' %}
-              <select id="rider-select-{{ o.id }}" class="w-full bg-zinc-900 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:border-sky-400 transition">
-                <option value="">-- Select Delivery Rider --</option>
+              <select id="rider-select-{{ o.id }}" class="w-full bg-[#09090C] border border-white/[0.09] rounded-xl px-3 py-2.5 text-xs text-white font-bold outline-none focus:border-sky-400 transition">
+                <option value="">-- Choose Delivery Rider --</option>
                 {% for r in riders %}<option value="{{ r.id }}">{{ r.username|title }}</option>{% endfor %}
               </select>
-              <button type="button" data-id="{{ o.id }}" onclick="dispatchOrder(this.dataset.id)" class="w-full py-3.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black shadow-lg shadow-sky-400/20 transition active:scale-95">
+              <button type="button" data-id="{{ o.id }}" onclick="dispatchOrder(this.dataset.id)" class="w-full py-3 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition active:scale-[0.98]">
                 Assign Rider & Dispatch →
               </button>
               {% else %}
-              <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'OUT')" class="w-full py-3.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black shadow-lg shadow-sky-400/20 transition active:scale-95">
-                Mark Ready for Self-Pickup →
+              <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'OUT')" class="w-full py-3 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition active:scale-[0.98]">
+                Mark Ready at Counter →
               </button>
               {% endif %}
             </div>
@@ -208,45 +319,44 @@
         </div>
       </div>
 
-      <!-- SWIMLANE 3: OUT FOR DELIVERY / READY (status == 'OUT') -->
-      <div class="flex flex-col lg:h-full bg-zinc-900/50 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl">
-        <div class="shrink-0 px-5 py-4 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-emerald-400 text-black flex items-center justify-center shadow-lg shadow-emerald-400/20">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            </div>
-            <h2 class="text-xs sm:text-sm font-black uppercase tracking-widest text-emerald-400">3. Out for Delivery</h2>
+      <!-- SWIMLANE 3: OUT FOR DELIVERY / COUNTER READY (status == 'OUT') -->
+      <div class="swimlane-shell flex flex-col lg:h-full rounded-2xl overflow-hidden">
+        <div class="shrink-0 px-4 py-3.5 bg-emerald-400/[0.07] border-b border-emerald-400/20 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">3. Out for Delivery</h2>
           </div>
-          <span id="badge-out" class="px-3 py-1 rounded-full text-xs font-black bg-emerald-400 text-black">0</span>
+          <span id="badge-out" class="px-2.5 py-0.5 rounded-md text-xs font-black bg-emerald-400 text-black">0</span>
         </div>
 
-        <div id="lane-out" class="lane-content flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+        <div id="lane-out" class="lane-content flex-1 overflow-y-auto p-3.5 space-y-3.5 no-scrollbar">
           {% for o in orders %}{% if o.status == 'OUT' %}
-          <div class="out-order-card bg-zinc-950/90 border border-emerald-500/40 hover:border-emerald-400 p-5 rounded-3xl shadow-xl relative overflow-hidden transition">
+          <div class="out-order-card k-ticket qsr-ticket border-emerald-400/35 p-4 sm:p-5 rounded-2xl relative overflow-hidden"
+               data-diets="{% for i in o.items.all %}{% if i.is_veg %}VEG {% else %}NONVEG {% endif %}{% endfor %}">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-400"></div>
 
             <div class="flex justify-between items-center mb-1.5 pl-2">
-              <span class="font-black text-white text-base sm:text-lg tracking-tight">{{ o.order_number }}</span>
-              <span class="text-lg font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
+              <span class="font-black text-white text-base tracking-tight">{{ o.order_number }}</span>
+              <span class="text-base font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
             </div>
 
-            <p class="text-xs text-zinc-400 font-bold mb-3 pl-2">
+            <p class="text-xs text-zinc-400 font-semibold mb-2.5 pl-2">
               {{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="underline text-zinc-200">{{ o.customer_phone }}</a>
             </p>
 
             {% if o.delivery_address and o.order_type == 'DELIVERY' %}
-            <p class="text-xs text-zinc-400 bg-zinc-900 p-2.5 rounded-xl border border-white/5 mb-3 ml-2">{{ o.delivery_address }}</p>
+            <p class="text-xs text-zinc-300 qsr-well p-2.5 rounded-xl mb-3 ml-2">{{ o.delivery_address }}</p>
             {% endif %}
 
-            <div class="pl-2 space-y-3">
+            <div class="pl-2 space-y-2.5">
               {% if o.delivery_boy %}
-              <div class="text-[11px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl inline-flex items-center gap-2">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+              <div class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
                 <span>Rider: {{ o.delivery_boy.username|title }}</span>
               </div>
               {% endif %}
-              <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'DONE')" class="w-full py-3.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-black shadow-lg shadow-emerald-400/20 transition active:scale-95">
-                Mark Completed & Paid ✓
+              <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'DONE')" class="w-full py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-black transition active:scale-[0.98]">
+                Complete & Cash Collected ✓
               </button>
             </div>
           </div>
@@ -256,84 +366,277 @@
 
     </div>
 
-    <!-- ========================================== -->
-    <!-- VIEW 2: TODAY'S COMPLETED / REJECTED TAB   -->
-    <!-- ========================================== -->
-    <div id="view-history" class="hidden h-full max-w-6xl mx-auto flex flex-col space-y-4 overflow-y-auto pb-12">
-      <div class="flex flex-wrap items-center justify-between gap-4 bg-zinc-900/90 p-5 rounded-3xl border border-white/10">
-        <div>
-          <h2 class="text-base sm:text-lg font-black text-white">Today's Completed & Cancelled Orders ({{ history_orders|length }})</h2>
-          <p class="text-xs text-zinc-400 mt-0.5">Search by order number, customer name, or mobile number</p>
+    <!-- ========================================================== -->
+    <!-- VIEW 2: ALL-TIME KITCHEN ORDERS HISTORY (SEARCH & FILTERS) -->
+    <!-- ========================================================== -->
+    <div id="view-history" class="hidden h-full max-w-[1600px] mx-auto flex flex-col space-y-5 overflow-y-auto pb-16 pr-1 no-scrollbar">
+
+      <!-- Top Control & Multi-Filter Bar -->
+      <div class="qsr-ticket rounded-2xl p-5 space-y-4">
+        
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base sm:text-xl font-black text-white">Complete Kitchen Order Archive</h2>
+            <p class="text-xs text-zinc-400 mt-0.5">Filter by Pure Veg, Non-Veg, date, delivery status, or search any dish, guest, or order ID</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="px-4 py-2 rounded-xl qsr-well text-right">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Showing Orders</p>
+              <p id="histFilteredCount" class="text-base font-black text-white">{{ history_orders|length }}</p>
+            </div>
+            <div class="px-4 py-2 rounded-xl qsr-well border-emerald-500/25 text-right">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Delivered Value</p>
+              <p id="histFilteredRevenue" class="text-base font-black text-yellow-400">₹0</p>
+            </div>
+          </div>
         </div>
-        <input id="historySearch" oninput="filterHistory()" type="text" placeholder="Search today's history..." class="w-full sm:w-64 bg-zinc-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
+
+        <!-- Search + Date Picker + Dietary & Status Filter Pills -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-3 border-t border-white/[0.08]">
+          
+          <div class="lg:col-span-4 relative">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input id="historySearch" oninput="applyHistoryFilters()" type="text" placeholder="Search Order ID, Customer, Phone, Burger, or Rider..."
+              class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:border-yellow-400 outline-none transition">
+            <button id="clearHistSearchBtn" type="button" onclick="resetHistoryFilters()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <div class="lg:col-span-3 flex items-center gap-2">
+            <input id="historyDateFilter" onchange="applyHistoryFilters()" type="date"
+              class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-bold text-zinc-200 focus:border-yellow-400 outline-none transition">
+            <button type="button" onclick="setTodayDateFilter()" class="shrink-0 px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-[11px] font-black text-yellow-400 transition">
+              Today
+            </button>
+          </div>
+
+          <div class="lg:col-span-5 flex items-center gap-1 overflow-x-auto no-scrollbar bg-[#09090C] p-1 rounded-xl border border-white/[0.08]">
+            <button type="button" onclick="setStatusFilter('ALL', this)" class="hist-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition whitespace-nowrap">All</button>
+            <button type="button" onclick="setStatusFilter('VEG_ONLY', this)" class="hist-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap">Pure Veg</button>
+            <button type="button" onclick="setStatusFilter('HAS_NONVEG', this)" class="hist-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-red-400 hover:text-red-300 transition whitespace-nowrap">Non-Veg</button>
+            <button type="button" onclick="setStatusFilter('DONE', this)" class="hist-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition whitespace-nowrap">Delivered</button>
+            <button type="button" onclick="setStatusFilter('CANCELLED', this)" class="hist-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition whitespace-nowrap">Cancelled</button>
+          </div>
+
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Historical Orders Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {% for o in history_orders %}
-        <div class="hist-card bg-zinc-900/70 border border-white/10 p-5 rounded-3xl flex flex-col justify-between gap-4" data-search="{{ o.order_number|lower }} {{ o.customer_name|lower }} {{ o.customer_phone }}">
+        <div class="hist-card qsr-ticket p-5 rounded-2xl flex flex-col justify-between gap-4 hover:border-white/20 transition"
+             data-status="{{ o.status }}"
+             data-type="{{ o.order_type }}"
+             data-date="{{ o.created_at|date:'Y-m-d' }}"
+             data-amount="{{ o.total_amount }}"
+             data-diets="{% for i in o.items.all %}{% if i.is_veg %}VEG {% else %}NONVEG {% endif %}{% endfor %}"
+             data-search="{{ o.order_number|lower }} {{ o.customer_name|lower }} {{ o.customer_phone }} {{ o.order_type|lower }} {% if o.delivery_boy %}{{ o.delivery_boy.username|lower }}{% endif %} {% for i in o.items.all %}{{ i.item_name|lower }} {% endfor %}">
+          
           <div>
-            <div class="flex items-center justify-between gap-2">
-              <span class="font-black text-white text-base">{{ o.order_number }}</span>
-              <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider {% if o.status == 'DONE' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% else %}bg-red-500/15 text-red-400 border border-red-500/30{% endif %}">
+            <div class="flex items-start justify-between gap-2 pb-3 border-b border-white/[0.07]">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-black text-white text-base tracking-tight">{{ o.order_number }}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-white/[0.07] text-zinc-200">{{ o.order_type }}</span>
+                </div>
+                <p class="text-[11px] text-zinc-400 font-semibold mt-1">{{ o.created_at|date:"d M Y, h:i A" }}</p>
+              </div>
+
+              <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider {% if o.status == 'DONE' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% else %}bg-red-500/15 text-red-400 border border-red-500/30{% endif %}">
                 {% if o.status == 'DONE' %}Delivered{% else %}Cancelled{% endif %}
               </span>
             </div>
-            <p class="text-xs text-zinc-400 font-bold mt-1">{{ o.customer_name }} • {{ o.customer_phone }}</p>
-            {% if o.delivery_boy %}
-            <p class="text-[11px] text-emerald-400 font-bold mt-1">Rider: {{ o.delivery_boy.username|title }}</p>
-            {% endif %}
-            <div class="mt-3 pt-3 border-t border-white/10 text-xs text-zinc-300 space-y-1 font-semibold">
-              {% for i in o.items.all %}<div>{{ i.quantity }} × {{ i.item_name }}</div>{% endfor %}
+
+            <div class="mt-3 space-y-1">
+              <p class="text-xs font-extrabold text-zinc-200">
+                {{ o.customer_name }} • <a href="tel:{{ o.customer_phone }}" class="text-yellow-400 hover:underline">{{ o.customer_phone }}</a>
+              </p>
+              {% if o.delivery_address and o.order_type == 'DELIVERY' %}
+              <p class="text-[11px] text-zinc-400 line-clamp-1">{{ o.delivery_address }}</p>
+              {% endif %}
+              {% if o.delivery_boy %}
+              <p class="text-[11px] text-emerald-400 font-bold">Rider: {{ o.delivery_boy.username|title }}</p>
+              {% endif %}
+            </div>
+
+            <div class="mt-3 p-3 rounded-xl qsr-well text-xs text-zinc-200 space-y-1.5 font-semibold">
+              {% for i in o.items.all %}
+              <div class="flex items-center justify-between gap-2">
+                <span class="flex items-center gap-2 min-w-0">
+                  {% if i.is_veg %}
+                  <svg class="w-3.5 h-3.5 shrink-0"><use href="#veg-mark"/></svg>
+                  {% else %}
+                  <svg class="w-3.5 h-3.5 shrink-0"><use href="#nonveg-mark"/></svg>
+                  {% endif %}
+                  <span class="truncate"><strong class="text-yellow-400 font-black">{{ i.quantity }}×</strong> {{ i.item_name }}</span>
+                </span>
+                <span class="text-zinc-500 shrink-0">₹{{ i.unit_price|floatformat:0 }}</span>
+              </div>
+              {% endfor %}
             </div>
           </div>
 
-          <div class="flex items-center justify-between pt-3 border-t border-white/10">
-            <span class="text-[11px] text-zinc-500 font-bold">{{ o.updated_at|date:"h:i A" }} • {{ o.order_type }}</span>
+          <div class="flex items-center justify-between pt-3 border-t border-white/[0.07]">
+            <span class="text-[11px] text-zinc-500 font-semibold">
+              Updated {{ o.updated_at|date:"h:i A" }} {% if o.coupon_code %}• {{ o.coupon_code }}{% endif %}
+            </span>
             <span class="font-black text-yellow-400 text-lg">₹{{ o.total_amount|floatformat:0 }}</span>
           </div>
         </div>
         {% empty %}
-        <div class="col-span-full text-center py-20 bg-zinc-900/40 rounded-3xl border border-dashed border-white/10 text-sm font-bold text-zinc-500">
-          No orders completed or cancelled today yet.
+        <div class="col-span-full text-center py-20 qsr-ticket rounded-2xl text-sm font-bold text-zinc-500">
+          No historical orders in the database yet.
         </div>
         {% endfor %}
       </div>
+
+      <div id="noFilterMatchBox" class="hidden text-center py-16 qsr-ticket rounded-2xl">
+        <p class="text-sm font-black text-white">No Orders Match Your Filter</p>
+        <p class="text-xs text-zinc-400 mt-1">Try clearing the search text, date filter, or dietary pill.</p>
+        <button type="button" onclick="resetHistoryFilters()" class="mt-4 px-5 py-2.5 rounded-xl bg-yellow-400 text-black text-xs font-black">
+          Reset All Filters
+        </button>
+      </div>
+
+      <!-- Minimal Studio Credit -->
+      <footer class="pt-4 border-t border-white/[0.07] flex items-center justify-between text-[11px] text-zinc-500">
+        <span>© 2026 Over The Moon Burger • Kitchen Archive</span>
+        <a href="https://www.instagram.com/zyrac__/" target="_blank" rel="noopener noreferrer" class="hover:text-zinc-300 transition">
+          Made by <strong class="text-zinc-300">ZYRAC</strong> • <span class="text-yellow-400 font-semibold">@zyrac__</span>
+        </a>
+      </footer>
+
     </div>
 
   </main>
 
   <script>
+    const TODAY_STR = "{{ today_str }}";
+    let activeHistFilter = 'ALL';
+    let kanbanDiet = 'ALL';
+
     function getCookie(name) {
       let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
       return v ? v[2] : null;
     }
 
-    // Update live count badges on each swimlane
-    const newCount = document.querySelectorAll('.new-order-card').length;
-    const prepCount = document.querySelectorAll('.prep-order-card').length;
-    const outCount = document.querySelectorAll('.out-order-card').length;
-    document.getElementById('badge-new').textContent = newCount;
-    document.getElementById('badge-prep').textContent = prepCount;
-    document.getElementById('badge-out').textContent = outCount;
+    // Highlight mixed Veg + Non-Veg orders automatically on load
+    document.querySelectorAll('.k-ticket').forEach(card => {
+      const diets = card.dataset.diets || '';
+      if (diets.includes('VEG') && diets.includes('NONVEG')) {
+        const alertBox = card.querySelector('.mixed-alert');
+        if (alertBox) alertBox.classList.remove('hidden');
+      }
+    });
+
+    function updateSwimlaneCounts() {
+      const n = [...document.querySelectorAll('.new-order-card')].filter(el => el.style.display !== 'none').length;
+      const p = [...document.querySelectorAll('.prep-order-card')].filter(el => el.style.display !== 'none').length;
+      const o = [...document.querySelectorAll('.out-order-card')].filter(el => el.style.display !== 'none').length;
+      document.getElementById('badge-new').textContent = n;
+      document.getElementById('badge-prep').textContent = p;
+      document.getElementById('badge-out').textContent = o;
+      return n;
+    }
+
+    const newCount = updateSwimlaneCounts();
+
+    function setKanbanDiet(diet, btn) {
+      kanbanDiet = diet;
+      document.querySelectorAll('.k-diet-btn').forEach(b => {
+        b.className = "k-diet-btn px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition flex items-center gap-1";
+      });
+      btn.className = "k-diet-btn px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-white/15 text-white transition flex items-center gap-1";
+
+      document.querySelectorAll('.k-ticket').forEach(card => {
+        const diets = card.dataset.diets || '';
+        let show = true;
+        if (diet === 'VEG') show = diets.includes('VEG');
+        else if (diet === 'NONVEG') show = diets.includes('NONVEG');
+        card.style.display = show ? 'block' : 'none';
+      });
+      updateSwimlaneCounts();
+    }
 
     function switchView(view) {
       document.getElementById('view-kanban').classList.toggle('hidden', view !== 'kanban');
       document.getElementById('view-history').classList.toggle('hidden', view !== 'history');
 
       document.getElementById('tab-kanban').className = view === 'kanban'
-        ? "flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black bg-yellow-400 text-black shadow transition flex items-center justify-center gap-2"
-        : "flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black text-zinc-400 hover:text-white transition flex items-center justify-center gap-2";
+        ? "flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs font-extrabold bg-yellow-400 text-black transition flex items-center justify-center gap-2"
+        : "flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-2";
 
       document.getElementById('tab-history').className = view === 'history'
-        ? "flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black bg-yellow-400 text-black shadow transition flex items-center justify-center gap-2"
-        : "flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black text-zinc-400 hover:text-white transition flex items-center justify-center gap-2";
+        ? "flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs font-extrabold bg-yellow-400 text-black transition flex items-center justify-center gap-2"
+        : "flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-2";
+
+      if (view === 'history') applyHistoryFilters();
     }
 
-    function filterHistory() {
-      const q = document.getElementById('historySearch').value.toLowerCase();
-      document.querySelectorAll('.hist-card').forEach(card => {
-        card.style.display = card.dataset.search.includes(q) ? 'flex' : 'none';
+    function setStatusFilter(filterVal, btn) {
+      activeHistFilter = filterVal;
+      document.querySelectorAll('.hist-flt-btn').forEach(b => {
+        b.className = "hist-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition whitespace-nowrap";
       });
+      btn.className = "hist-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition whitespace-nowrap";
+      applyHistoryFilters();
+    }
+
+    function setTodayDateFilter() {
+      const dateInput = document.getElementById('historyDateFilter');
+      dateInput.value = (dateInput.value === TODAY_STR) ? '' : TODAY_STR;
+      applyHistoryFilters();
+    }
+
+    function resetHistoryFilters() {
+      document.getElementById('historySearch').value = '';
+      document.getElementById('historyDateFilter').value = '';
+      const allBtn = document.querySelector('.hist-flt-btn');
+      if (allBtn) setStatusFilter('ALL', allBtn);
+      else applyHistoryFilters();
+    }
+
+    function applyHistoryFilters() {
+      const q = document.getElementById('historySearch').value.toLowerCase().trim();
+      const selectedDate = document.getElementById('historyDateFilter').value;
+      document.getElementById('clearHistSearchBtn').classList.toggle('hidden', !q && !selectedDate && activeHistFilter === 'ALL');
+
+      let visibleCount = 0;
+      let deliveredRevenue = 0;
+
+      document.querySelectorAll('.hist-card').forEach(card => {
+        const status = card.dataset.status;
+        const date = card.dataset.date;
+        const diets = card.dataset.diets || '';
+        const searchStr = card.dataset.search;
+        const amount = parseFloat(card.dataset.amount || 0);
+
+        const matchQuery = !q || searchStr.includes(q);
+        const matchDate = !selectedDate || date === selectedDate;
+
+        let matchPill = true;
+        if (activeHistFilter === 'VEG_ONLY') {
+          matchPill = diets.includes('VEG') && !diets.includes('NONVEG');
+        } else if (activeHistFilter === 'HAS_NONVEG') {
+          matchPill = diets.includes('NONVEG');
+        } else if (activeHistFilter === 'DONE' || activeHistFilter === 'CANCELLED') {
+          matchPill = (status === activeHistFilter);
+        }
+
+        if (matchQuery && matchDate && matchPill) {
+          card.style.display = 'flex';
+          visibleCount++;
+          if (status === 'DONE') deliveredRevenue += amount;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      document.getElementById('histFilteredCount').textContent = visibleCount;
+      document.getElementById('histFilteredRevenue').textContent = `₹${Math.round(deliveredRevenue).toLocaleString('en-IN')}`;
+      document.getElementById('noFilterMatchBox').classList.toggle('hidden', visibleCount > 0 || document.querySelectorAll('.hist-card').length === 0);
     }
 
     async function setStatus(orderId, status) {
@@ -356,7 +659,7 @@
       window.location.reload();
     }
 
-    // Audio alert when new incoming orders increase
+    // Audio chime when new incoming orders arrive
     const lastCount = parseInt(sessionStorage.getItem('otm_new_count') || '0');
     if (newCount > lastCount) {
       try {
@@ -370,7 +673,8 @@
     }
     sessionStorage.setItem('otm_new_count', newCount);
 
-    // Auto-refresh every 8 seconds only when viewing the Live Kanban Board
+    applyHistoryFilters();
+
     setTimeout(() => {
       if (!document.getElementById('view-kanban').classList.contains('hidden')) {
         window.location.reload();
