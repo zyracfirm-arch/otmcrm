@@ -84,6 +84,11 @@ class Order(models.Model):
         ('DONE', 'Delivered'),
         ('CANCELLED', 'Cancelled'),
     )
+    PAYMENT_MODE_CHOICES = (
+        ('UNPAID', 'Pending'),
+        ('CASH', 'Cash'),
+        ('UPI', 'UPI / Online'),
+    )
 
     order_number = models.CharField(max_length=30, unique=True, editable=False)
     tracking_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
@@ -93,6 +98,7 @@ class Order(models.Model):
     delivery_address = models.TextField(blank=True)
     order_type = models.CharField(max_length=10, choices=ORDER_TYPES, default='DELIVERY')
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='NEW', db_index=True)
+    payment_mode = models.CharField(max_length=10, choices=PAYMENT_MODE_CHOICES, default='UNPAID', db_index=True)
 
     delivery_boy = models.ForeignKey(
         User,
@@ -133,3 +139,22 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.item_name}"
+
+
+class ShopSettings(models.Model):
+    is_open = models.BooleanField(default=True)
+    reopen_time = models.CharField(max_length=50, default="7:00 PM")
+    closed_reason = models.CharField(
+        max_length=120,
+        blank=True,
+        default="Kitchen is resting"
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return f"Shop Status: {'OPEN' if self.is_open else 'CLOSED'} (Opens at {self.reopen_time})"

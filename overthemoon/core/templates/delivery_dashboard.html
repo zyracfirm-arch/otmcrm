@@ -134,19 +134,23 @@
         </div>
       </div>
 
-      <!-- Rider Shift Cash & Drop Counter Strip -->
-      <div class="grid grid-cols-3 gap-2.5">
+      <!-- Rider Shift Cash vs. UPI & Drop Counter Strip -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div class="qsr-well rounded-xl p-3">
           <span class="text-[10px] font-semibold text-zinc-400 block">Active Bags</span>
           <span class="text-lg sm:text-xl font-black text-yellow-400 mt-0.5 block">{{ orders|length }}</span>
         </div>
         <div class="qsr-well rounded-xl p-3">
-          <span class="text-[10px] font-semibold text-zinc-400 block">Cash to Collect</span>
+          <span class="text-[10px] font-semibold text-zinc-400 block">To Collect</span>
           <span id="pendingCashStat" class="text-lg sm:text-xl font-black text-white mt-0.5 block">₹0</span>
         </div>
-        <div class="qsr-well rounded-xl p-3">
-          <span class="text-[10px] font-semibold text-zinc-400 block">Cash Collected ({{ history_orders|length }})</span>
+        <div class="qsr-well rounded-xl p-3 border-emerald-500/20">
+          <span class="text-[10px] font-semibold text-emerald-400 block">Physical Cash</span>
           <span id="collectedCashStat" class="text-lg sm:text-xl font-black text-emerald-400 mt-0.5 block">₹0</span>
+        </div>
+        <div class="qsr-well rounded-xl p-3 border-sky-500/20">
+          <span class="text-[10px] font-semibold text-sky-400 block">UPI Received</span>
+          <span id="collectedUpiStat" class="text-lg sm:text-xl font-black text-sky-400 mt-0.5 block">₹0</span>
         </div>
       </div>
 
@@ -179,7 +183,7 @@
         <div class="absolute top-0 left-0 w-1.5 h-full bg-yellow-400"></div>
 
         <div>
-          <!-- Top Order ID & Cash to Collect -->
+          <!-- Top Order ID & Amount to Collect -->
           <div class="flex justify-between items-start gap-3 pl-2 pb-3.5 mb-3.5 border-b border-white/[0.07]">
             <div>
               <div class="flex items-center gap-1.5 flex-wrap">
@@ -190,7 +194,7 @@
               <p class="text-[11px] text-zinc-500 font-medium mt-0.5">Picked up at {{ o.updated_at|date:"h:i A" }}</p>
             </div>
             <div class="text-right">
-              <span class="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider block">Collect Cash</span>
+              <span class="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider block">Collect Amount</span>
               <span class="text-2xl sm:text-3xl font-black text-yellow-400 tracking-tight mt-0.5 block">₹{{ o.total_amount|floatformat:0 }}</span>
             </div>
           </div>
@@ -240,7 +244,7 @@
           </div>
         </div>
 
-        <!-- Bottom Action Buttons (Call, Maps, Complete Drop) -->
+        <!-- Bottom Action Buttons (Call, Maps, WhatsApp, Mark Delivered -> Cash/UPI Modal) -->
         <div class="space-y-2 pl-2 pt-1">
           <div class="grid grid-cols-2 gap-2">
             <a href="tel:{{ o.customer_phone }}" class="py-3 bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.09] text-white rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 active:scale-[0.98]">
@@ -253,9 +257,26 @@
             </a>
           </div>
 
-          <button type="button" data-id="{{ o.id }}" onclick="markDelivered(this.dataset.id)" class="w-full py-3.5 bg-emerald-400 hover:bg-emerald-300 text-black rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-emerald-400/15 transition flex items-center justify-center gap-2 active:scale-[0.98]">
+          <button type="button"
+            data-phone="{{ o.customer_phone }}"
+            data-name="{{ o.customer_name }}"
+            data-ordernum="{{ o.order_number }}"
+            data-rider="{{ request.user.username|title }}"
+            data-trackurl="{% url 'track_order' o.tracking_token %}"
+            onclick="riderWhatsAppPing(this)"
+            class="w-full py-2.5 px-3.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-400 text-xs font-extrabold transition flex items-center justify-center gap-1.5 active:scale-[0.98]">
+            <span>WhatsApp Customer</span>
+          </button>
+
+          <button type="button"
+            data-id="{{ o.id }}"
+            data-ordernum="{{ o.order_number }}"
+            data-name="{{ o.customer_name }}"
+            data-amount="{{ o.total_amount|floatformat:0 }}"
+            onclick="openDeliverModal(this)"
+            class="w-full py-3.5 bg-emerald-400 hover:bg-emerald-300 text-black rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-emerald-400/15 transition flex items-center justify-center gap-2 active:scale-[0.98]">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-            <span>Delivered & Cash Collected</span>
+            <span>Mark Delivered (Cash / UPI)</span>
           </button>
         </div>
       </div>
@@ -280,7 +301,7 @@
       <div class="qsr-card rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-base font-extrabold text-white">Completed Deliveries ({{ history_orders|length }})</h2>
-          <p class="text-xs text-zinc-400 mt-0.5">All past orders delivered and cash collected during your shifts</p>
+          <p class="text-xs text-zinc-400 mt-0.5">All past orders delivered with Cash vs. UPI settlement breakdown</p>
         </div>
         <input id="riderHistSearch" oninput="filterRiderHistory()" type="text" placeholder="Search order ID, guest, or phone..."
           class="pos-input w-full sm:w-64 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500">
@@ -288,12 +309,22 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for o in history_orders %}
-        <div class="rider-hist-card qsr-card p-4 sm:p-5 rounded-2xl flex flex-col justify-between gap-3 relative overflow-hidden" data-amount="{{ o.total_amount }}" data-search="{{ o.order_number|lower }} {{ o.customer_name|lower }} {{ o.customer_phone }}">
-          <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500/50"></div>
+        <div class="rider-hist-card qsr-card p-4 sm:p-5 rounded-2xl flex flex-col justify-between gap-3 relative overflow-hidden"
+             data-amount="{{ o.total_amount }}"
+             data-payment="{{ o.payment_mode|default:'CASH' }}"
+             data-search="{{ o.order_number|lower }} {{ o.customer_name|lower }} {{ o.customer_phone }} {{ o.payment_mode|lower }}">
+          <div class="absolute top-0 left-0 w-1 h-full {% if o.payment_mode == 'UPI' %}bg-sky-400/70{% else %}bg-emerald-500/60{% endif %}"></div>
           <div class="pl-1.5">
             <div class="flex items-center justify-between gap-2">
               <span class="text-sm font-black text-white">{{ o.order_number }}</span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">Delivered</span>
+              <div class="flex items-center gap-1.5">
+                {% if o.payment_mode == 'UPI' %}
+                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-sky-500/15 text-sky-400 border border-sky-500/30">UPI</span>
+                {% else %}
+                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Cash</span>
+                {% endif %}
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-white/[0.06] text-zinc-300">Delivered</span>
+              </div>
             </div>
             <p class="text-xs font-bold text-zinc-200 mt-1.5">{{ o.customer_name }} • {{ o.customer_phone }}</p>
             <p class="text-[11px] text-zinc-400 mt-1 line-clamp-2">{{ o.delivery_address }}</p>
@@ -315,7 +346,7 @@
 
           <div class="pl-1.5 pt-3 border-t border-white/[0.07] flex items-center justify-between">
             <span class="text-[11px] text-zinc-500 font-medium">{{ o.updated_at|date:"d M, h:i A" }}</span>
-            <span class="text-base font-black text-emerald-400">₹{{ o.total_amount|floatformat:0 }}</span>
+            <span class="text-base font-black {% if o.payment_mode == 'UPI' %}text-sky-400{% else %}text-emerald-400{% endif %}">₹{{ o.total_amount|floatformat:0 }}</span>
           </div>
         </div>
         {% empty %}
@@ -336,13 +367,57 @@
 
   </main>
 
+  <!-- Cash vs. UPI Collection Confirmation Modal -->
+  <div id="deliverModal" onclick="closeDeliverModal()" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm p-4 flex items-end sm:items-center justify-center">
+    <div onclick="event.stopPropagation()" class="w-full max-w-sm qsr-card rounded-3xl p-5 sm:p-6 space-y-4 border-yellow-400/35">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-widest text-yellow-400 block">Confirm Payment Collected</span>
+          <h3 id="deliverModalOrder" class="text-lg font-black text-white mt-0.5">#OTM-000</h3>
+          <p id="deliverModalGuest" class="text-xs text-zinc-400 font-medium">Customer Name</p>
+        </div>
+        <button type="button" onclick="closeDeliverModal()" class="p-2 rounded-xl bg-white/[0.06] text-zinc-400 hover:text-white">✕</button>
+      </div>
+
+      <div class="qsr-well rounded-2xl p-4 text-center">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block">Total Amount</span>
+        <span id="deliverModalAmount" class="text-3xl font-black text-yellow-400 mt-1 block">₹0</span>
+      </div>
+
+      <p class="text-[11px] text-zinc-400 text-center font-medium">How did the customer pay?</p>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" id="confirmCashBtn" onclick="confirmDelivery('CASH')"
+          class="py-3.5 px-3 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-black font-black text-xs sm:text-sm transition active:scale-95 flex flex-col items-center justify-center gap-1 shadow-lg shadow-emerald-400/15">
+          <span>Physical Cash</span>
+          <span class="text-[10px] font-bold opacity-80">In Hand</span>
+        </button>
+
+        <button type="button" id="confirmUpiBtn" onclick="confirmDelivery('UPI')"
+          class="py-3.5 px-3 rounded-2xl bg-sky-400 hover:bg-sky-300 text-black font-black text-xs sm:text-sm transition active:scale-95 flex flex-col items-center justify-center gap-1 shadow-lg shadow-sky-400/15">
+          <span>UPI / Online</span>
+          <span class="text-[10px] font-bold opacity-80">GPay / PhonePe</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {% csrf_token %}
+
   <script>
+    let selectedOrderId = null;
+
     function getCookie(name) {
       let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-      return v ? v[2] : null;
+      if (v) return v[2];
+      if (name === 'csrftoken') {
+        const inp = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (inp) return inp.value;
+      }
+      return '';
     }
 
-    // Calculate Pending Cash, Collected Cash & Highlight Mixed Veg/Non-Veg Bags
+    // Calculate Pending Amount, Physical Cash, UPI Received & Highlight Mixed Veg/Non-Veg Bags
     let pendingCash = 0;
     document.querySelectorAll('.active-rider-card').forEach(el => {
       pendingCash += parseFloat(el.dataset.amount || 0);
@@ -367,11 +442,16 @@
     });
 
     let collectedCash = 0;
+    let collectedUpi = 0;
     document.querySelectorAll('.rider-hist-card').forEach(el => {
-      collectedCash += parseFloat(el.dataset.amount || 0);
+      const amt = parseFloat(el.dataset.amount || 0);
+      if (el.dataset.payment === 'UPI') collectedUpi += amt;
+      else collectedCash += amt;
     });
+
     document.getElementById('pendingCashStat').textContent = `₹${Math.round(pendingCash).toLocaleString('en-IN')}`;
     document.getElementById('collectedCashStat').textContent = `₹${Math.round(collectedCash).toLocaleString('en-IN')}`;
+    document.getElementById('collectedUpiStat').textContent = `₹${Math.round(collectedUpi).toLocaleString('en-IN')}`;
 
     function switchTab(tab) {
       document.getElementById('view-active').classList.toggle('hidden', tab !== 'active');
@@ -393,22 +473,59 @@
       });
     }
 
-    async function markDelivered(orderId) {
-      if (!confirm('Confirm cash collected and order handed over to the customer?')) return;
-      await fetch(`/otm-vault-9921/order/${orderId}/status/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ status: 'DONE' })
-      });
-      window.location.reload();
+    function riderWhatsAppPing(btn) {
+      const rawPhone = (btn.dataset.phone || '').replace(/\D/g, '');
+      const phone = rawPhone.length === 10 ? `91${rawPhone}` : rawPhone;
+      const name = btn.dataset.name || 'Bhai';
+      const orderNum = btn.dataset.ordernum;
+      const rider = btn.dataset.rider || 'your OTM rider';
+      const trackUrl = `${window.location.origin}${btn.dataset.trackurl}`;
+
+      const msg = `Hello ${name}! Your Over The Moon order (${orderNum}) is out for delivery with ${rider} — reaching your doorstep shortly! Track live: ${trackUrl}`;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
     }
 
-    setTimeout(() => {
-      if (!document.getElementById('view-active').classList.contains('hidden')) {
+    function openDeliverModal(btn) {
+      selectedOrderId = btn.dataset.id;
+      document.getElementById('deliverModalOrder').textContent = btn.dataset.ordernum;
+      document.getElementById('deliverModalGuest').textContent = btn.dataset.name;
+      document.getElementById('deliverModalAmount').textContent = `₹${btn.dataset.amount}`;
+      document.getElementById('deliverModal').classList.remove('hidden');
+    }
+
+    function closeDeliverModal() {
+      selectedOrderId = null;
+      document.getElementById('deliverModal').classList.add('hidden');
+    }
+
+    async function confirmDelivery(paymentMode) {
+      if (!selectedOrderId) return;
+      document.getElementById('confirmCashBtn').disabled = true;
+      document.getElementById('confirmUpiBtn').disabled = true;
+
+      try {
+        const res = await fetch(`/otm-vault-9921/order/${selectedOrderId}/status/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ status: 'DONE', payment_mode: paymentMode })
+        });
+        if (!res.ok) throw new Error();
+        window.location.reload();
+      } catch (e) {
+        alert('Could not update delivery. Please try again.');
+        document.getElementById('confirmCashBtn').disabled = false;
+        document.getElementById('confirmUpiBtn').disabled = false;
+      }
+    }
+
+    // Auto-refresh only when Active tab is open and Payment Modal is closed
+   setInterval(() => {
+      const isModalOpen = !document.getElementById('deliverModal').classList.contains('hidden');
+      const isActiveTab = !document.getElementById('view-active').classList.contains('hidden');
+      if (isActiveTab && !isModalOpen) {
         window.location.reload();
       }
     }, 15000);
   </script>
-  {% csrf_token %}
 </body>
 </html>

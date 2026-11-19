@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Inside Our Khamasa Kitchen — Over The Moon Burger, Ahmedabad</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-canvas: #08080A;
+      --bg-surface: #111115;
+      --bg-well: #09090C;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(255, 255, 255, 0.14);
+      --brand-gold: #FACC15;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-canvas);
+      color: #F4F4F5;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      letter-spacing: -0.012em;
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Appetizing Warm Ember & Cheddar Ambient Glow */
+    .hunger-glow {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(250, 204, 21, 0.14), rgba(249, 115, 22, 0.04) 42%, transparent 72%),
+        radial-gradient(circle at 85% 65%, rgba(234, 88, 12, 0.06), transparent 55%);
+    }
+
+    .nav-surface {
+      background: rgba(10, 10, 13, 0.88);
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .qsr-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow:
+        0 1px 0 0 var(--border-highlight) inset,
+        0 24px 48px -16px rgba(0, 0, 0, 0.85);
+    }
+
+    .glass-hud {
+      background: rgba(12, 12, 16, 0.72);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* Interactive Burger Layer Stack */
+    .burger-layer {
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, background-color 0.25s ease;
+    }
+    .burger-layer.active-layer {
+      transform: translateX(8px);
+      border-color: rgba(250, 204, 21, 0.65);
+      background: linear-gradient(90deg, rgba(250, 204, 21, 0.12) 0%, #111115 100%);
+    }
+
+    /* Infinite Sensory Marquee */
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marqueeScroll 26s linear infinite;
+    }
+    .marquee-track:hover {
+      animation-play-state: paused;
+    }
+
+    /* Video Reel Card Hover Zoom */
+    .reel-card video, .reel-card img {
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reel-card:hover video, .reel-card:hover img {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative overflow-x-hidden selection:bg-yellow-400 selection:text-black">
+
+  <!-- Reusable Brand + FSSAI Pure Veg & Non-Veg SVG Symbols -->
+  <svg class="hidden" aria-hidden="true">
+    <symbol id="otm-astronaut" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="28" fill="#FACC15"/>
+      <rect x="16" y="38" width="12" height="22" rx="6" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+      <rect x="92" y="38" width="12" height="22" rx="6" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+      <circle cx="60" cy="46" r="34" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4.5"/>
+      <ellipse cx="60" cy="47" rx="26" ry="22" fill="#1E1B4B"/>
+      <path d="M40 36 C47 29, 60 29, 68 33" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.9"/>
+      <circle cx="75" cy="49" r="3.5" fill="#FFFFFF" opacity="0.9"/>
+      <circle cx="71" cy="57" r="2" fill="#FFFFFF" opacity="0.9"/>
+      <path d="M35 76 C35 66, 85 66, 85 76 L90 100 C90 106, 30 106, 30 100 Z" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+      <rect x="20" y="86" width="18" height="24" rx="9" fill="#E2E8F0" stroke="#1E1B4B" stroke-width="4"/>
+      <rect x="82" y="86" width="18" height="24" rx="9" fill="#E2E8F0" stroke="#1E1B4B" stroke-width="4"/>
+      <path d="M38 72 C38 57, 82 57, 82 72 Z" fill="#F59E0B" stroke="#1E1B4B" stroke-width="3.5"/>
+      <path d="M36 74 Q48 79 60 74 Q72 79 84 74" stroke="#22C55E" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+      <polygon points="42,76 60,82 78,76" fill="#FACC15"/>
+      <rect x="38" y="77" width="44" height="7" rx="3.5" fill="#78350F" stroke="#1E1B4B" stroke-width="3"/>
+      <rect x="40" y="84" width="40" height="7" rx="3.5" fill="#F59E0B" stroke="#1E1B4B" stroke-width="3.5"/>
+      <circle cx="40" cy="76" r="8.5" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="3.5"/>
+      <circle cx="80" cy="76" r="8.5" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="3.5"/>
+    </symbol>
+
+    <symbol id="veg-mark" viewBox="0 0 24 24">
+      <rect x="2" y="2" width="20" height="20" rx="4" fill="#08080A" stroke="#22C55E" stroke-width="2.3"/>
+      <circle cx="12" cy="12" r="5" fill="#22C55E"/>
+    </symbol>
+
+    <symbol id="nonveg-mark" viewBox="0 0 24 24">
+      <rect x="2" y="2" width="20" height="20" rx="4" fill="#08080A" stroke="#EF4444" stroke-width="2.3"/>
+      <polygon points="12,6.5 17.5,16.5 6.5,16.5" fill="#EF4444"/>
+    </symbol>
+  </svg>
+
+  <div class="fixed inset-0 hunger-glow pointer-events-none -z-10"></div>
+
+  <!-- Sticky Top Navigation -->
+  <header class="sticky top-0 z-30 nav-surface">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <a href="{% url 'public_menu' %}" class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl overflow-hidden border border-yellow-400/50 shrink-0 shadow-sm">
+          <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-sm sm:text-base font-black text-white tracking-tight truncate">OVER THE MOON</span>
+            {% if shop_settings.is_open %}
+            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-extrabold text-emerald-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <span>GRILL LIVE</span>
+            </span>
+            {% else %}
+            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-400/30 text-[10px] font-extrabold text-amber-300">
+              <span>RESTING</span>
+            </span>
+            {% endif %}
+          </div>
+          <span class="text-[11px] font-medium text-zinc-400 block truncate">Khamasa, Old City Ahmedabad</span>
+        </div>
+      </a>
+
+      <div class="flex items-center gap-2 shrink-0">
+        {% if request.user.is_authenticated and not request.user.is_staff %}
+        <a href="{% url 'customer_dashboard' %}" class="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-bold text-zinc-200 transition">
+          My Orders
+        </a>
+        {% endif %}
+        <a href="{% url 'public_menu' %}" class="px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black transition active:scale-95 shadow-lg shadow-yellow-400/15">
+          Order Hot Menu →
+        </a>
+      </div>
+    </div>
+  </header>
+
+  {% if not shop_settings.is_open %}
+  <div class="bg-amber-500/10 border-b border-amber-400/25 px-4 py-2.5 text-center">
+    <p class="text-xs font-extrabold text-amber-300">
+      {{ shop_settings.closed_reason|default:"Kitchen is resting" }} — opens at <span class="text-yellow-400 underline">{{ shop_settings.reopen_time }}</span>.
+    </p>
+  </div>
+  {% endif %}
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-14 space-y-12 sm:space-y-16">
+
+    <!-- ========================================================= -->
+    <!-- 1. CINEMATIC VIDEO HERO + LIVE KITCHEN TELEMETRY HUD      -->
+    <!-- ========================================================= -->
+    <section class="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_32px_70px_-16px_rgba(0,0,0,0.95)] min-h-[460px] sm:min-h-[540px] flex items-end">
+      <!-- Auto-Playing Sizzle Background Video + High-Res Fallback Poster -->
+      <video autoplay muted loop playsinline
+        poster="https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=1400"
+        class="absolute inset-0 w-full h-full object-cover object-center scale-[1.02]">
+        <source src="https://videos.pexels.com/video-files/3196062/3196062-uhd_2560_1440_25fps.mp4" type="video/mp4">
+      </video>
+
+      <!-- Dark Appetite Contrast Vignette -->
+      <div class="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/75 to-black/35"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-[#08080A]/95 via-[#08080A]/50 to-transparent"></div>
+
+      <!-- Hero Content -->
+      <div class="relative z-10 w-full p-6 sm:p-10 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+        <div class="lg:col-span-7 space-y-4">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-hud text-[11px] font-extrabold uppercase tracking-wider text-yellow-400">
+            <span class="w-2 h-2 rounded-full bg-yellow-400 animate-ping"></span>
+            <span>Khamasa Street Craft • Est. Ahmedabad</span>
+          </div>
+
+          <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-[1.06]">
+            Hot Off the Iron.<br>
+            <span class="text-yellow-400">Never Off a Heat Lamp.</span>
+          </h1>
+
+          <p class="text-sm sm:text-base text-zinc-200 max-w-xl leading-relaxed font-medium">
+            At <strong class="text-white">Over The Moon Burger</strong>, Chef Ubedulla Mansuri runs a strict made-to-order grill in Khamasa. Cold patties hit 220°C iron the second your ticket chimes—toasted butter buns, molten cheddar, and crisp crunch delivered straight from our counter to your hands.
+          </p>
+
+          <div class="pt-2 flex flex-wrap items-center gap-3">
+            <a href="{% url 'public_menu' %}" class="px-6 py-3.5 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs sm:text-sm font-black transition shadow-xl shadow-yellow-400/20 active:scale-95">
+              See Today's Hot Menu →
+            </a>
+            <a href="#kitchen-reels" class="px-5 py-3.5 rounded-2xl glass-hud hover:bg-white/15 text-white text-xs sm:text-sm font-bold transition flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span>Watch Kitchen Sizzle</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Glass Telemetry Cards -->
+        <div class="lg:col-span-5 grid grid-cols-2 gap-3">
+          <div class="glass-hud rounded-2xl p-4">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block">Pre-Stacked Burgers</span>
+            <span class="text-2xl sm:text-3xl font-black text-yellow-400 mt-1 block">ZERO</span>
+            <span class="text-[11px] text-zinc-300 mt-1 block">Seared only after you order</span>
+          </div>
+
+          <div class="glass-hud rounded-2xl p-4">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block">Direct Delivery</span>
+            <span class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1 block">₹0 FEE</span>
+            <span class="text-[11px] text-zinc-300 mt-1 block">No inflated app markups</span>
+          </div>
+
+          <div class="col-span-2 glass-hud rounded-2xl p-4 flex items-center justify-between gap-3">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block">Strict FSSAI Separation</span>
+              <span class="text-xs sm:text-sm font-black text-white mt-0.5 block">Dedicated Pure Veg & Non-Veg Grills</span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <svg class="w-5 h-5"><use href="#veg-mark"/></svg>
+              <svg class="w-5 h-5"><use href="#nonveg-mark"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- 2. SENSORY CRAVING MARQUEE STRIP                          -->
+    <!-- ========================================================= -->
+    <div class="rounded-2xl bg-[#111115] border border-white/[0.08] py-3 overflow-hidden">
+      <div class="marquee-track flex items-center gap-8 text-xs font-black uppercase tracking-widest text-zinc-300 px-4">
+        <span class="text-yellow-400">★ Butter-Toasted Sesame Buns</span>
+        <span>•</span>
+        <span>Molten Cheddar Cheese Pull</span>
+        <span>•</span>
+        <span class="text-emerald-400">100% Separate Pure Veg Station</span>
+        <span>•</span>
+        <span>Crispy Zinger Chicken Fillets</span>
+        <span>•</span>
+        <span class="text-amber-300">Khamasa Secret Spice Glaze</span>
+        <span>•</span>
+        <span>Foil-Sealed Piping Hot Dispatch</span>
+        <span>•</span>
+        <!-- Duplicate for seamless loop -->
+        <span class="text-yellow-400">★ Butter-Toasted Sesame Buns</span>
+        <span>•</span>
+        <span>Molten Cheddar Cheese Pull</span>
+        <span>•</span>
+        <span class="text-emerald-400">100% Separate Pure Veg Station</span>
+        <span>•</span>
+        <span>Crispy Zinger Chicken Fillets</span>
+        <span>•</span>
+        <span class="text-amber-300">Khamasa Secret Spice Glaze</span>
+        <span>•</span>
+        <span>Foil-Sealed Piping Hot Dispatch</span>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- 3. INTERACTIVE "ANATOMY OF AN OTM BURGER" LAYER INSPECTOR  -->
+    <!-- ========================================================= -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+      <div class="lg:col-span-5 space-y-4">
+        <span class="text-[11px] font-extrabold uppercase tracking-widest text-yellow-400 block">Interactive Craft Breakdown</span>
+        <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+          Why the First Bite Hits Different.
+        </h2>
+        <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+          Tap any layer of our signature build to see how we lock in crunch, heat, and sauce balance so your burger never arrives soggy.
+        </p>
+
+        <!-- High-Contrast Macro Burger Visual + Active Layer Callout -->
+        <div class="qsr-card rounded-3xl overflow-hidden relative">
+          <img id="layerPreviewImg"
+            src="https://images.pexels.com/photos/1199957/pexels-photo-1199957.jpeg?auto=compress&cs=tinysrgb&w=900"
+            alt="Over The Moon Signature Burger"
+            class="w-full h-64 sm:h-72 object-cover transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/40 to-transparent"></div>
+          <div class="absolute bottom-0 inset-x-0 p-5">
+            <span id="layerBadge" class="px-2.5 py-0.5 rounded bg-yellow-400 text-black text-[10px] font-black uppercase tracking-wider">
+              Layer 01 • Crown
+            </span>
+            <h3 id="layerHeadline" class="text-base sm:text-lg font-black text-white mt-1.5">
+              Butter-Brushed Toasted Brioche Crown
+            </h3>
+            <p id="layerDetail" class="text-xs text-zinc-300 mt-1 leading-relaxed">
+              Griddled cut-side down in salted butter for 18 seconds to create a crisp moisture barrier against steam.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 Interactive Layer Cards -->
+      <div class="lg:col-span-7 space-y-2.5">
+        <button type="button" onclick="selectBurgerLayer(0, this)"
+          class="burger-layer active-layer w-full text-left rounded-2xl bg-[#111115] border border-white/[0.08] p-4 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <span class="w-8 h-8 rounded-xl bg-yellow-400 text-black font-black text-xs flex items-center justify-center shrink-0">01</span>
+            <div>
+              <h4 class="text-sm font-black text-white">Butter-Toasted Brioche Crown</h4>
+              <p class="text-xs text-zinc-400 mt-0.5">Golden crust locks in steam so the top bun stays pillowy, never mushy.</p>
+            </div>
+          </div>
+          <span class="text-xs font-extrabold text-yellow-400 shrink-0">18s Sear</span>
+        </button>
+
+        <button type="button" onclick="selectBurgerLayer(1, this)"
+          class="burger-layer w-full text-left rounded-2xl bg-[#111115] border border-white/[0.08] p-4 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <span class="w-8 h-8 rounded-xl bg-white/[0.07] text-yellow-400 font-black text-xs flex items-center justify-center shrink-0">02</span>
+            <div>
+              <h4 class="text-sm font-black text-white">Molten Cheddar & Liquid Cheese Cascade</h4>
+              <p class="text-xs text-zinc-400 mt-0.5">Steamed under a stainless dome right on top of the patty for a real cheese pull.</p>
+            </div>
+          </div>
+          <span class="text-xs font-extrabold text-amber-300 shrink-0">220°C Melt</span>
+        </button>
+
+        <button type="button" onclick="selectBurgerLayer(2, this)"
+          class="burger-layer w-full text-left rounded-2xl bg-[#111115] border border-white/[0.08] p-4 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <span class="w-8 h-8 rounded-xl bg-white/[0.07] text-yellow-400 font-black text-xs flex items-center justify-center shrink-0">03</span>
+            <div>
+              <h4 class="text-sm font-black text-white">Thick Paneer Slab or Crispy Chicken Zinger</h4>
+              <p class="text-xs text-zinc-400 mt-0.5">Cooked on separate Veg & Non-Veg stations with zero cross-contact.</p>
+            </div>
+          </div>
+          <span class="text-xs font-extrabold text-emerald-400 shrink-0">Fresh Cut</span>
+        </button>
+
+        <button type="button" onclick="selectBurgerLayer(3, this)"
+          class="burger-layer w-full text-left rounded-2xl bg-[#111115] border border-white/[0.08] p-4 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <span class="w-8 h-8 rounded-xl bg-white/[0.07] text-yellow-400 font-black text-xs flex items-center justify-center shrink-0">04</span>
+            <div>
+              <h4 class="text-sm font-black text-white">House-Whipped Khamasa Garlic & Chipotle Glaze</h4>
+              <p class="text-xs text-zinc-400 mt-0.5">Small-batch smoky spice emulsion balanced for Ahmedabad palates.</p>
+            </div>
+          </div>
+          <span class="text-xs font-extrabold text-yellow-400 shrink-0">OTM Secret</span>
+        </button>
+
+        <button type="button" onclick="selectBurgerLayer(4, this)"
+          class="burger-layer w-full text-left rounded-2xl bg-[#111115] border border-white/[0.08] p-4 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <span class="w-8 h-8 rounded-xl bg-white/[0.07] text-yellow-400 font-black text-xs flex items-center justify-center shrink-0">05</span>
+            <div>
+              <h4 class="text-sm font-black text-white">Ice-Crisp Lettuce & Double-Toasted Heel</h4>
+              <p class="text-xs text-zinc-400 mt-0.5">Chilled crunch meets a caramelized base bun engineered to hold heavy fillings.</p>
+            </div>
+          </div>
+          <span class="text-xs font-extrabold text-zinc-300 shrink-0">Zero Sog</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- 4. KITCHEN REELS & FOOD PHOTOGRAPHY GALLERY               -->
+    <!-- ========================================================= -->
+    <section id="kitchen-reels" class="space-y-5 scroll-mt-24">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-widest text-yellow-400 block">Straight From The Grill</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">Kitchen Reels & Visual Proof</h2>
+        </div>
+        <p class="text-xs text-zinc-400 font-medium">Real textures. Live sizzle. Tap any reel to watch full screen.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Reel 1: Video -->
+        <div onclick="openMediaModal('video', 'https://videos.pexels.com/video-files/3196062/3196062-uhd_2560_1440_25fps.mp4', 'The 220°C Iron Sear')"
+          class="reel-card cursor-pointer qsr-card rounded-3xl overflow-hidden relative h-80 sm:h-96 group">
+          <video autoplay muted loop playsinline
+            poster="https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=800"
+            class="w-full h-full object-cover">
+            <source src="https://videos.pexels.com/video-files/3196062/3196062-uhd_2560_1440_25fps.mp4" type="video/mp4">
+          </video>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#08080A] via-black/25 to-transparent"></div>
+          <div class="absolute top-3.5 left-3.5 px-2.5 py-1 rounded-lg glass-hud text-[10px] font-black uppercase text-yellow-400 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+            <span>REEL 01 • LIVE GRILL</span>
+          </div>
+          <div class="absolute bottom-4 inset-x-4">
+            <h3 class="text-base font-black text-white">The 220°C Iron Sear</h3>
+            <p class="text-xs text-zinc-300 mt-0.5">Crispy edges, juicy center, zero pre-cooked batches.</p>
+          </div>
+        </div>
+
+        <!-- Reel 2: Photo Showcase -->
+        <div onclick="openMediaModal('image', 'https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg?auto=compress&cs=tinysrgb&w=1200', 'Double Cheese Burst & Loaded Fries')"
+          class="reel-card cursor-pointer qsr-card rounded-3xl overflow-hidden relative h-80 sm:h-96 group">
+          <img src="https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg?auto=compress&cs=tinysrgb&w=800"
+            alt="Double Cheese Burst Burger" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-[#08080A] via-black/25 to-transparent"></div>
+          <div class="absolute top-3.5 left-3.5 px-2.5 py-1 rounded-lg glass-hud text-[10px] font-black uppercase text-emerald-400">
+            PHOTO 02 • MOLTEN CHEDDAR
+          </div>
+          <div class="absolute bottom-4 inset-x-4">
+            <h3 class="text-base font-black text-white">Molten Cheddar Overload</h3>
+            <p class="text-xs text-zinc-300 mt-0.5">Drenched in warm cheddar & house peri-peri dust.</p>
+          </div>
+        </div>
+
+        <!-- Reel 3: Video -->
+        <div onclick="openMediaModal('video', 'https://videos.pexels.com/video-files/4253312/4253312-uhd_2560_1440_25fps.mp4', 'Golden Crispy Fries & Foil Seal')"
+          class="reel-card cursor-pointer qsr-card rounded-3xl overflow-hidden relative h-80 sm:h-96 group">
+          <video autoplay muted loop playsinline
+            poster="https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?auto=compress&cs=tinysrgb&w=800"
+            class="w-full h-full object-cover">
+            <source src="https://videos.pexels.com/video-files/4253312/4253312-uhd_2560_1440_25fps.mp4" type="video/mp4">
+          </video>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#08080A] via-black/25 to-transparent"></div>
+          <div class="absolute top-3.5 left-3.5 px-2.5 py-1 rounded-lg glass-hud text-[10px] font-black uppercase text-amber-300 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+            <span>REEL 03 • CRISP & PACK</span>
+          </div>
+          <div class="absolute bottom-4 inset-x-4">
+            <h3 class="text-base font-black text-white">Golden Crunch & Foil Seal</h3>
+            <p class="text-xs text-zinc-300 mt-0.5">Veg & Non-Veg sealed in separate carry bags.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- 5. THREE KHAMASA KITCHEN GUARANTEES                       -->
+    <!-- ========================================================= -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="qsr-card rounded-2xl p-6 space-y-2.5">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5"><use href="#veg-mark"/></svg>
+          <svg class="w-5 h-5"><use href="#nonveg-mark"/></svg>
+        </div>
+        <h3 class="text-base font-black text-white">100% Separate Veg & Non-Veg Prep</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Pure Veg paneer & crispy veggie patties are cooked on dedicated surfaces and packed in separate sealed carry bags from Non-Veg chicken items.
+        </p>
+      </div>
+
+      <div class="qsr-card rounded-2xl p-6 space-y-2.5">
+        <div class="w-9 h-9 rounded-xl bg-yellow-400/15 border border-yellow-400/30 text-yellow-400 flex items-center justify-center font-black text-xs">
+          15m
+        </div>
+        <h3 class="text-base font-black text-white">Direct Khamasa Rider Dispatch</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          No third-party middlemen or 30% inflated menu prices. Your burger leaves Chef Ubedulla's counter straight to our in-house riders with live step-by-step tracking.
+        </p>
+      </div>
+
+      <div class="qsr-card rounded-2xl p-6 space-y-2.5">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-black text-xs">
+          VIP
+        </div>
+        <h3 class="text-base font-black text-white">1-Tap Reorder & Astronaut Club</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Save your favorite burger combo once and reorder in a single tap from your member dashboard—with automatic OTM Astronaut Premium recognition for loyal regulars.
+        </p>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- 6. CRAVING CONVERSION BANNER (SYNCED WITH SHOP STATUS)    -->
+    <!-- ========================================================= -->
+    <section class="qsr-card rounded-3xl p-6 sm:p-8 border border-yellow-400/30 bg-gradient-to-r from-[#16130B] via-[#111115] to-[#111115] flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="space-y-1.5">
+        <span class="text-[10px] font-extrabold uppercase tracking-widest text-yellow-400 block">
+          Khamasa, Ahmedabad • Helpline +91 99041 23420
+        </span>
+        <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+          {% if shop_settings.is_open %}
+            Hungry Yet? The Grill Is Hot Right Now.
+          {% else %}
+            {{ shop_settings.closed_reason|default:"Kitchen is resting" }} — Opens at {{ shop_settings.reopen_time }}
+          {% endif %}
+        </h2>
+        <p class="text-xs text-zinc-400">
+          Free local delivery • Cash or UPI on delivery • Freshly grilled to order.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 shrink-0">
+        <a href="tel:9904123420" class="px-5 py-3.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-extrabold text-white transition">
+          Call Kitchen
+        </a>
+        <a href="{% url 'public_menu' %}" class="px-6 py-3.5 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs sm:text-sm font-black transition shadow-lg shadow-yellow-400/15">
+          {% if shop_settings.is_open %}Order Now →{% else %}Browse Menu →{% endif %}
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Full-Screen Reel / Photo Lightbox Modal -->
+  <div id="mediaModal" onclick="closeMediaModal()" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-4 flex items-center justify-center">
+    <div onclick="event.stopPropagation()" class="w-full max-w-3xl qsr-card rounded-3xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-white/10 flex items-center justify-between">
+        <h3 id="mediaModalTitle" class="text-sm font-black text-white">Kitchen Reel</h3>
+        <button type="button" onclick="closeMediaModal()" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-white">✕ Close</button>
+      </div>
+      <div id="mediaModalBody" class="bg-black flex items-center justify-center max-h-[75vh] overflow-hidden"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 border-t border-white/[0.07] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-500">
+    <div class="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
+      <span>© 2026 Over The Moon Burger • Khamasa, Ahmedabad</span>
+      <span>•</span>
+      <a href="{% url 'public_menu' %}" class="text-zinc-300 hover:text-yellow-400 font-bold transition">Order Menu</a>
+    </div>
+    <a href="https://www.instagram.com/zyrac__/" target="_blank" rel="noopener noreferrer" class="hover:text-zinc-300 transition">
+      Made by <strong class="text-zinc-300">ZYRAC</strong> • <span class="text-yellow-400 font-semibold">@zyrac__</span>
+    </a>
+  </footer>
+
+  <script>
+    const burgerLayers = [
+      {
+        badge: "Layer 01 • Crown",
+        headline: "Butter-Brushed Toasted Brioche Crown",
+        detail: "Griddled cut-side down in salted butter for 18 seconds to create a crisp moisture barrier against steam.",
+        img: "https://images.pexels.com/photos/1199957/pexels-photo-1199957.jpeg?auto=compress&cs=tinysrgb&w=900"
+      },
+      {
+        badge: "Layer 02 • Cheese Melt",
+        headline: "Molten Cheddar & Liquid Cheese Cascade",
+        detail: "Steamed under a stainless dome right on top of the hot patty so every bite stretches with rich cheddar.",
+        img: "https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg?auto=compress&cs=tinysrgb&w=900"
+      },
+      {
+        badge: "Layer 03 • Core Patty",
+        headline: "Thick Paneer Slab or Crispy Chicken Zinger",
+        detail: "Cooked on separate Pure Veg and Non-Veg stations with zero cross-contact and sealed in separate bags.",
+        img: "https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=900"
+      },
+      {
+        badge: "Layer 04 • House Sauce",
+        headline: "House-Whipped Khamasa Garlic & Chipotle Glaze",
+        detail: "Small-batch smoky spice emulsion balanced specifically for bold Old City Ahmedabad flavor.",
+        img: "https://images.pexels.com/photos/2271107/pexels-photo-2271107.jpeg?auto=compress&cs=tinysrgb&w=900"
+      },
+      {
+        badge: "Layer 05 • Crunch Base",
+        headline: "Ice-Crisp Lettuce & Double-Toasted Heel",
+        detail: "Chilled crunch meets a caramelized base bun engineered to hold heavy fillings without going soggy.",
+        img: "https://images.pexels.com/photos/1556698/pexels-photo-1556698.jpeg?auto=compress&cs=tinysrgb&w=900"
+      }
+    ];
+
+    function selectBurgerLayer(idx, btn) {
+      const data = burgerLayers[idx];
+      if (!data) return;
+
+      document.querySelectorAll('.burger-layer').forEach((el, i) => {
+        el.classList.toggle('active-layer', i === idx);
+        const numBadge = el.querySelector('span');
+        if (numBadge) {
+          numBadge.className = i === idx
+            ? "w-8 h-8 rounded-xl bg-yellow-400 text-black font-black text-xs flex items-center justify-center shrink-0"
+            : "w-8 h-8 rounded-xl bg-white/[0.07] text-yellow-400 font-black text-xs flex items-center justify-center shrink-0";
+        }
+      });
+
+      document.getElementById('layerBadge').textContent = data.badge;
+      document.getElementById('layerHeadline').textContent = data.headline;
+      document.getElementById('layerDetail').textContent = data.detail;
+      document.getElementById('layerPreviewImg').src = data.img;
+    }
+
+    function openMediaModal(type, src, title) {
+      document.getElementById('mediaModalTitle').textContent = title;
+      const body = document.getElementById('mediaModalBody');
+      if (type === 'video') {
+        body.innerHTML = `<video controls autoplay playsinline class="w-full max-h-[75vh] object-contain"><source src="${src}" type="video/mp4"></video>`;
+      } else {
+        body.innerHTML = `<img src="${src}" alt="${title}" class="w-full max-h-[75vh] object-contain">`;
+      }
+      document.getElementById('mediaModal').classList.remove('hidden');
+    }
+
+    function closeMediaModal() {
+      document.getElementById('mediaModalBody').innerHTML = '';
+      document.getElementById('mediaModal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

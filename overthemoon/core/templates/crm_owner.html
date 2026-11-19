@@ -8,12 +8,13 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #08080A; color: #f4f4f5; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #070709; color: #f4f4f5; -webkit-font-smoothing: antialiased; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .apple-glass { background: rgba(14, 14, 18, 0.92); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); }
-    .apple-card { background: #111115; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 14px 30px -12px rgba(0, 0, 0, 0.7); }
-    .tab-content { display: none; animation: fadeIn 0.2s ease-out; }
+    .apple-glass { background: rgba(12, 12, 16, 0.94); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); }
+    .apple-card { background: #101014; border: 1px solid rgba(255, 255, 255, 0.07); box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 16px 32px -16px rgba(0, 0, 0, 0.75); }
+    .apple-well { background: #09090C; border: 1px solid rgba(255, 255, 255, 0.06); }
+    .tab-content { display: none; animation: fadeIn 0.18s ease-out; }
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -55,195 +56,323 @@
   </svg>
 
   <!-- Responsive Sidebar Navigation -->
-  <aside class="w-full lg:w-72 apple-glass border-b lg:border-b-0 lg:border-r border-white/[0.08] shrink-0 flex flex-col z-20">
+  <aside class="w-full lg:w-68 xl:w-72 apple-glass border-b lg:border-b-0 lg:border-r border-white/[0.07] shrink-0 flex flex-col z-20">
     
     <!-- Top Brand & Quick Links -->
-    <div class="p-5 border-b border-white/[0.08] flex flex-col gap-4">
+    <div class="p-4 sm:p-5 border-b border-white/[0.07] flex flex-col gap-3.5">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-xl overflow-hidden border border-yellow-400/50 shrink-0">
+          <div class="w-10 h-10 rounded-xl overflow-hidden border border-yellow-400/40 shrink-0">
             <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
           </div>
           <div>
-            <h1 class="font-black text-base sm:text-lg text-white leading-none tracking-tight">OWNER VAULT</h1>
-            <p class="text-[10px] font-bold uppercase tracking-widest text-yellow-400 mt-1">Chef Ubedulla Mansuri</p>
+            <h1 class="font-black text-sm sm:text-base text-white leading-none tracking-tight">OWNER VAULT</h1>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-yellow-400/90 mt-1">Chef Ubedulla Mansuri</p>
           </div>
         </div>
-        <a href="{% url 'crm_logout' %}" class="lg:hidden p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20" title="Logout">
+        <a href="{% url 'crm_logout' %}" class="lg:hidden p-2 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20" title="Logout">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         </a>
       </div>
 
       <div class="grid grid-cols-2 gap-2">
-        <a href="{% url 'crm_orders_inbox' %}" class="px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 text-xs font-extrabold border border-white/[0.08] transition flex items-center justify-center gap-1.5">
-          <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+        <a href="{% url 'crm_orders_inbox' %}" class="px-2.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] text-zinc-200 text-[11px] font-bold border border-white/[0.07] transition flex items-center justify-center gap-1.5 whitespace-nowrap">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
           <span>Kitchen Live</span>
         </a>
-        <a href="{% url 'public_menu' %}" target="_blank" class="px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 text-xs font-extrabold border border-white/[0.08] transition flex items-center justify-center gap-1.5">
+        <a href="{% url 'public_menu' %}" target="_blank" class="px-2.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] text-zinc-200 text-[11px] font-bold border border-white/[0.07] transition flex items-center justify-center gap-1.5 whitespace-nowrap">
           <span>Storefront</span>
-          <svg class="w-3.5 h-3.5 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          <svg class="w-3 h-3 text-yellow-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
         </a>
       </div>
     </div>
 
     <!-- All 5 Sidebar Tabs -->
-    <nav class="p-3 lg:p-4 flex lg:flex-col gap-2 overflow-x-auto no-scrollbar">
-      <button type="button" id="nav-btn-analytics" onclick="openTab('tab-analytics', this)" class="tab-btn active shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-black text-left bg-yellow-400 text-black flex items-center justify-between gap-2.5 transition">
+    <nav class="p-3 lg:p-4 flex lg:flex-col gap-1.5 overflow-x-auto no-scrollbar">
+      <button type="button" id="nav-btn-analytics" onclick="openTab('tab-analytics', this)" class="tab-btn active shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-black text-left bg-yellow-400 text-black flex items-center justify-between gap-2.5 transition">
         <span class="flex items-center gap-2.5">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
           <span>Revenue & Analytics</span>
         </span>
       </button>
 
-      <button type="button" id="nav-btn-history" onclick="openTab('tab-history', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+      <button type="button" id="nav-btn-history" onclick="openTab('tab-history', this)" class="tab-btn shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-semibold text-left text-zinc-400 hover:text-white hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5">
         <span class="flex items-center gap-2.5">
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
           <span>All Orders History</span>
         </span>
-        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-white/10 text-zinc-200" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-white/10 text-zinc-200">{{ all_history|length }}</span>
+        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/[0.07] text-zinc-300" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/[0.07] text-zinc-300">{{ all_history|length }}</span>
       </button>
 
-      <button type="button" id="nav-btn-customers" onclick="openTab('tab-customers', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+      <button type="button" id="nav-btn-customers" onclick="openTab('tab-customers', this)" class="tab-btn shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-semibold text-left text-zinc-400 hover:text-white hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5">
         <span class="flex items-center gap-2.5">
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           <span>Customer People</span>
         </span>
-        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-emerald-500/15 text-emerald-400" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-emerald-500/15 text-emerald-400">{{ customers|length }}</span>
+        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 text-emerald-400" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 text-emerald-400">{{ customers|length }}</span>
       </button>
 
-      <button type="button" id="nav-btn-menu" onclick="openTab('tab-menu', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+      <button type="button" id="nav-btn-menu" onclick="openTab('tab-menu', this)" class="tab-btn shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-semibold text-left text-zinc-400 hover:text-white hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5">
         <span class="flex items-center gap-2.5">
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
           <span>Menu & Stock</span>
         </span>
-        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-white/10 text-zinc-200" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-white/10 text-zinc-200">{{ menu_items|length }}</span>
+        <span id="navMenuCount" data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/[0.07] text-zinc-300" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/[0.07] text-zinc-300">{{ menu_items|length }}</span>
       </button>
 
-      <button type="button" id="nav-btn-coupons" onclick="openTab('tab-coupons', this)" class="tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5">
+      <button type="button" id="nav-btn-coupons" onclick="openTab('tab-coupons', this)" class="tab-btn shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-semibold text-left text-zinc-400 hover:text-white hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5">
         <span class="flex items-center gap-2.5">
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
           <span>Promo Coupons</span>
         </span>
-        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-yellow-400/15 text-yellow-400" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-yellow-400/15 text-yellow-400">{{ coupons|length }}</span>
+        <span id="navCouponCount" data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-yellow-400/15 text-yellow-400" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-yellow-400/15 text-yellow-400">{{ coupons|length }}</span>
+      </button>
+
+      <button type="button" id="nav-btn-staff" onclick="openTab('tab-staff', this)" class="tab-btn shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-semibold text-left text-zinc-400 hover:text-white hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+          <span>Team & Riders</span>
+        </span>
+        <span id="navStaffCount" data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/15 text-sky-400" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/15 text-sky-400">{{ staff_members|length }}</span>
       </button>
     </nav>
 
     <!-- Bottom Sidebar Logout & ZYRAC Credit -->
-    <div class="mt-auto p-4 hidden lg:flex flex-col gap-3 border-t border-white/[0.08]">
-      <a href="{% url 'crm_logout' %}" class="w-full py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 flex items-center justify-center gap-2 text-xs font-black text-red-400 transition">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+    <div class="mt-auto p-4 hidden lg:flex flex-col gap-3 border-t border-white/[0.07]">
+      <a href="{% url 'crm_logout' %}" class="w-full py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 flex items-center justify-center gap-2 text-xs font-bold text-red-400 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         <span>Sign Out</span>
       </a>
-      <a href="https://www.instagram.com/zyrac__/" target="_blank" rel="noopener noreferrer" class="text-center text-[10px] font-bold text-zinc-500 hover:text-yellow-400 transition">
+      <a href="https://www.instagram.com/zyrac__/" target="_blank" rel="noopener noreferrer" class="text-center text-[10px] font-semibold text-zinc-500 hover:text-yellow-400 transition">
         Made by <strong class="text-zinc-300">ZYRAC</strong> • @zyrac__
       </a>
     </div>
   </aside>
 
   <!-- Main Workspace Area -->
-  <main class="flex-1 lg:h-screen overflow-y-auto p-4 sm:p-8 space-y-6">
+  <main class="flex-1 lg:h-screen overflow-y-auto p-4 sm:p-7 space-y-6">
+
+    <!-- Compact Live Kitchen Open / Closed Master Switch (Zero-Refresh) -->
+    <section id="shopStatusCard" class="apple-card rounded-2xl px-4 py-3.5 sm:px-5 border {% if shop_settings.is_open %}border-white/[0.08]{% else %}border-red-500/35 bg-red-950/10{% endif %} flex flex-col lg:flex-row lg:items-center justify-between gap-3 transition">
+      <div class="flex items-center gap-3">
+        <div id="shopStatusIconWrap" class="w-9 h-9 rounded-xl {% if shop_settings.is_open %}bg-emerald-500/10 border border-emerald-500/25 text-emerald-400{% else %}bg-red-500/10 border border-red-500/25 text-red-400{% endif %} flex items-center justify-center shrink-0">
+          <span id="shopStatusDot" class="w-2.5 h-2.5 rounded-full {% if shop_settings.is_open %}bg-emerald-400 animate-ping{% else %}bg-red-400{% endif %}"></span>
+        </div>
+        <div>
+          <h2 class="text-xs sm:text-sm font-extrabold text-white tracking-tight">
+            Storefront:
+            <span id="shopStatusBadge" class="{% if shop_settings.is_open %}text-emerald-400{% else %}text-red-400{% endif %}">
+              {% if shop_settings.is_open %}Accepting Orders Live{% else %}Paused / Closed{% endif %}
+            </span>
+          </h2>
+          <p id="shopStatusSubtext" class="text-[11px] text-zinc-400 mt-0.5">
+            {% if shop_settings.is_open %}
+              Customers can browse and place orders normally.
+            {% else %}
+              Checkout shows: <strong class="text-zinc-200">"{{ shop_settings.closed_reason }} — opens at {{ shop_settings.reopen_time }}"</strong>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
+        <select id="shopClosedReason" class="apple-well rounded-xl px-3 py-2 text-xs font-semibold text-zinc-200 focus:border-yellow-400 outline-none">
+          <option value="Kitchen is resting" {% if shop_settings.closed_reason == "Kitchen is resting" %}selected{% endif %}>Kitchen is resting</option>
+          <option value="Heavy rain — riders paused" {% if shop_settings.closed_reason == "Heavy rain — riders paused" %}selected{% endif %}>Heavy rain — riders paused</option>
+          <option value="Massive rush — prepping orders" {% if shop_settings.closed_reason == "Massive rush — prepping orders" %}selected{% endif %}>Massive rush — prepping orders</option>
+          <option value="Closed for tonight" {% if shop_settings.closed_reason == "Closed for tonight" %}selected{% endif %}>Closed for tonight</option>
+        </select>
+
+        <div class="flex items-center gap-2">
+          <input id="shopReopenTime" type="text" value="{{ shop_settings.reopen_time }}" placeholder="e.g. 7:00 PM"
+            class="w-full sm:w-24 apple-well rounded-xl px-2.5 py-2 text-xs font-bold text-yellow-400 text-center focus:border-yellow-400 outline-none"
+            title="Reopen Time">
+          <button type="button" onclick="saveShopStatus(false)"
+            class="shrink-0 px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.07] text-xs font-bold text-zinc-200 transition">
+            Save Time
+          </button>
+        </div>
+
+        <button type="button" id="shopToggleBtn" onclick="saveShopStatus(true)"
+          class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition active:scale-95 shrink-0 {% if shop_settings.is_open %}bg-red-500/90 hover:bg-red-500 text-white{% else %}bg-emerald-400 hover:bg-emerald-300 text-black{% endif %}">
+          {% if shop_settings.is_open %}Pause Orders{% else %}Open Kitchen Now{% endif %}
+        </button>
+      </div>
+    </section>
 
     <!-- ========================================================= -->
-    <!-- TAB 1: REVENUE ANALYTICS + VEG vs NON-VEG SALES SPLIT     -->
+    <!-- TAB 1: CLEAN BUSINESS ANALYTICS & UNIFIED CLOSING REPORT  -->
     <!-- ========================================================= -->
     <div id="tab-analytics" class="tab-content active space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+
+      <!-- Page Header + Period Filter -->
+      <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Business Performance & Analytics</h2>
-          <p class="text-xs text-zinc-400 mt-0.5">Filter revenue, Veg vs. Non-Veg sales split, rush hours, and top-selling burgers</p>
+          <p class="text-xs text-zinc-400 mt-0.5">Live daily closing tally, rider cash settlement, and revenue trends</p>
         </div>
 
-        <div class="flex bg-[#09090C] p-1 rounded-xl border border-white/[0.08]">
-          <button type="button" onclick="filterData(7)" id="flt-7" class="px-4 py-2 rounded-lg text-xs font-black bg-yellow-400 text-black transition">Last 7 Days</button>
-          <button type="button" onclick="filterData(15)" id="flt-15" class="px-4 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition">Last 15 Days</button>
-          <button type="button" onclick="filterData(30)" id="flt-30" class="px-4 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition">Last 30 Days</button>
+        <div class="flex apple-well p-1 rounded-xl">
+          <button type="button" onclick="filterData(7)" id="flt-7" class="px-3.5 py-1.5 rounded-lg text-xs font-black bg-yellow-400 text-black transition">7 Days</button>
+          <button type="button" onclick="filterData(15)" id="flt-15" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition">15 Days</button>
+          <button type="button" onclick="filterData(30)" id="flt-30" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition">30 Days</button>
         </div>
       </div>
 
-      <!-- 5 KPI Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="apple-card rounded-2xl p-5 relative overflow-hidden">
-          <div class="absolute top-0 left-0 w-full h-1 bg-yellow-400"></div>
-          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Period Revenue</p>
-          <p class="text-2xl sm:text-3xl font-black text-yellow-400 mt-2" id="stat-rev">₹0</p>
-          <p class="text-[10px] text-zinc-500 font-semibold mt-1" id="stat-aov">Avg Order: ₹0</p>
+      <!-- 1. UNIFIED CLOSING SUMMARY & RIDER CASH SETTLEMENT CARD (No Duplicate Numbers) -->
+      <section class="apple-card rounded-2xl p-5 sm:p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/[0.06]">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base sm:text-lg font-black text-white tracking-tight">Closing Summary &amp; Rider Cash Settlement</h3>
+              <span class="px-2 py-0.5 rounded-md bg-white/[0.06] text-[10px] font-bold text-zinc-300">{{ today_str }}</span>
+            </div>
+            <p class="text-xs text-zinc-400 mt-0.5">Track total sales, physical cash to collect from each rider, UPI total, and cancellations</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex apple-well p-1 rounded-xl">
+              <button type="button" id="settle-today" onclick="setSettlementScope('TODAY')" class="px-3 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition">Today</button>
+              <button type="button" id="settle-period" onclick="setSettlementScope('PERIOD')" class="px-3 py-1.5 rounded-lg text-[11px] font-semibold text-zinc-400 hover:text-white transition">Selected Period</button>
+            </div>
+
+            <button type="button" onclick="sendDailyClosingWhatsApp()"
+              class="px-4 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-black transition active:scale-95 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+              <span>Send WhatsApp Report</span>
+            </button>
+          </div>
         </div>
 
-        <div onclick="document.getElementById('nav-btn-history').click()" class="cursor-pointer apple-card hover:border-sky-400/50 rounded-2xl p-5 relative overflow-hidden transition group">
-          <div class="absolute top-0 left-0 w-full h-1 bg-sky-400"></div>
+        <!-- 4 Clean, Single-Source Closing KPIs -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="apple-well rounded-xl p-4">
+            <span class="text-[11px] font-semibold text-zinc-400 block">Total Settled Sales</span>
+            <span id="eodTotalSales" class="text-2xl font-black text-yellow-400 mt-1 block">₹0</span>
+            <span id="eodDeliveredCount" class="text-[11px] text-zinc-500 mt-0.5 block">0 delivered orders</span>
+          </div>
+
+          <div class="apple-well rounded-xl p-4">
+            <span class="text-[11px] font-semibold text-zinc-400 block">Physical Cash (Collect)</span>
+            <span id="eodTotalCash" class="text-2xl font-black text-emerald-400 mt-1 block">₹0</span>
+            <span class="text-[11px] text-zinc-500 mt-0.5 block">In-hand from riders</span>
+          </div>
+
+          <div class="apple-well rounded-xl p-4">
+            <span class="text-[11px] font-semibold text-zinc-400 block">UPI / Online Received</span>
+            <span id="eodTotalUpi" class="text-2xl font-black text-sky-400 mt-1 block">₹0</span>
+            <span class="text-[11px] text-zinc-500 mt-0.5 block">Direct bank / QR</span>
+          </div>
+
+          <div class="apple-well rounded-xl p-4">
+            <span class="text-[11px] font-semibold text-zinc-400 block">Cancelled Today</span>
+            <span id="eodCancelledCount" class="text-2xl font-black text-red-400 mt-1 block">{{ today_cancelled_count|default:0 }}</span>
+            <span class="text-[11px] text-zinc-500 mt-0.5 block">₹{{ today_cancelled_value|default:0 }} cancelled value</span>
+          </div>
+        </div>
+
+        <!-- Per-Rider Breakdown Table -->
+        <div class="apple-well rounded-xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+              <thead class="text-[10px] text-zinc-400 uppercase tracking-wider bg-white/[0.02] border-b border-white/[0.06]">
+                <tr>
+                  <th class="px-4 py-3 font-bold">Rider / Counter</th>
+                  <th class="px-4 py-3 font-bold text-center">Drops</th>
+                  <th class="px-4 py-3 font-bold text-right text-emerald-400">Physical Cash (Collect)</th>
+                  <th class="px-4 py-3 font-bold text-right text-sky-400">UPI Received</th>
+                  <th class="px-4 py-3 font-bold text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody id="riderSettlementBody" class="divide-y divide-white/[0.05]"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. PERIOD PERFORMANCE KPI STRIP (5 Clean Cards) -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+        <div class="apple-card rounded-2xl p-4 sm:p-5">
+          <p class="text-[11px] text-zinc-400 font-semibold">Period Revenue</p>
+          <p class="text-2xl font-black text-white mt-1.5" id="stat-rev">₹0</p>
+          <p class="text-[11px] text-zinc-500 mt-1" id="stat-aov">Avg Order: ₹0</p>
+        </div>
+
+        <div onclick="document.getElementById('nav-btn-history').click()" class="cursor-pointer apple-card hover:border-white/20 rounded-2xl p-4 sm:p-5 transition group">
           <div class="flex items-center justify-between">
-            <p class="text-[10px] text-sky-400 uppercase font-black tracking-widest">Delivered Orders</p>
-            <svg class="w-4 h-4 text-sky-400 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            <p class="text-[11px] text-zinc-400 font-semibold">Delivered Orders</p>
+            <svg class="w-3.5 h-3.5 text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </div>
-          <p class="text-2xl sm:text-3xl font-black text-white mt-2" id="stat-ord">0</p>
-          <p class="text-[10px] text-zinc-400 font-semibold mt-1">All-Time Total: {{ all_history|length }}</p>
+          <p class="text-2xl font-black text-white mt-1.5" id="stat-ord">0</p>
+          <p class="text-[11px] text-zinc-500 mt-1">All-time: {{ all_history|length }}</p>
         </div>
 
-        <div onclick="document.getElementById('nav-btn-customers').click()" class="cursor-pointer apple-card hover:border-emerald-400/50 rounded-2xl p-5 relative overflow-hidden transition group">
-          <div class="absolute top-0 left-0 w-full h-1 bg-emerald-400"></div>
+        <div onclick="document.getElementById('nav-btn-customers').click()" class="cursor-pointer apple-card hover:border-white/20 rounded-2xl p-4 sm:p-5 transition group">
           <div class="flex items-center justify-between">
-            <p class="text-[10px] text-emerald-400 uppercase font-black tracking-widest">Customer People</p>
-            <svg class="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            <p class="text-[11px] text-zinc-400 font-semibold">Customer People</p>
+            <svg class="w-3.5 h-3.5 text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </div>
-          <p class="text-2xl sm:text-3xl font-black text-white mt-2">{{ customers|length }}</p>
-          <p class="text-[10px] text-yellow-400 font-bold mt-1">{{ premium_count }} OTM Premium (₹5k+)</p>
+          <p class="text-2xl font-black text-white mt-1.5">{{ customers|length }}</p>
+          <p class="text-[11px] text-yellow-400/90 font-semibold mt-1">{{ premium_count }} OTM Premium (₹5k+)</p>
         </div>
 
-        <div class="apple-card rounded-2xl p-5">
-          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">#1 Bestseller Dish</p>
-          <p class="text-sm sm:text-base font-black text-amber-300 mt-2 truncate" id="stat-best">-</p>
-          <p class="text-[10px] text-zinc-500 font-semibold mt-1">Most ordered item in period</p>
+        <div class="apple-card rounded-2xl p-4 sm:p-5">
+          <p class="text-[11px] text-zinc-400 font-semibold">#1 Bestseller Dish</p>
+          <p class="text-sm sm:text-base font-black text-white mt-2 truncate" id="stat-best">-</p>
+          <p class="text-[11px] text-zinc-500 mt-1">Top ordered in period</p>
         </div>
 
-        <div class="apple-card rounded-2xl p-5">
-          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Peak Rush Hour</p>
-          <p class="text-base sm:text-lg font-black text-white mt-2" id="stat-peak">-</p>
-          <p class="text-[10px] text-zinc-500 font-semibold mt-1">Busiest kitchen window</p>
+        <div class="apple-card rounded-2xl p-4 sm:p-5 col-span-2 lg:col-span-1">
+          <p class="text-[11px] text-zinc-400 font-semibold">Peak Rush Hour</p>
+          <p class="text-base sm:text-lg font-black text-white mt-1.5" id="stat-peak">-</p>
+          <p class="text-[11px] text-zinc-500 mt-1">Busiest kitchen window</p>
         </div>
       </div>
 
-      <!-- Veg vs. Non-Veg Sales Split Bar -->
-      <div class="apple-card rounded-2xl p-5">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <div class="flex items-center gap-4 text-xs font-extrabold">
-            <span class="inline-flex items-center gap-1.5 text-emerald-400">
-              <svg class="w-3.5 h-3.5"><use href="#veg-mark"/></svg>
-              <span>Pure Veg Sales: <strong id="vegRevLabel" class="text-white">₹0</strong> (<span id="vegPctLabel">0%</span>)</span>
-            </span>
-            <span class="inline-flex items-center gap-1.5 text-red-400">
-              <svg class="w-3.5 h-3.5"><use href="#nonveg-mark"/></svg>
-              <span>Non-Veg Sales: <strong id="nonvegRevLabel" class="text-white">₹0</strong> (<span id="nonvegPctLabel">0%</span>)</span>
-            </span>
+      <!-- 3. REVENUE TRENDLINE + TOP DISHES + VEG/NON-VEG SPLIT -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        <div class="xl:col-span-8 apple-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between gap-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-black text-white">Daily Revenue Trendline</h3>
+              <p class="text-[11px] text-zinc-500 mt-0.5">Completed orders across selected period</p>
+            </div>
+            <span class="text-[11px] font-bold text-yellow-400 bg-yellow-400/10 px-2.5 py-1 rounded-lg">Delivered</span>
           </div>
-          <span class="text-[11px] font-semibold text-zinc-500">Item-level dietary breakdown</span>
-        </div>
-        <div class="w-full h-2.5 bg-[#09090C] rounded-full overflow-hidden flex border border-white/[0.06]">
-          <div id="vegSplitBar" class="h-full bg-emerald-400 transition-all duration-500" style="width: 50%;"></div>
-          <div id="nonvegSplitBar" class="h-full bg-red-400 transition-all duration-500" style="width: 50%;"></div>
-        </div>
-      </div>
 
-      <!-- Chart + Top 5 Bestsellers Leaderboard Grid -->
-      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        <div class="xl:col-span-8 apple-card rounded-2xl p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xs font-black uppercase tracking-widest text-zinc-400">Daily Revenue Trendline</h3>
-            <span class="text-[11px] font-bold text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-lg border border-yellow-400/20">Delivered Orders</span>
-          </div>
-          <div class="w-full h-72 sm:h-80">
+          <div class="w-full h-64 sm:h-72">
             <canvas id="revenueChart"></canvas>
+          </div>
+
+          <!-- Integrated Veg vs. Non-Veg Split Bar -->
+          <div class="pt-4 border-t border-white/[0.06] space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-bold">
+              <span class="inline-flex items-center gap-1.5 text-emerald-400">
+                <svg class="w-3.5 h-3.5"><use href="#veg-mark"/></svg>
+                <span>Pure Veg: <strong id="vegRevLabel" class="text-white">₹0</strong> (<span id="vegPctLabel">0%</span>)</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5 text-red-400">
+                <svg class="w-3.5 h-3.5"><use href="#nonveg-mark"/></svg>
+                <span>Non-Veg: <strong id="nonvegRevLabel" class="text-white">₹0</strong> (<span id="nonvegPctLabel">0%</span>)</span>
+              </span>
+            </div>
+            <div class="w-full h-2 apple-well rounded-full overflow-hidden flex">
+              <div id="vegSplitBar" class="h-full bg-emerald-400 transition-all duration-500" style="width: 50%;"></div>
+              <div id="nonvegSplitBar" class="h-full bg-red-400 transition-all duration-500" style="width: 50%;"></div>
+            </div>
           </div>
         </div>
 
         <!-- Top 5 Bestselling Dishes Leaderboard -->
-        <div class="xl:col-span-4 apple-card rounded-2xl p-6 flex flex-col justify-between">
+        <div class="xl:col-span-4 apple-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between">
           <div>
-            <h3 class="text-xs font-black uppercase tracking-widest text-yellow-400 mb-4">Top Selling Dishes Leaderboard</h3>
-            <div id="topDishesList" class="space-y-3"></div>
+            <h3 class="text-sm font-black text-white mb-1">Top Selling Dishes</h3>
+            <p class="text-[11px] text-zinc-500 mb-5">Most ordered items in selected period</p>
+            <div id="topDishesList" class="space-y-3.5"></div>
           </div>
-          <button type="button" onclick="document.getElementById('nav-btn-history').click()" class="mt-6 w-full py-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-extrabold text-white transition flex items-center justify-center gap-2">
+          <button type="button" onclick="document.getElementById('nav-btn-history').click()" class="mt-6 w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.07] text-xs font-bold text-zinc-200 transition flex items-center justify-center gap-2">
             <span>Inspect Full Order Archive ({{ all_history|length }})</span>
-            <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <svg class="w-3.5 h-3.5 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </button>
         </div>
       </div>
@@ -262,22 +391,22 @@
           </div>
 
           <div class="flex items-center gap-3">
-            <div class="px-4 py-2 rounded-xl bg-[#09090C] border border-white/[0.08] text-right">
+            <div class="px-4 py-2 rounded-xl apple-well text-right">
               <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Matching Orders</p>
               <p id="ownerHistCount" class="text-base font-black text-white">{{ all_history|length }}</p>
             </div>
-            <div class="px-4 py-2 rounded-xl bg-[#09090C] border border-emerald-500/20 text-right">
+            <div class="px-4 py-2 rounded-xl apple-well text-right">
               <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Filtered Revenue</p>
               <p id="ownerHistRevenue" class="text-base font-black text-yellow-400">₹0</p>
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-3 border-t border-white/[0.08]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-3 border-t border-white/[0.07]">
           <div class="lg:col-span-4 relative">
             <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <input id="ownerHistSearch" oninput="applyOwnerHistoryFilters()" type="text" placeholder="Search Order ID, Customer, Phone, Dish, Rider..."
-              class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:border-yellow-400 outline-none transition">
+              class="w-full apple-well rounded-xl pl-10 pr-9 py-2.5 text-xs font-semibold text-white placeholder-zinc-500 focus:border-yellow-400 outline-none transition">
             <button id="clearOwnerHistBtn" type="button" onclick="resetOwnerHistoryFilters()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -285,13 +414,13 @@
 
           <div class="lg:col-span-3 flex items-center gap-2">
             <input id="ownerHistDate" onchange="applyOwnerHistoryFilters()" type="date"
-              class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-bold text-zinc-200 focus:border-yellow-400 outline-none transition">
-            <button type="button" onclick="toggleOwnerTodayDate()" class="shrink-0 px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-[11px] font-black text-yellow-400 transition">
+              class="w-full apple-well rounded-xl px-3.5 py-2.5 text-xs font-bold text-zinc-200 focus:border-yellow-400 outline-none transition">
+            <button type="button" onclick="toggleOwnerTodayDate()" class="shrink-0 px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.07] text-[11px] font-black text-yellow-400 transition">
               Today
             </button>
           </div>
 
-          <div class="lg:col-span-5 flex items-center gap-1 overflow-x-auto no-scrollbar bg-[#09090C] p-1 rounded-xl border border-white/[0.08]">
+          <div class="lg:col-span-5 flex items-center gap-1 overflow-x-auto no-scrollbar apple-well p-1 rounded-xl">
             <button type="button" onclick="setOwnerHistFilter('ALL', this)" class="own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition whitespace-nowrap">All</button>
             <button type="button" onclick="setOwnerHistFilter('VEG_ONLY', this)" class="own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition whitespace-nowrap">Pure Veg</button>
             <button type="button" onclick="setOwnerHistFilter('HAS_NONVEG', this)" class="own-flt-btn flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-red-400 hover:text-red-300 transition whitespace-nowrap">Non-Veg</button>
@@ -351,8 +480,7 @@
               {% endif %}
             </div>
 
-            <!-- Ordered Items With Veg & Non-Veg Badges -->
-            <div class="mt-3 p-3 rounded-xl bg-[#09090C] border border-white/[0.06] text-xs text-zinc-200 space-y-1.5 font-semibold">
+            <div class="mt-3 p-3 rounded-xl apple-well text-xs text-zinc-200 space-y-1.5 font-semibold">
               {% for i in o.items.all %}
               <div class="flex items-center justify-between gap-2">
                 <span class="flex items-center gap-2 min-w-0">
@@ -400,23 +528,23 @@
     <!-- TAB 3: CUSTOMER PEOPLE CRM (PREMIUM / NORMAL / NEW TIERS) -->
     <!-- ========================================================= -->
     <div id="tab-customers" class="tab-content space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.07] pb-4">
         <div>
           <h2 class="text-xl font-black text-white">Customer People & Member Tiers ({{ customers|length }} People)</h2>
           <p class="text-xs text-zinc-400 mt-0.5">OTM Premium (₹5,000+ spent) • Normal Members (2+ orders) • New Members (First-time guests)</p>
         </div>
-        <input id="custSearchInput" oninput="filterCustomers()" type="text" placeholder="Search by name, phone, tier, or address..." class="w-full sm:w-72 bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
+        <input id="custSearchInput" oninput="filterCustomers()" type="text" placeholder="Search by name, phone, tier, or address..." class="w-full sm:w-72 apple-well rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
       </div>
 
       <!-- 3 Interactive Member Tier Summary Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div onclick="setCustTierFilter('PREMIUM', document.getElementById('tier-pill-PREMIUM'))" class="cursor-pointer apple-card border-yellow-400/35 hover:border-yellow-400 rounded-2xl p-5 flex items-center justify-between transition">
+        <div onclick="setCustTierFilter('PREMIUM', document.getElementById('tier-pill-PREMIUM'))" class="cursor-pointer apple-card hover:border-yellow-400/50 rounded-2xl p-5 flex items-center justify-between transition">
           <div>
             <span class="text-[10px] font-black uppercase tracking-widest text-yellow-400 block">OTM Astronaut Premium</span>
             <p class="text-2xl sm:text-3xl font-black text-white mt-1">{{ premium_count }}</p>
             <p class="text-[11px] font-semibold text-zinc-400 mt-1">Lifetime spend ₹5,000+</p>
           </div>
-          <div class="w-12 h-12 rounded-2xl overflow-hidden border-2 border-yellow-400 shrink-0 shadow-[0_0_16px_rgba(250,204,21,0.3)]">
+          <div class="w-12 h-12 rounded-2xl overflow-hidden border-2 border-yellow-400/70 shrink-0">
             <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
           </div>
         </div>
@@ -427,7 +555,7 @@
             <p class="text-2xl sm:text-3xl font-black text-white mt-1">{{ normal_count }}</p>
             <p class="text-[11px] font-semibold text-zinc-400 mt-1">Repeat customers (2+ orders)</p>
           </div>
-          <div class="w-11 h-11 rounded-2xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center shrink-0">
+          <div class="w-11 h-11 rounded-2xl bg-sky-500/15 border border-sky-500/25 text-sky-400 flex items-center justify-center shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
           </div>
         </div>
@@ -438,14 +566,14 @@
             <p class="text-2xl sm:text-3xl font-black text-white mt-1">{{ new_member_count }}</p>
             <p class="text-[11px] font-semibold text-zinc-400 mt-1">First-time guests (0–1 order)</p>
           </div>
-          <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+          <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg>
           </div>
         </div>
       </div>
 
       <!-- Member Tier Filter Pills -->
-      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-[#09090C] p-1.5 rounded-xl border border-white/[0.08] w-fit max-w-full">
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar apple-well p-1.5 rounded-xl w-fit max-w-full">
         <button type="button" id="tier-pill-ALL"
           data-default="cust-tier-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition whitespace-nowrap flex items-center gap-1.5"
           onclick="setCustTierFilter('ALL', this)"
@@ -479,7 +607,7 @@
       <!-- Customer People Table -->
       <div class="apple-card rounded-2xl p-2 sm:p-6 overflow-x-auto">
         <table class="w-full text-left text-sm whitespace-nowrap">
-          <thead class="text-xs text-zinc-400 uppercase tracking-widest border-b border-white/[0.08]">
+          <thead class="text-xs text-zinc-400 uppercase tracking-widest border-b border-white/[0.07]">
             <tr>
               <th class="px-4 py-3 font-bold">#</th>
               <th class="px-4 py-3 font-bold">Customer Name</th>
@@ -533,33 +661,33 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- TAB 4: MENU & STOCK CONTROL (WITH VEG & NON-VEG CONTROLS) -->
+    <!-- TAB 4: MENU & STOCK CONTROL (ZERO-REFRESH + MOBILE READY) -->
     <!-- ========================================================= -->
     <div id="tab-menu" class="tab-content space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.07] pb-4">
         <div>
-          <h2 class="text-xl font-black text-white">Menu & Instant Stock Editor ({{ menu_items|length }} Dishes)</h2>
-          <p class="text-xs text-zinc-400 mt-0.5">Add Pure Veg or Non-Veg dishes, edit prices, switch Veg/Non-Veg tags, or toggle stock</p>
+          <h2 class="text-xl font-black text-white">Menu & Instant Stock Editor (<span id="menuHeaderCount">{{ menu_items|length }}</span> Dishes)</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Add Pure Veg or Non-Veg dishes, edit prices, switch Veg/Non-Veg tags, or toggle stock instantly without page reload</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <div class="flex bg-[#09090C] p-1 rounded-xl border border-white/[0.08]">
+          <div class="flex apple-well p-1 rounded-xl">
             <button type="button" onclick="setMenuDietFilter('ALL', this)" class="menu-diet-btn px-3 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition">All</button>
             <button type="button" onclick="setMenuDietFilter('VEG', this)" class="menu-diet-btn px-3 py-1.5 rounded-lg text-[11px] font-bold text-emerald-400 transition">Pure Veg</button>
             <button type="button" onclick="setMenuDietFilter('NONVEG', this)" class="menu-diet-btn px-3 py-1.5 rounded-lg text-[11px] font-bold text-red-400 transition">Non-Veg</button>
           </div>
-          <input id="menuSearchInput" oninput="filterOwnerMenu()" type="text" placeholder="Search dish or category..." class="flex-1 sm:w-56 bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-2 text-xs text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
+          <input id="menuSearchInput" oninput="filterOwnerMenu()" type="text" placeholder="Search dish or category..." class="flex-1 sm:w-56 apple-well rounded-xl px-4 py-2 text-xs text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
         </div>
       </div>
 
       <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        <!-- Add New Dish Form (With Pure Veg / Non-Veg Selector) -->
-        <div class="xl:col-span-4 apple-card rounded-2xl p-6 h-fit space-y-3.5">
+        <!-- Add New Dish Form -->
+        <div class="xl:col-span-4 apple-card rounded-2xl p-5 sm:p-6 h-fit space-y-3.5">
           <h3 class="text-sm font-black text-yellow-400 uppercase tracking-wider">Add New Dish</h3>
           
           <div>
             <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">Dietary Classification</label>
-            <div class="grid grid-cols-2 gap-2 p-1 bg-[#09090C] rounded-xl border border-white/[0.08]">
+            <div class="grid grid-cols-2 gap-2 p-1 apple-well rounded-xl">
               <label class="cursor-pointer">
                 <input type="radio" name="newItemDiet" value="true" checked class="peer hidden">
                 <div class="py-2 px-3 rounded-lg text-xs font-extrabold text-zinc-400 peer-checked:bg-emerald-500/15 peer-checked:text-emerald-300 peer-checked:border peer-checked:border-emerald-500/40 flex items-center justify-center gap-1.5 transition">
@@ -577,59 +705,60 @@
             </div>
           </div>
 
-          <input id="itemCategory" list="categoryList" placeholder="Category (e.g. Chicken Burgers, Veg Burgers)" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <input id="itemCategory" list="categoryList" placeholder="Category (e.g. Chicken Burgers, Veg Burgers)" class="w-full apple-well rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
           <datalist id="categoryList">{% for c in categories %}<option value="{{ c.name }}">{% endfor %}</datalist>
-          <input id="itemName" placeholder="Dish Name" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
-          <input id="itemPrice" type="number" placeholder="Price in ₹" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
-          <input id="itemImage" placeholder="Image URL (optional)" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
-          <textarea id="itemDesc" rows="2" placeholder="Ingredients / Description" class="w-full bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none"></textarea>
+          <input id="itemName" placeholder="Dish Name" class="w-full apple-well rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <input id="itemPrice" type="number" placeholder="Price in ₹" class="w-full apple-well rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <input id="itemImage" placeholder="Image URL (optional)" class="w-full apple-well rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+          <textarea id="itemDesc" rows="2" placeholder="Ingredients / Description" class="w-full apple-well rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none"></textarea>
           <label class="flex items-center gap-2 text-xs text-zinc-300 font-bold cursor-pointer">
             <input id="itemBest" type="checkbox" class="w-4 h-4 accent-yellow-400"> Mark as Most Ordered
           </label>
-          <button type="button" onclick="saveMenuItem()" class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition">+ Save to Live Menu</button>
+          <button type="button" onclick="saveMenuItem()" class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition active:scale-[0.99]">+ Save to Live Menu</button>
         </div>
 
-        <!-- Live Stock List -->
-        <div class="xl:col-span-8 apple-card rounded-2xl p-6">
-          <div class="space-y-3 max-h-[650px] overflow-y-auto pr-2 no-scrollbar">
+        <!-- Live Stock List (Mobile-Responsive Zero-Refresh) -->
+        <div class="xl:col-span-8 apple-card rounded-2xl p-4 sm:p-6">
+          <div id="ownerMenuList" class="space-y-3 max-h-[650px] overflow-y-auto pr-1 no-scrollbar">
             {% for item in menu_items %}
-            <div class="owner-menu-row rounded-2xl bg-[#09090C] border border-white/[0.06] p-4 flex flex-wrap items-center justify-between gap-4"
+            <div class="owner-menu-row rounded-2xl apple-well p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                  data-diet="{% if item.is_veg %}VEG{% else %}NONVEG{% endif %}"
                  data-search="{{ item.name|lower }} {{ item.category.name|lower }}">
               
               <div class="flex items-start gap-3 min-w-0">
-                {% if item.is_veg %}
-                <svg class="w-4 h-4 shrink-0 mt-1" title="Pure Veg"><use href="#veg-mark"/></svg>
-                {% else %}
-                <svg class="w-4 h-4 shrink-0 mt-1" title="Non-Veg"><use href="#nonveg-mark"/></svg>
-                {% endif %}
-                <div>
-                  <div class="flex items-center gap-2">
+                <svg class="diet-svg w-4 h-4 shrink-0 mt-1"><use href="{% if item.is_veg %}#veg-mark{% else %}#nonveg-mark{% endif %}"/></svg>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-[10px] uppercase font-black tracking-widest text-yellow-400">{{ item.category.name }}</span>
-                    <span class="text-[10px] font-bold {% if item.is_veg %}text-emerald-400{% else %}text-red-400{% endif %}">
+                    <span class="diet-label text-[10px] font-bold {% if item.is_veg %}text-emerald-400{% else %}text-red-400{% endif %}">
                       • {% if item.is_veg %}Pure Veg{% else %}Non-Veg{% endif %}
                     </span>
                   </div>
-                  <h4 class="font-extrabold text-white text-sm mt-0.5">{{ item.name }}</h4>
+                  <h4 class="font-extrabold text-white text-sm mt-0.5 truncate">{{ item.name }}</h4>
                 </div>
               </div>
 
-              <div class="flex items-center gap-2 flex-wrap ml-auto">
+              <div class="grid grid-cols-4 sm:flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
                 <button type="button"
                   data-id="{{ item.id }}"
                   data-name="{{ item.name }}"
                   data-price="{{ item.price|floatformat:0 }}"
                   data-nextveg="{% if item.is_veg %}false{% else %}true{% endif %}"
-                  onclick="toggleItemDiet(this.dataset.id, this.dataset.name, this.dataset.price, this.dataset.nextveg === 'true')"
-                  class="px-2.5 py-2 rounded-xl text-[11px] font-extrabold border transition {% if item.is_veg %}bg-emerald-500/10 text-emerald-400 border-emerald-500/25 hover:bg-emerald-500/20{% else %}bg-red-500/10 text-red-400 border-red-500/25 hover:bg-red-500/20{% endif %}"
+                  onclick="toggleItemDiet(this)"
+                  class="diet-toggle-btn px-2.5 py-2 rounded-xl text-[11px] font-extrabold border transition text-center {% if item.is_veg %}bg-emerald-500/10 text-emerald-400 border-emerald-500/25 hover:bg-emerald-500/20{% else %}bg-red-500/10 text-red-400 border-red-500/25 hover:bg-red-500/20{% endif %}"
                   title="Click to switch Veg / Non-Veg">
                   {% if item.is_veg %}Veg{% else %}Non-Veg{% endif %}
                 </button>
 
-                <input id="price-{{ item.id }}" type="number" value="{{ item.price|floatformat:0 }}" class="w-20 bg-zinc-900 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-white font-bold text-center">
-                <button type="button" data-id="{{ item.id }}" data-name="{{ item.name }}" onclick="updateItemPrice(this.dataset.id, this.dataset.name)" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition">Save ₹</button>
-                <button type="button" data-id="{{ item.id }}" onclick="toggleStock(this.dataset.id)"
-                  class="px-3.5 py-2 rounded-xl text-xs font-black transition {% if item.is_available %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% else %}bg-red-500/15 text-red-400 border border-red-500/30{% endif %}">
+                <input id="price-{{ item.id }}" type="number" value="{{ item.price|floatformat:0 }}" class="w-full sm:w-20 bg-zinc-900 border border-white/10 rounded-xl px-2 py-2 text-xs text-white font-bold text-center">
+
+                <button type="button" data-id="{{ item.id }}" data-name="{{ item.name }}" onclick="updateItemPrice(this.dataset.id, this.dataset.name, this)"
+                  class="px-2.5 sm:px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition text-center">
+                  Save ₹
+                </button>
+
+                <button type="button" data-id="{{ item.id }}" data-available="{% if item.is_available %}true{% else %}false{% endif %}" onclick="toggleStock(this.dataset.id, this)"
+                  class="px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-black transition text-center {% if item.is_available %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% else %}bg-red-500/15 text-red-400 border border-red-500/30{% endif %}">
                   {% if item.is_available %}In Stock{% else %}Sold Out{% endif %}
                 </button>
               </div>
@@ -641,32 +770,32 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- TAB 5: PROMO COUPONS                                      -->
+    <!-- TAB 5: PROMO COUPONS (ZERO-REFRESH + MOBILE READY)        -->
     <!-- ========================================================= -->
     <div id="tab-coupons" class="tab-content space-y-6">
-      <h2 class="text-xl font-black text-white border-b border-white/[0.08] pb-4">Promo Coupons & Live Offers ({{ coupons|length }})</h2>
+      <h2 class="text-xl font-black text-white border-b border-white/[0.07] pb-4">Promo Coupons & Live Offers (<span id="couponHeaderCount">{{ coupons|length }}</span>)</h2>
       <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        <div class="xl:col-span-5 apple-card rounded-2xl p-6 h-fit space-y-3.5">
+        <div class="xl:col-span-5 apple-card rounded-2xl p-5 sm:p-6 h-fit space-y-3.5">
           <h3 class="text-sm font-black text-yellow-400 uppercase tracking-wider">Create Promo Code</h3>
-          <input id="cpCode" placeholder="Code (e.g. OTM50)" class="w-full uppercase bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm font-bold text-white focus:border-yellow-400 outline-none">
+          <input id="cpCode" placeholder="Code (e.g. OTM50)" class="w-full uppercase apple-well rounded-xl px-4 py-3 text-sm font-bold text-white focus:border-yellow-400 outline-none">
           <div class="grid grid-cols-2 gap-3">
-            <select id="cpType" class="bg-[#09090C] border border-white/[0.08] rounded-xl px-3 py-3 text-sm text-white outline-none">
+            <select id="cpType" class="apple-well rounded-xl px-3 py-3 text-sm text-white outline-none">
               <option value="FLAT">Flat ₹ Off</option>
               <option value="PERCENT">Percent % Off</option>
             </select>
-            <input id="cpValue" type="number" placeholder="Value (e.g. 50)" class="bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+            <input id="cpValue" type="number" placeholder="Value (e.g. 50)" class="apple-well rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
           </div>
           <div class="grid grid-cols-2 gap-3">
-            <input id="cpMin" type="number" value="199" placeholder="Min Order ₹" class="bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
-            <input id="cpMax" type="number" value="100" placeholder="Max Cap ₹" class="bg-[#09090C] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+            <input id="cpMin" type="number" value="199" placeholder="Min Order ₹" class="apple-well rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
+            <input id="cpMax" type="number" value="100" placeholder="Max Cap ₹" class="apple-well rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400 outline-none">
           </div>
           <label class="flex items-center gap-2 text-xs text-zinc-300 font-bold cursor-pointer">
             <input id="cpFirst" type="checkbox" class="w-4 h-4 accent-yellow-400"> Valid on First Order Only
           </label>
-          <button type="button" onclick="createCoupon()" class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition">+ Launch Coupon</button>
+          <button type="button" onclick="createCoupon()" class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition active:scale-[0.99]">+ Launch Coupon</button>
         </div>
 
-        <div class="xl:col-span-7 space-y-3">
+        <div id="ownerCouponList" class="xl:col-span-7 space-y-3">
           {% for c in coupons %}
           <div class="apple-card rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -678,13 +807,89 @@
                 {% if c.discount_type == 'FLAT' %}₹{{ c.value|floatformat:0 }} FLAT OFF{% else %}{{ c.value|floatformat:0 }}% OFF (up to ₹{{ c.max_discount|floatformat:0 }}){% endif %} on orders above ₹{{ c.min_order_amount|floatformat:0 }}
               </p>
             </div>
-            <button type="button" data-id="{{ c.id }}" onclick="toggleCoupon(this.dataset.id)"
+            <button type="button" data-id="{{ c.id }}" data-active="{% if c.is_active %}true{% else %}false{% endif %}" onclick="toggleCoupon(this.dataset.id, this)"
               class="px-4 py-2 rounded-xl text-xs font-black transition {% if c.is_active %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% else %}bg-zinc-800 text-zinc-500 border border-white/10{% endif %}">
               {% if c.is_active %}Active Live{% else %}Paused{% endif %}
             </button>
           </div>
           {% empty %}
-          <div class="rounded-2xl bg-[#111115] border border-white/[0.08] p-10 text-center text-xs text-zinc-500 font-bold">No promo coupons created yet.</div>
+          <div id="emptyCouponMsg" class="rounded-2xl apple-card p-10 text-center text-xs text-zinc-500 font-bold">No promo coupons created yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <!-- ========================================================= -->
+    <!-- TAB 6: TEAM & RIDERS (CREATE / DELETE RIDER & KITCHEN)    -->
+    <!-- ========================================================= -->
+    <div id="tab-staff" class="tab-content space-y-6">
+      <div class="border-b border-white/[0.07] pb-4">
+        <h2 class="text-xl font-black text-white">Team &amp; Riders Access (<span id="staffHeaderCount">{{ staff_members|length }}</span>)</h2>
+        <p class="text-xs text-zinc-400 mt-0.5">Create or remove login accounts for Delivery Riders and Kitchen KDS staff instantly</p>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <!-- Create Staff Form -->
+        <div class="xl:col-span-5 apple-card rounded-2xl p-5 sm:p-6 h-fit space-y-4">
+          <h3 class="text-sm font-black text-yellow-400 uppercase tracking-wider">Add Rider or Kitchen Staff</h3>
+
+          <div>
+            <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">Select Role</label>
+            <div class="grid grid-cols-2 gap-2 p-1 apple-well rounded-xl">
+              <label class="cursor-pointer">
+                <input type="radio" name="newStaffRole" value="RIDER" checked class="peer hidden">
+                <div class="py-2.5 px-3 rounded-lg text-xs font-extrabold text-zinc-400 peer-checked:bg-sky-500/15 peer-checked:text-sky-400 peer-checked:border peer-checked:border-sky-500/40 text-center transition">
+                  Delivery Rider
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="newStaffRole" value="KITCHEN" class="peer hidden">
+                <div class="py-2.5 px-3 rounded-lg text-xs font-extrabold text-zinc-400 peer-checked:bg-amber-500/15 peer-checked:text-amber-300 peer-checked:border peer-checked:border-amber-500/40 text-center transition">
+                  Kitchen Staff
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <input id="staffUsername" type="text" placeholder="Username (e.g. rider2, kitchen_ali)"
+            class="w-full apple-well rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
+
+          <input id="staffPassword" type="password" placeholder="Login Password (min 4 chars)"
+            class="w-full apple-well rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-zinc-500 focus:border-yellow-400 outline-none">
+
+          <button type="button" id="createStaffBtn" onclick="createStaff()"
+            class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition active:scale-[0.99]">
+            + Create Staff Account
+          </button>
+        </div>
+
+        <!-- Active Staff List -->
+        <div id="ownerStaffList" class="xl:col-span-7 space-y-3">
+          {% for s in staff_members %}
+          <div id="staff-row-{{ s.id }}" class="apple-card rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 {% if s.role == 'RIDER' %}bg-sky-500/15 text-sky-400 border border-sky-500/30{% else %}bg-amber-500/15 text-amber-300 border border-amber-500/30{% endif %}">
+                {{ s.username|slice:":1"|upper }}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h4 class="font-black text-white text-sm sm:text-base truncate">{{ s.username }}</h4>
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider {% if s.role == 'RIDER' %}bg-sky-500/15 text-sky-400 border border-sky-500/25{% else %}bg-amber-500/15 text-amber-300 border border-amber-500/25{% endif %}">
+                    {% if s.role == 'RIDER' %}Rider{% else %}Kitchen{% endif %}
+                  </span>
+                </div>
+                <p class="text-[11px] text-zinc-500 font-medium mt-0.5">Added {{ s.joined }}</p>
+              </div>
+            </div>
+
+            <button type="button" data-id="{{ s.id }}" data-name="{{ s.username }}" onclick="deleteStaff(this.dataset.id, this.dataset.name, this)"
+              class="shrink-0 px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 text-xs font-extrabold transition">
+              Delete
+            </button>
+          </div>
+          {% empty %}
+          <div id="emptyStaffMsg" class="rounded-2xl apple-card p-10 text-center text-xs text-zinc-500 font-bold">
+            No riders or kitchen staff added yet.
+          </div>
           {% endfor %}
         </div>
       </div>
@@ -692,21 +897,111 @@
 
   </main>
 
+  <!-- Instant Zero-Refresh Toast Notification -->
+  <div id="ownerToast" class="hidden fixed bottom-5 right-5 left-5 sm:left-auto z-50 px-4 py-3 rounded-2xl bg-[#111115] border border-yellow-400/40 text-xs font-extrabold text-white shadow-2xl flex items-center justify-center sm:justify-start gap-2.5">
+    <span id="ownerToastDot" class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+    <span id="ownerToastMsg">Saved!</span>
+  </div>
+
+  {% csrf_token %}
+
+  <!-- Safe JSON Data Container -->
+  <script id="otm-orders-data" type="application/json">{{ orders_json|safe }}</script>
+
   <script>
     const TODAY_STR = "{{ today_str }}";
+    const TODAY_CANCELLED_COUNT = Number("{{ today_cancelled_count|default:'0' }}");
+    const TODAY_CANCELLED_VALUE = Number("{{ today_cancelled_value|default:'0' }}");
+    let currentShopOpen = "{{ shop_settings.is_open|yesno:'true,false' }}" === "true";
     let ownerHistFilter = 'ALL';
     let menuDietFilter = 'ALL';
     let custTierFilter = 'ALL';
+    let toastTimer = null;
 
     function getCookie(name) {
       let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-      return v ? v[2] : null;
+      if (v) return v[2];
+      if (name === 'csrftoken') {
+        const input = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (input) return input.value;
+      }
+      return '';
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('ownerToast');
+      const dot = document.getElementById('ownerToastDot');
+      const text = document.getElementById('ownerToastMsg');
+      if (!toast) return;
+      text.textContent = msg;
+      dot.className = isError ? "w-2 h-2 rounded-full bg-red-400 shrink-0" : "w-2 h-2 rounded-full bg-emerald-400 shrink-0";
+      toast.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('hidden'), 2400);
+    }
+
+    // Zero-Refresh Shop Open / Closed Master Switch
+    async function saveShopStatus(toggleState) {
+      const nextOpen = toggleState ? !currentShopOpen : currentShopOpen;
+      const reopenTime = (document.getElementById('shopReopenTime').value || '7:00 PM').trim();
+      const closedReason = document.getElementById('shopClosedReason').value;
+      const toggleBtn = document.getElementById('shopToggleBtn');
+      if (toggleBtn) toggleBtn.disabled = true;
+
+      try {
+        const res = await fetch('/otm-vault-9921/shop-status/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({
+            is_open: nextOpen,
+            reopen_time: reopenTime,
+            closed_reason: closedReason
+          })
+        });
+        if (!res.ok) throw new Error();
+        currentShopOpen = nextOpen;
+
+        const card = document.getElementById('shopStatusCard');
+        const iconWrap = document.getElementById('shopStatusIconWrap');
+        const dot = document.getElementById('shopStatusDot');
+        const badge = document.getElementById('shopStatusBadge');
+        const subtext = document.getElementById('shopStatusSubtext');
+
+        if (currentShopOpen) {
+          card.className = "apple-card rounded-2xl px-4 py-3.5 sm:px-5 border border-white/[0.08] flex flex-col lg:flex-row lg:items-center justify-between gap-3 transition";
+          iconWrap.className = "w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 flex items-center justify-center shrink-0";
+          dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+          badge.className = "text-emerald-400";
+          badge.textContent = "Accepting Orders Live";
+          subtext.innerHTML = "Customers can browse and place orders normally.";
+          toggleBtn.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition active:scale-95 shrink-0 bg-red-500/90 hover:bg-red-500 text-white";
+          toggleBtn.textContent = "Pause Orders";
+          showToast("Kitchen is now OPEN LIVE!");
+        } else {
+          card.className = "apple-card rounded-2xl px-4 py-3.5 sm:px-5 border border-red-500/35 bg-red-950/10 flex flex-col lg:flex-row lg:items-center justify-between gap-3 transition";
+          iconWrap.className = "w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 flex items-center justify-center shrink-0";
+          dot.className = "w-2.5 h-2.5 rounded-full bg-red-400";
+          badge.className = "text-red-400";
+          badge.textContent = "Paused / Closed";
+          subtext.innerHTML = `Checkout shows: <strong class="text-zinc-200">"${closedReason} — opens at ${reopenTime}"</strong>`;
+          toggleBtn.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition active:scale-95 shrink-0 bg-emerald-400 hover:bg-emerald-300 text-black";
+          toggleBtn.textContent = "Open Kitchen Now";
+          showToast(toggleState ? `Orders paused until ${reopenTime}` : `Reopen time saved: ${reopenTime}`);
+        }
+      } catch (e) {
+        showToast("Failed to update shop status", true);
+      } finally {
+        if (toggleBtn) toggleBtn.disabled = false;
+      }
     }
 
     function openTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => {
-        b.className = "tab-btn shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-left text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-between gap-2.5";
+        b.className = "tab-btn shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-semibold text-left text-zinc-400 hover:text-white hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5";
         const badge = b.querySelector('.tab-count');
         if (badge && badge.dataset.default) {
           badge.className = badge.dataset.default;
@@ -714,8 +1009,8 @@
       });
 
       document.getElementById(tabId).classList.add('active');
-      btn.className = "tab-btn active shrink-0 px-4 py-3 rounded-xl text-xs sm:text-sm font-black text-left bg-yellow-400 text-black flex items-center justify-between gap-2.5 transition";
-      
+      btn.className = "tab-btn active shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-black text-left bg-yellow-400 text-black flex items-center justify-between gap-2.5 transition";
+
       const activeBadge = btn.querySelector('.tab-count');
       if (activeBadge) {
         activeBadge.className = "tab-count px-2 py-0.5 rounded-md text-[10px] font-black bg-black/15 text-black";
@@ -724,7 +1019,7 @@
       if (tabId === 'tab-history') applyOwnerHistoryFilters();
     }
 
-   // Customer Member Tier & Search Filtering (OTM Premium / Normal / New)
+    // Customer Member Tier & Search Filtering
     function setCustTierFilter(tier, btn) {
       custTierFilter = tier;
       document.querySelectorAll('.cust-tier-btn').forEach(b => {
@@ -833,21 +1128,131 @@
       document.getElementById('ownerNoMatchBox').classList.toggle('hidden', visible > 0 || document.querySelectorAll('.owner-hist-row').length === 0);
     }
 
-    // Revenue Chart + Veg/Non-Veg Split + Top Dishes Leaderboard
-    const rawData = JSON.parse('{{ orders_json|escapejs|default:"[]" }}');
+    // Safe JSON Parsing for Revenue Chart & Unified Closing Settlement
+    let rawData = [];
+    try {
+      const jsonEl = document.getElementById('otm-orders-data');
+      rawData = JSON.parse(jsonEl ? jsonEl.textContent : '[]');
+      if (!Array.isArray(rawData)) rawData = [];
+    } catch (err) {
+      console.error('Failed to parse orders_json:', err);
+      rawData = [];
+    }
+
     let chartInstance = null;
+    let settlementScope = 'TODAY';
+    let lastFilteredOrders = [];
+
+    function getScopedClosingStats() {
+      const source = settlementScope === 'TODAY'
+        ? rawData.filter(o => o.date === TODAY_STR || o.updated_date === TODAY_STR)
+        : lastFilteredOrders;
+
+      let totalSales = 0;
+      let totalCash = 0;
+      let totalUpi = 0;
+      const byRider = {};
+
+      source.forEach(o => {
+        const rider = o.rider || 'Counter / Pickup';
+        const mode = (o.payment_mode || '').toUpperCase() === 'UPI' ? 'UPI' : 'CASH';
+        const amt = parseFloat(o.amount || 0);
+
+        totalSales += amt;
+        if (!byRider[rider]) byRider[rider] = { drops: 0, cash: 0, upi: 0, total: 0 };
+        byRider[rider].drops += 1;
+        byRider[rider].total += amt;
+
+        if (mode === 'UPI') {
+          totalUpi += amt;
+          byRider[rider].upi += amt;
+        } else {
+          totalCash += amt;
+          byRider[rider].cash += amt;
+        }
+      });
+
+      return { count: source.length, totalSales, totalCash, totalUpi, byRider };
+    }
+
+    function setSettlementScope(scope) {
+      settlementScope = scope;
+      document.getElementById('settle-today').className = scope === 'TODAY'
+        ? "px-3 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition"
+        : "px-3 py-1.5 rounded-lg text-[11px] font-semibold text-zinc-400 hover:text-white transition";
+      document.getElementById('settle-period').className = scope === 'PERIOD'
+        ? "px-3 py-1.5 rounded-lg text-[11px] font-black bg-yellow-400 text-black transition"
+        : "px-3 py-1.5 rounded-lg text-[11px] font-semibold text-zinc-400 hover:text-white transition";
+      renderRiderSettlement();
+    }
+
+    function renderRiderSettlement() {
+      const stats = getScopedClosingStats();
+
+      document.getElementById('eodTotalSales').textContent = `₹${Math.round(stats.totalSales).toLocaleString('en-IN')}`;
+      document.getElementById('eodDeliveredCount').textContent = `${stats.count} delivered order${stats.count === 1 ? '' : 's'}`;
+      document.getElementById('eodTotalCash').textContent = `₹${Math.round(stats.totalCash).toLocaleString('en-IN')}`;
+      document.getElementById('eodTotalUpi').textContent = `₹${Math.round(stats.totalUpi).toLocaleString('en-IN')}`;
+
+      const tbody = document.getElementById('riderSettlementBody');
+      const rows = Object.entries(stats.byRider).sort((a, b) => b[1].cash - a[1].cash);
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-xs font-semibold text-zinc-500">No delivered orders in this timeframe yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(([rider, s]) => `
+        <tr class="hover:bg-white/[0.02] transition">
+          <td class="px-4 py-3 font-bold text-white">${rider}</td>
+          <td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-md bg-white/[0.06] text-zinc-200 font-bold text-xs">${s.drops}</span></td>
+          <td class="px-4 py-3 text-right font-black text-emerald-400">₹${Math.round(s.cash).toLocaleString('en-IN')}</td>
+          <td class="px-4 py-3 text-right font-bold text-sky-400">₹${Math.round(s.upi).toLocaleString('en-IN')}</td>
+          <td class="px-4 py-3 text-right font-black text-yellow-400">₹${Math.round(s.total).toLocaleString('en-IN')}</td>
+        </tr>
+      `).join('');
+    }
+
+    function sendDailyClosingWhatsApp() {
+      const stats = getScopedClosingStats();
+      const scopeTitle = settlementScope === 'TODAY' ? `TODAY (${TODAY_STR})` : 'SELECTED PERIOD';
+      const lines = [
+        `*OVER THE MOON — CLOSING REPORT (${scopeTitle})*`,
+        `Chef Ubedulla Mansuri | Khamasa Kitchen`,
+        `--------------------------------`,
+        `Total Sales: Rs.${Math.round(stats.totalSales).toLocaleString('en-IN')} (${stats.count} orders)`,
+        `Physical Cash: Rs.${Math.round(stats.totalCash).toLocaleString('en-IN')}`,
+        `UPI / Online: Rs.${Math.round(stats.totalUpi).toLocaleString('en-IN')}`,
+        `Cancelled Today: ${TODAY_CANCELLED_COUNT} (Rs.${Math.round(TODAY_CANCELLED_VALUE).toLocaleString('en-IN')})`,
+        `--------------------------------`,
+        `*Cash Collected Per Rider:*`
+      ];
+
+      const entries = Object.entries(stats.byRider).sort((a, b) => b[1].cash - a[1].cash);
+      if (entries.length === 0) {
+        lines.push(`• No delivered orders recorded`);
+      } else {
+        entries.forEach(([rider, r]) => {
+          lines.push(`• ${rider} (${r.drops} drops): Cash Rs.${Math.round(r.cash)} | UPI Rs.${Math.round(r.upi)}`);
+        });
+      }
+
+      window.open(`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener,noreferrer');
+    }
 
     function filterData(days) {
       [7, 15, 30].forEach(d => {
         document.getElementById(`flt-${d}`).className = d === days
-          ? "px-4 py-2 rounded-lg text-xs font-black bg-yellow-400 text-black transition"
-          : "px-4 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition";
+          ? "px-3.5 py-1.5 rounded-lg text-xs font-black bg-yellow-400 text-black transition"
+          : "px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition";
       });
 
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - days);
 
       const filtered = rawData.filter(o => new Date(o.date) >= cutoff);
+      lastFilteredOrders = filtered;
+      renderRiderSettlement();
 
       let revenue = 0;
       let orderCount = filtered.length;
@@ -887,7 +1292,7 @@
 
       const topListEl = document.getElementById('topDishesList');
       if (sortedItems.length === 0) {
-        topListEl.innerHTML = `<div class="text-xs font-bold text-zinc-500 py-8 text-center">No completed dish sales in this timeframe yet.</div>`;
+        topListEl.innerHTML = `<div class="text-xs font-semibold text-zinc-500 py-8 text-center">No completed dish sales in this timeframe yet.</div>`;
       } else {
         const topFive = sortedItems.slice(0, 5);
         const maxVal = topFive[0][1].qty || 1;
@@ -896,14 +1301,14 @@
           const iconRef = info.is_veg ? '#veg-mark' : '#nonveg-mark';
           return `
             <div class="space-y-1.5">
-              <div class="flex justify-between items-center text-xs font-extrabold gap-2">
-                <span class="text-white truncate flex items-center gap-1.5">
+              <div class="flex justify-between items-center text-xs font-bold gap-2">
+                <span class="text-zinc-200 truncate flex items-center gap-1.5">
                   <svg class="w-3.5 h-3.5 shrink-0"><use href="${iconRef}"/></svg>
                   <span class="truncate">${idx + 1}. ${name}</span>
                 </span>
                 <span class="text-yellow-400 shrink-0">${info.qty} sold</span>
               </div>
-              <div class="w-full h-2 bg-[#09090C] rounded-full overflow-hidden">
+              <div class="w-full h-1.5 apple-well rounded-full overflow-hidden">
                 <div class="h-full ${info.is_veg ? 'bg-emerald-400' : 'bg-red-400'} rounded-full" style="width:${pct}%"></div>
               </div>
             </div>`;
@@ -924,7 +1329,7 @@
 
       const avgOrder = orderCount > 0 ? Math.round(revenue / orderCount) : 0;
       document.getElementById('stat-rev').innerText = `₹${Math.round(revenue).toLocaleString('en-IN')}`;
-      document.getElementById('stat-aov').innerText = `Avg Order Value: ₹${avgOrder}`;
+      document.getElementById('stat-aov').innerText = `Avg Order: ₹${avgOrder}`;
       document.getElementById('stat-ord').innerText = orderCount;
       document.getElementById('stat-best').innerText = bestItem;
       document.getElementById('stat-peak').innerText = peakHour;
@@ -935,8 +1340,8 @@
       if (chartInstance) chartInstance.destroy();
       const ctx = document.getElementById('revenueChart').getContext('2d');
 
-      let gradient = ctx.createLinearGradient(0, 0, 0, 300);
-      gradient.addColorStop(0, 'rgba(250, 204, 21, 0.35)');
+      let gradient = ctx.createLinearGradient(0, 0, 0, 280);
+      gradient.addColorStop(0, 'rgba(250, 204, 21, 0.28)');
       gradient.addColorStop(1, 'rgba(250, 204, 21, 0.0)');
 
       chartInstance = new Chart(ctx, {
@@ -948,11 +1353,11 @@
             data: amounts.length ? amounts : [0],
             borderColor: '#FACC15',
             backgroundColor: gradient,
-            borderWidth: 3,
-            pointBackgroundColor: '#08080A',
+            borderWidth: 2.5,
+            pointBackgroundColor: '#070709',
             pointBorderColor: '#FACC15',
             pointBorderWidth: 2,
-            pointRadius: 4,
+            pointRadius: 3.5,
             fill: true,
             tension: 0.4
           }]
@@ -962,73 +1367,355 @@
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
-            x: { grid: { display: false }, ticks: { color: '#71717A', font: { family: 'Inter', weight: 'bold' } } },
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false }, ticks: { color: '#71717A', font: { family: 'Inter', weight: 'bold' }, callback: v => '₹' + v } }
+            x: { grid: { display: false }, ticks: { color: '#71717A', font: { family: 'Inter', size: 11, weight: '600' } } },
+            y: { grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false }, ticks: { color: '#71717A', font: { family: 'Inter', size: 11, weight: '600' }, callback: v => '₹' + v } }
           }
         }
       });
+    }
+
+    // Zero-Refresh Stock Toggle
+    async function toggleStock(itemId, btn) {
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/otm-vault-9921/menu/${itemId}/toggle/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        if (!res.ok) throw new Error();
+        const isNowAvailable = btn.dataset.available !== 'true';
+        btn.dataset.available = isNowAvailable ? 'true' : 'false';
+        btn.textContent = isNowAvailable ? 'In Stock' : 'Sold Out';
+        btn.className = isNowAvailable
+          ? "px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-black transition text-center bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+          : "px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-black transition text-center bg-red-500/15 text-red-400 border border-red-500/30";
+        showToast(isNowAvailable ? 'Marked In Stock' : 'Marked Sold Out');
+      } catch (e) {
+        showToast('Failed to update stock', true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Zero-Refresh Veg / Non-Veg Switch
+    async function toggleItemDiet(btn) {
+      const itemId = btn.dataset.id;
+      const itemName = btn.dataset.name;
+      const itemPrice = document.getElementById(`price-${itemId}`)?.value || btn.dataset.price;
+      const nextIsVeg = btn.dataset.nextveg === 'true';
+
+      btn.disabled = true;
+      try {
+        const res = await fetch('/otm-vault-9921/menu/save/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ id: itemId, name: itemName, price: itemPrice, is_veg: nextIsVeg })
+        });
+        if (!res.ok) throw new Error();
+
+        const row = btn.closest('.owner-menu-row');
+        btn.dataset.nextveg = nextIsVeg ? 'false' : 'true';
+        btn.textContent = nextIsVeg ? 'Veg' : 'Non-Veg';
+        btn.className = nextIsVeg
+          ? "diet-toggle-btn px-2.5 py-2 rounded-xl text-[11px] font-extrabold border transition text-center bg-emerald-500/10 text-emerald-400 border-emerald-500/25 hover:bg-emerald-500/20"
+          : "diet-toggle-btn px-2.5 py-2 rounded-xl text-[11px] font-extrabold border transition text-center bg-red-500/10 text-red-400 border-red-500/25 hover:bg-red-500/20";
+
+        if (row) {
+          row.dataset.diet = nextIsVeg ? 'VEG' : 'NONVEG';
+          const useEl = row.querySelector('.diet-svg use');
+          if (useEl) useEl.setAttribute('href', nextIsVeg ? '#veg-mark' : '#nonveg-mark');
+          const lbl = row.querySelector('.diet-label');
+          if (lbl) {
+            lbl.textContent = nextIsVeg ? '• Pure Veg' : '• Non-Veg';
+            lbl.className = nextIsVeg ? "diet-label text-[10px] font-bold text-emerald-400" : "diet-label text-[10px] font-bold text-red-400";
+          }
+        }
+        showToast(`${itemName} switched to ${nextIsVeg ? 'Pure Veg' : 'Non-Veg'}`);
+      } catch (e) {
+        showToast('Failed to switch diet', true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Zero-Refresh Price Save
+    async function updateItemPrice(itemId, itemName, btn) {
+      const newPrice = document.getElementById(`price-${itemId}`).value;
+      if (!newPrice) return;
+      const oldText = btn.textContent;
+      btn.textContent = '...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/otm-vault-9921/menu/save/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ id: itemId, name: itemName, price: newPrice })
+        });
+        if (!res.ok) throw new Error();
+        btn.textContent = 'Saved ✓';
+        btn.className = "px-2.5 sm:px-3 py-2 rounded-xl bg-emerald-500/20 text-xs font-black text-emerald-400 transition text-center";
+        showToast(`${itemName} updated to ₹${newPrice}`);
+        setTimeout(() => {
+          btn.textContent = oldText;
+          btn.className = "px-2.5 sm:px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition text-center";
+        }, 1200);
+      } catch (e) {
+        btn.textContent = oldText;
+        showToast('Failed to save price', true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Zero-Refresh Add New Menu Item
+    async function saveMenuItem() {
+      const dietRadio = document.querySelector('input[name="newItemDiet"]:checked');
+      const payload = {
+        category: document.getElementById('itemCategory').value.trim() || 'Signatures',
+        name: document.getElementById('itemName').value.trim(),
+        price: document.getElementById('itemPrice').value.trim(),
+        image_url: document.getElementById('itemImage').value.trim(),
+        description: document.getElementById('itemDesc').value.trim(),
+        is_veg: dietRadio ? (dietRadio.value === 'true') : true,
+        is_bestseller: document.getElementById('itemBest').checked
+      };
+      if (!payload.name || !payload.price) return showToast('Enter dish name and price.', true);
+
+      try {
+        const res = await fetch('/otm-vault-9921/menu/save/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error();
+
+        const list = document.getElementById('ownerMenuList');
+        const newId = data.id || Date.now();
+        const isVeg = payload.is_veg;
+        const rowHtml = `
+          <div class="owner-menu-row rounded-2xl apple-well border-yellow-400/35 p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+               data-diet="${isVeg ? 'VEG' : 'NONVEG'}"
+               data-search="${payload.name.toLowerCase()} ${payload.category.toLowerCase()}">
+            <div class="flex items-start gap-3 min-w-0">
+              <svg class="diet-svg w-4 h-4 shrink-0 mt-1"><use href="${isVeg ? '#veg-mark' : '#nonveg-mark'}"/></svg>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-[10px] uppercase font-black tracking-widest text-yellow-400">${payload.category}</span>
+                  <span class="diet-label text-[10px] font-bold ${isVeg ? 'text-emerald-400' : 'text-red-400'}">• ${isVeg ? 'Pure Veg' : 'Non-Veg'}</span>
+                </div>
+                <h4 class="font-extrabold text-white text-sm mt-0.5 truncate">${payload.name}</h4>
+              </div>
+            </div>
+            <div class="grid grid-cols-4 sm:flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+              <button type="button" data-id="${newId}" data-name="${payload.name}" data-price="${payload.price}" data-nextveg="${isVeg ? 'false' : 'true'}" onclick="toggleItemDiet(this)"
+                class="diet-toggle-btn px-2.5 py-2 rounded-xl text-[11px] font-extrabold border transition text-center ${isVeg ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' : 'bg-red-500/10 text-red-400 border-red-500/25'}">
+                ${isVeg ? 'Veg' : 'Non-Veg'}
+              </button>
+              <input id="price-${newId}" type="number" value="${payload.price}" class="w-full sm:w-20 bg-zinc-900 border border-white/10 rounded-xl px-2 py-2 text-xs text-white font-bold text-center">
+              <button type="button" data-id="${newId}" data-name="${payload.name}" onclick="updateItemPrice(this.dataset.id, this.dataset.name, this)"
+                class="px-2.5 sm:px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition text-center">Save ₹</button>
+              <button type="button" data-id="${newId}" data-available="true" onclick="toggleStock(this.dataset.id, this)"
+                class="px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-black transition text-center bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">In Stock</button>
+            </div>
+          </div>`;
+        if (list) list.insertAdjacentHTML('afterbegin', rowHtml);
+
+        const countEl = document.getElementById('menuHeaderCount');
+        const navCount = document.getElementById('navMenuCount');
+        if (countEl) countEl.textContent = Number(countEl.textContent) + 1;
+        if (navCount) navCount.textContent = Number(navCount.textContent) + 1;
+
+        ['itemName', 'itemPrice', 'itemImage', 'itemDesc'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('itemBest').checked = false;
+        showToast(`Added "${payload.name}" to live menu!`);
+      } catch (e) {
+        showToast('Could not add dish', true);
+      }
+    }
+
+    // Zero-Refresh Create Coupon
+    async function createCoupon() {
+      const payload = {
+        code: document.getElementById('cpCode').value.trim().toUpperCase(),
+        discount_type: document.getElementById('cpType').value,
+        value: document.getElementById('cpValue').value.trim(),
+        min_order_amount: document.getElementById('cpMin').value || 0,
+        max_discount: document.getElementById('cpMax').value || 100,
+        first_order_only: document.getElementById('cpFirst').checked
+      };
+      if (!payload.code || !payload.value) return showToast('Enter coupon code and value.', true);
+
+      try {
+        const res = await fetch('/otm-vault-9921/coupon/create/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error();
+
+        const emptyMsg = document.getElementById('emptyCouponMsg');
+        if (emptyMsg) emptyMsg.remove();
+
+        const list = document.getElementById('ownerCouponList');
+        const newId = data.id || Date.now();
+        const desc = payload.discount_type === 'FLAT'
+          ? `₹${payload.value} FLAT OFF`
+          : `${payload.value}% OFF (up to ₹${payload.max_discount})`;
+        const cardHtml = `
+          <div class="apple-card rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4 border-yellow-400/35">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h4 class="font-black text-lg text-yellow-400 tracking-wide">${payload.code}</h4>
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-white/5 text-zinc-300">Used 0 times</span>
+              </div>
+              <p class="text-xs font-medium text-zinc-400 mt-1">${desc} on orders above ₹${payload.min_order_amount}</p>
+            </div>
+            <button type="button" data-id="${newId}" data-active="true" onclick="toggleCoupon(this.dataset.id, this)"
+              class="px-4 py-2 rounded-xl text-xs font-black transition bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Active Live</button>
+          </div>`;
+        if (list) list.insertAdjacentHTML('afterbegin', cardHtml);
+
+        const cHeader = document.getElementById('couponHeaderCount');
+        const cNav = document.getElementById('navCouponCount');
+        if (cHeader) cHeader.textContent = Number(cHeader.textContent) + 1;
+        if (cNav) cNav.textContent = Number(cNav.textContent) + 1;
+
+        document.getElementById('cpCode').value = '';
+        document.getElementById('cpValue').value = '';
+        document.getElementById('cpFirst').checked = false;
+        showToast(`Coupon ${payload.code} launched live!`);
+      } catch (e) {
+        showToast('Could not create coupon', true);
+      }
+    }
+
+    // Zero-Refresh Toggle Coupon
+    async function toggleCoupon(couponId, btn) {
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/otm-vault-9921/coupon/${couponId}/toggle/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        if (!res.ok) throw new Error();
+        const isNowActive = btn.dataset.active !== 'true';
+        btn.dataset.active = isNowActive ? 'true' : 'false';
+        btn.textContent = isNowActive ? 'Active Live' : 'Paused';
+        btn.className = isNowActive
+          ? "px-4 py-2 rounded-xl text-xs font-black transition bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+          : "px-4 py-2 rounded-xl text-xs font-black transition bg-zinc-800 text-zinc-500 border border-white/10";
+        showToast(isNowActive ? 'Coupon Activated' : 'Coupon Paused');
+      } catch (e) {
+        showToast('Failed to toggle coupon', true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    // Zero-Refresh Create Rider / Kitchen Staff
+    async function createStaff() {
+      const roleRadio = document.querySelector('input[name="newStaffRole"]:checked');
+      const payload = {
+        role: roleRadio ? roleRadio.value : 'RIDER',
+        username: document.getElementById('staffUsername').value.trim(),
+        password: document.getElementById('staffPassword').value.trim()
+      };
+      if (!payload.username || !payload.password) {
+        return showToast('Enter username and password.', true);
+      }
+
+      const btn = document.getElementById('createStaffBtn');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/otm-vault-9921/staff/create/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          return showToast(data.error || 'Could not create account.', true);
+        }
+
+        const emptyMsg = document.getElementById('emptyStaffMsg');
+        if (emptyMsg) emptyMsg.remove();
+
+        const isRider = data.role === 'RIDER';
+        const initial = data.username.charAt(0).toUpperCase();
+        const rowHtml = `
+          <div id="staff-row-${data.id}" class="apple-card rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4 border-yellow-400/35">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${isRider ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">
+                ${initial}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h4 class="font-black text-white text-sm sm:text-base truncate">${data.username}</h4>
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${isRider ? 'bg-sky-500/15 text-sky-400 border border-sky-500/25' : 'bg-amber-500/15 text-amber-300 border border-amber-500/25'}">
+                    ${isRider ? 'Rider' : 'Kitchen'}
+                  </span>
+                </div>
+                <p class="text-[11px] text-zinc-500 font-medium mt-0.5">Added ${data.joined}</p>
+              </div>
+            </div>
+            <button type="button" data-id="${data.id}" data-name="${data.username}" onclick="deleteStaff(this.dataset.id, this.dataset.name, this)"
+              class="shrink-0 px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 text-xs font-extrabold transition">
+              Delete
+            </button>
+          </div>`;
+
+        document.getElementById('ownerStaffList').insertAdjacentHTML('afterbegin', rowHtml);
+
+        const sHeader = document.getElementById('staffHeaderCount');
+        const sNav = document.getElementById('navStaffCount');
+        if (sHeader) sHeader.textContent = Number(sHeader.textContent) + 1;
+        if (sNav) sNav.textContent = Number(sNav.textContent) + 1;
+
+        document.getElementById('staffUsername').value = '';
+        document.getElementById('staffPassword').value = '';
+        showToast(`${isRider ? 'Rider' : 'Kitchen'} account "${data.username}" created!`);
+      } catch (e) {
+        showToast('Failed to create staff account.', true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Zero-Refresh Delete Rider / Kitchen Staff
+    async function deleteStaff(userId, username, btn) {
+      if (!confirm(`Delete staff account "${username}"? They will immediately lose access.`)) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/otm-vault-9921/staff/${userId}/delete/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          return showToast(data.error || 'Could not delete account.', true);
+        }
+
+        const row = document.getElementById(`staff-row-${userId}`);
+        if (row) row.remove();
+
+        const sHeader = document.getElementById('staffHeaderCount');
+        const sNav = document.getElementById('navStaffCount');
+        if (sHeader) sHeader.textContent = Math.max(0, Number(sHeader.textContent) - 1);
+        if (sNav) sNav.textContent = Math.max(0, Number(sNav.textContent) - 1);
+
+        showToast(`Deleted "${username}"`);
+      } catch (e) {
+        showToast('Failed to delete account.', true);
+        btn.disabled = false;
+      }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       filterData(7);
       applyOwnerHistoryFilters();
     });
-
-    async function toggleStock(itemId) {
-      await fetch(`/otm-vault-9921/menu/${itemId}/toggle/`, { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
-      window.location.reload();
-    }
-
-    async function toggleItemDiet(itemId, itemName, itemPrice, nextIsVeg) {
-      await fetch('/otm-vault-9921/menu/save/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ id: itemId, name: itemName, price: itemPrice, is_veg: nextIsVeg })
-      });
-      window.location.reload();
-    }
-
-    async function updateItemPrice(itemId, itemName) {
-      const newPrice = document.getElementById(`price-${itemId}`).value;
-      await fetch('/otm-vault-9921/menu/save/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ id: itemId, name: itemName, price: newPrice }) });
-      window.location.reload();
-    }
-
-    async function saveMenuItem() {
-      const dietRadio = document.querySelector('input[name="newItemDiet"]:checked');
-      const payload = {
-        category: document.getElementById('itemCategory').value || 'Signatures',
-        name: document.getElementById('itemName').value,
-        price: document.getElementById('itemPrice').value,
-        image_url: document.getElementById('itemImage').value,
-        description: document.getElementById('itemDesc').value,
-        is_veg: dietRadio ? (dietRadio.value === 'true') : true,
-        is_bestseller: document.getElementById('itemBest').checked
-      };
-      if (!payload.name || !payload.price) return alert('Enter dish name and price.');
-      await fetch('/otm-vault-9921/menu/save/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify(payload) });
-      window.location.reload();
-    }
-
-    async function createCoupon() {
-      const payload = {
-        code: document.getElementById('cpCode').value,
-        discount_type: document.getElementById('cpType').value,
-        value: document.getElementById('cpValue').value,
-        min_order_amount: document.getElementById('cpMin').value || 0,
-        max_discount: document.getElementById('cpMax').value || 100,
-        first_order_only: document.getElementById('cpFirst').checked
-      };
-      if (!payload.code || !payload.value) return alert('Enter coupon code and discount value.');
-      await fetch('/otm-vault-9921/coupon/create/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify(payload) });
-      window.location.reload();
-    }
-
-    async function toggleCoupon(couponId) {
-      await fetch(`/otm-vault-9921/coupon/${couponId}/toggle/`, { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
-      window.location.reload();
-    }
   </script>
-  {% csrf_token %}
 </body>
 </html>

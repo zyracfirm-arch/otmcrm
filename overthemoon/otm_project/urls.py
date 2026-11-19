@@ -21,9 +21,12 @@ from core import views
 urlpatterns = [
     # Public Storefront & Live Order Tracker
     path('', views.public_menu, name='public_menu'),
+    path('about/', views.about_page, name='about_page'),
+    
     path('api/validate-coupon/', views.api_validate_coupon, name='validate_coupon'),
     path('api/place-order/', views.api_place_order, name='place_order'),
     path('track/<uuid:token>/', views.track_order, name='track_order'),
+    path('otm-vault-9921/shop-status/', views.api_toggle_shop_status, name='api_toggle_shop_status'),
 
     # One-Time Shop Hardware Lock Activation
     path('otm-device-authorize-9921/', views.activate_shop_device, name='activate_device'),
@@ -43,4 +46,10 @@ urlpatterns = [
 
     path('api/auth/', views.api_customer_auth, name='customer_auth'),
     path('my-orders/', views.customer_dashboard, name='customer_dashboard'),
+
+
+    path('otm-vault-9921/api/kds-poll/', views.api_kds_poll, name='api_kds_poll'),
+
+    path('otm-vault-9921/staff/create/', views.api_create_staff, name='api_create_staff'),
+    path('otm-vault-9921/staff/<int:user_id>/delete/', views.api_delete_staff, name='api_delete_staff'),
 ]

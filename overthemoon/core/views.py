@@ -11,8 +11,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-
-from .models import Category, MenuItem, Customer, Coupon, Order, OrderItem
+from django.db.models import Q
+from django.contrib.auth.models import User, Group
+from .models import Category, MenuItem, Customer, Coupon, Order, OrderItem, ShopSettings
 from .security import shop_device_and_login_required
 
 
@@ -24,12 +25,20 @@ def public_menu(request):
     coupons = Coupon.objects.filter(is_active=True)
     veg_count = MenuItem.objects.filter(is_veg=True, is_available=True).count()
     nonveg_count = MenuItem.objects.filter(is_veg=False, is_available=True).count()
+    shop_settings = ShopSettings.get_solo()
 
     return render(request, 'public_menu.html', {
         'categories': categories,
         'coupons': coupons,
         'veg_count': veg_count,
         'nonveg_count': nonveg_count,
+        'shop_settings': shop_settings,
+    })
+
+def about_page(request):
+    shop_settings = ShopSettings.get_solo()
+    return render(request, 'about.html', {
+        'shop_settings': shop_settings,
     })
 
 
@@ -77,6 +86,14 @@ def api_validate_coupon(request):
 
 @require_POST
 def api_place_order(request):
+    shop_settings = ShopSettings.get_solo()
+    if not shop_settings.is_open:
+        return JsonResponse({
+            'success': False,
+            'shop_closed': True,
+            'error': f"{shop_settings.closed_reason or 'Kitchen is resting'} — opens at {shop_settings.reopen_time}."
+        }, status=400)
+        
     if not request.user.is_authenticated or request.user.is_staff:
         return JsonResponse({
             'success': False,
@@ -309,49 +326,80 @@ def delivery_dashboard(request):
 def api_update_order_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     try:
-        new_status = json.loads(request.body).get('status')
+        data = json.loads(request.body or '{}')
     except Exception:
         return JsonResponse({'success': False, 'error': 'Invalid payload'}, status=400)
-    
+
+    new_status = data.get('status')
+    payment_mode = (data.get('payment_mode') or '').strip().upper()
+
     valid_keys = dict(Order.STATUS_CHOICES).keys()
     if new_status == 'PREPARING' and 'PREP' in valid_keys:
         new_status = 'PREP'
     elif new_status == 'CANCEL' and 'CANCELLED' in valid_keys:
         new_status = 'CANCELLED'
 
+    update_fields = ['updated_at']
+
     if new_status in valid_keys:
         order.status = new_status
-        order.save(update_fields=['status', 'updated_at'])
-    return JsonResponse({'success': True, 'status': order.status})
+        update_fields.append('status')
+
+    if payment_mode in ['CASH', 'UPI', 'UNPAID']:
+        order.payment_mode = payment_mode
+        update_fields.append('payment_mode')
+
+    if len(update_fields) > 1:
+        order.save(update_fields=update_fields)
+
+    return JsonResponse({
+        'success': True,
+        'status': order.status,
+        'payment_mode': getattr(order, 'payment_mode', 'UNPAID'),
+    })
 
 
 @shop_device_and_login_required(owner_only=True)
 def crm_owner_portal(request):
     today = timezone.now()
-    today_date = timezone.localdate()
+    local_today = timezone.localtime(today)
+    today_str = local_today.strftime('%Y-%m-%d')
     thirty_days_ago = today - timedelta(days=30)
-    
+
     done_orders = Order.objects.filter(
-        status='DONE',
-        created_at__gte=thirty_days_ago
-    ).prefetch_related('items')
-    
+        Q(status='DONE') & (Q(created_at__gte=thirty_days_ago) | Q(updated_at__gte=thirty_days_ago))
+    ).select_related('delivery_boy').prefetch_related('items')
+
     orders_data = []
     for o in done_orders:
+        created_local = timezone.localtime(o.created_at)
+        updated_local = timezone.localtime(o.updated_at) if o.updated_at else created_local
+        raw_mode = (getattr(o, 'payment_mode', '') or 'CASH').strip().upper()
+        normalized_mode = 'UPI' if raw_mode == 'UPI' else 'CASH'
+
         orders_data.append({
-            'date': timezone.localtime(o.created_at).strftime('%Y-%m-%d'),
-            'hour': timezone.localtime(o.created_at).hour,
+            'date': created_local.strftime('%Y-%m-%d'),
+            'updated_date': updated_local.strftime('%Y-%m-%d'),
+            'hour': created_local.hour,
             'amount': float(o.total_amount),
+            'rider': o.delivery_boy.username.title() if o.delivery_boy else 'Counter / Pickup',
+            'payment_mode': normalized_mode,
             'items': [
                 {
                     'name': i.item_name,
                     'qty': i.quantity,
                     'price': float(i.unit_price),
-                    'is_veg': getattr(i, 'is_veg', True),
+                    'is_veg': getattr(i, 'is_veg', getattr(getattr(i, 'menu_item', None), 'is_veg', True)),
                 }
                 for i in o.items.all()
             ]
         })
+
+    today_cancelled_qs = Order.objects.filter(
+        Q(status='CANCELLED') & (Q(updated_at__date=local_today) | Q(created_at__date=local_today))
+    )
+    today_cancelled_count = today_cancelled_qs.count()
+    today_cancelled_value = sum(float(o.total_amount) for o in today_cancelled_qs)
 
     all_history = Order.objects.select_related('delivery_boy', 'customer').prefetch_related('items').order_by('-created_at')[:1000]
     customers = Customer.objects.order_by('-total_spent', '-total_orders')
@@ -360,10 +408,25 @@ def crm_owner_portal(request):
     normal_count = Customer.objects.filter(total_spent__lt=Decimal('5000.00'), total_orders__gte=2).count()
     new_member_count = Customer.objects.filter(total_spent__lt=Decimal('5000.00'), total_orders__lte=1).count()
 
+    # Fetch Riders & Kitchen Staff (exclude owner/superusers)
+    staff_users = User.objects.filter(is_staff=True, is_superuser=False).prefetch_related('groups').order_by('-date_joined')
+    staff_members = []
+    for u in staff_users:
+        group_names = [g.name.lower() for g in u.groups.all()]
+        role = 'RIDER' if ('rider' in group_names or 'delivery' in group_names) else 'KITCHEN'
+        staff_members.append({
+            'id': u.id,
+            'username': u.username,
+            'role': role,
+            'joined': timezone.localtime(u.date_joined).strftime('%d %b %Y'),
+        })
+
     return render(request, 'crm_owner.html', {
         'orders_json': json.dumps(orders_data),
         'all_history': all_history,
-        'today_str': today_date.strftime('%Y-%m-%d'),
+        'today_str': today_str,
+        'today_cancelled_count': today_cancelled_count,
+        'today_cancelled_value': round(today_cancelled_value),
         'customers': customers,
         'premium_count': premium_count,
         'normal_count': normal_count,
@@ -371,8 +434,86 @@ def crm_owner_portal(request):
         'menu_items': MenuItem.objects.select_related('category').all(),
         'categories': Category.objects.all(),
         'coupons': Coupon.objects.all(),
+        'shop_settings': ShopSettings.get_solo(),
+        'staff_members': staff_members,
     })
 
+
+@shop_device_and_login_required(owner_only=True)
+@require_POST
+def api_create_staff(request):
+    try:
+        data = json.loads(request.body or '{}')
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid payload'}, status=400)
+
+    username = (data.get('username') or '').strip()
+    password = (data.get('password') or '').strip()
+    role = (data.get('role') or 'RIDER').strip().upper()
+
+    if not username or not password:
+        return JsonResponse({'success': False, 'error': 'Username and password are required.'}, status=400)
+    if len(password) < 4:
+        return JsonResponse({'success': False, 'error': 'Password must be at least 4 characters.'}, status=400)
+    if User.objects.filter(username__iexact=username).exists():
+        return JsonResponse({'success': False, 'error': 'That username already exists.'}, status=400)
+
+    user = User.objects.create_user(username=username, password=password)
+    user.is_staff = True
+    user.is_superuser = False
+    user.save()
+
+    group_name = 'Rider' if role == 'RIDER' else 'Kitchen'
+    group, _ = Group.objects.get_or_create(name=group_name)
+    user.groups.add(group)
+
+    return JsonResponse({
+        'success': True,
+        'id': user.id,
+        'username': user.username,
+        'role': 'RIDER' if role == 'RIDER' else 'KITCHEN',
+        'joined': timezone.localtime(user.date_joined).strftime('%d %b %Y'),
+    })
+
+
+@shop_device_and_login_required(owner_only=True)
+@require_POST
+def api_delete_staff(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if user.is_superuser or user.id == request.user.id:
+        return JsonResponse({'success': False, 'error': 'Cannot delete owner account.'}, status=403)
+
+    user.delete()
+    return JsonResponse({'success': True})
+
+
+@shop_device_and_login_required(owner_only=True)
+@require_POST
+def api_toggle_shop_status(request):
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        data = {}
+
+    shop = ShopSettings.get_solo()
+    if 'is_open' in data:
+        shop.is_open = bool(data['is_open'])
+    else:
+        shop.is_open = not shop.is_open
+
+    if 'reopen_time' in data and str(data['reopen_time']).strip():
+        shop.reopen_time = str(data['reopen_time']).strip()[:50]
+
+    if 'closed_reason' in data and str(data['closed_reason']).strip():
+        shop.closed_reason = str(data['closed_reason']).strip()[:120]
+
+    shop.save()
+    return JsonResponse({
+        'success': True,
+        'is_open': shop.is_open,
+        'reopen_time': shop.reopen_time,
+        'closed_reason': shop.closed_reason,
+    })
 
 @shop_device_and_login_required(owner_only=True)
 @require_POST
@@ -538,3 +679,15 @@ def customer_dashboard(request):
     )
     orders = Order.objects.filter(customer=customer).prefetch_related('items').order_by('-created_at')
     return render(request, 'customer_dashboard.html', {'orders': orders})
+
+
+
+@shop_device_and_login_required(owner_only=False)
+def api_kds_poll(request):
+    live_orders = Order.objects.exclude(status__in=['DONE', 'CANCELLED'])
+    latest_id = live_orders.order_by('-id').values_list('id', flat=True).first() or 0
+    return JsonResponse({
+        'latest_id': latest_id,
+        'new_count': live_orders.filter(status='NEW').count(),
+        'live_count': live_orders.count(),
+    })
