@@ -49,6 +49,10 @@ class Customer(models.Model):
     total_spent = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     last_order_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    auth_hash = models.CharField(max_length=128, blank=True, default='')       # Hashed password or 6-digit OTP
+    otp_expires_at = models.DateTimeField(null=True, blank=True)               # 5-minute expiry for OTP
+    failed_attempts = models.PositiveSmallIntegerField(default=0)              # Brute-force counter
+    locked_until = models.DateTimeField(null=True, blank=True)                 # 15-min lockout timestamp
 
     def __str__(self):
         return f"{self.name} ({self.phone})"

@@ -28,7 +28,7 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* Appetizing Warm Amber Glow (Fast-Food Hunger Psychology) */
+    /* Appetizing Warm Amber Glow */
     .hunger-glow {
       background:
         radial-gradient(circle at 50% -8%, rgba(250, 204, 21, 0.14), rgba(249, 115, 22, 0.04) 44%, transparent 74%),
@@ -36,7 +36,7 @@
     }
 
     .nav-surface {
-      background: rgba(11, 11, 14, 0.90);
+      background: rgba(11, 11, 14, 0.92);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-bottom: 1px solid var(--border-subtle);
@@ -58,7 +58,7 @@
     }
     .qsr-card.premium-card {
       border-color: rgba(250, 204, 21, 0.38);
-      background: linear-gradient(145deg, rgba(250, 204, 21, 0.07) 0%, #111115 65%);
+      background: linear-gradient(145deg, rgba(250, 204, 21, 0.08) 0%, #111115 65%);
       box-shadow: 0 1px 0 0 rgba(250, 204, 21, 0.2) inset, 0 18px 36px -14px rgba(250, 204, 21, 0.14);
     }
 
@@ -87,7 +87,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen pb-16 selection:bg-yellow-400 selection:text-black relative overflow-x-hidden">
+<body class="min-h-screen pb-24 sm:pb-16 selection:bg-yellow-400 selection:text-black relative overflow-x-hidden">
 
   <!-- Reusable Brand + FSSAI Pure Veg & Non-Veg SVG Symbols -->
   <svg class="hidden" aria-hidden="true">
@@ -125,165 +125,176 @@
 
   <div class="fixed inset-0 hunger-glow pointer-events-none -z-10"></div>
 
-  <!-- Sticky Member Header -->
+  <!-- Sticky Member Header (Compact & No-Wrap on Mobile) -->
   <header class="sticky top-0 z-30 nav-surface">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
-      <a href="{% url 'public_menu' %}" class="flex items-center gap-3 group">
-        <div class="astro-badge w-11 h-11 rounded-xl overflow-hidden shrink-0 border-2 {% if request.user.customer_profile.total_spent >= 5000 %}border-yellow-400 shadow-[0_0_16px_rgba(250,204,21,0.45)]{% else %}border-yellow-400/50 shadow-md{% endif %}">
+    <div class="max-w-5xl mx-auto px-3.5 sm:px-6 py-3 flex items-center justify-between gap-2.5">
+      <a href="{% url 'public_menu' %}" class="flex items-center gap-2.5 sm:gap-3 min-w-0 group">
+        <div class="astro-badge w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden shrink-0 border-2 {% if request.user.customer_profile.total_spent >= 5000 %}border-yellow-400 shadow-[0_0_16px_rgba(250,204,21,0.45)]{% else %}border-yellow-400/50 shadow-md{% endif %}">
           <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
         </div>
-        <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-yellow-400">Over The Moon Member</span>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-yellow-400 truncate">OTM Member</span>
             {% if request.user.customer_profile.total_spent >= 5000 %}
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-yellow-400 text-black text-[10px] font-black uppercase tracking-wide shadow-sm">
-              <svg class="w-3 h-3 rounded-sm"><use href="#otm-astronaut"/></svg>
-              <span>OTM Premium</span>
+            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-yellow-400 text-black text-[9px] font-black uppercase tracking-wide shrink-0">
+              <span>★ Premium</span>
             </span>
             {% endif %}
           </div>
-          <h1 class="text-base sm:text-lg font-black text-white tracking-tight leading-none mt-1">
+          <h1 class="text-sm sm:text-lg font-black text-white tracking-tight leading-tight truncate mt-0.5">
             {{ request.user.customer_profile.name|default:"Valued Guest" }}
           </h1>
-          <p class="text-[11px] text-zinc-400 font-medium mt-0.5">+91 {{ request.user.customer_profile.phone }}</p>
+          <p class="text-[10px] sm:text-[11px] text-zinc-400 font-medium truncate">+91 {{ request.user.customer_profile.phone }}</p>
         </div>
       </a>
 
-      <div class="flex items-center gap-2">
-        <a href="{% url 'public_menu' %}" class="px-4 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xs rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-yellow-400/15 active:scale-95">
-          <span>+ Craving More?</span>
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <a href="{% url 'public_menu' %}" class="px-3 sm:px-4 py-2 sm:py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xs rounded-xl transition flex items-center gap-1 shadow-lg shadow-yellow-400/15 active:scale-95 whitespace-nowrap">
+          <span class="sm:hidden">+ Order</span>
+          <span class="hidden sm:inline">+ Craving More?</span>
         </a>
-        <a href="{% url 'crm_logout' %}" class="px-3 py-2.5 rounded-xl bg-white/[0.05] hover:bg-red-500/15 text-zinc-400 hover:text-red-400 border border-white/[0.08] text-xs font-semibold transition" title="Sign Out">
-          Sign Out
+        <a href="{% url 'crm_logout' %}" class="p-2 sm:px-3 sm:py-2.5 rounded-xl bg-white/[0.05] hover:bg-red-500/15 text-zinc-400 hover:text-red-400 border border-white/[0.08] text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap" title="Sign Out">
+          <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
+          <span class="hidden sm:inline">Sign Out</span>
         </a>
       </div>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+  <main class="max-w-5xl mx-auto px-3.5 sm:px-6 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
 
-    <!-- Member Meals Count, Premium/Perks Status & Doorstep Strip (Zero Spending Guilt) -->
-    <section class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+    <!-- Responsive Bento Strip: 2-Col Compact on Mobile, 3-Col on Desktop -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
       <!-- Hot Meals Count -->
-      <div class="qsr-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+      <div class="qsr-card rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between">
         <div>
-          <span class="text-[11px] font-semibold text-zinc-400 block">Hot Meals Ordered</span>
-          <p class="text-2xl font-black text-white mt-0.5">{{ orders|length }}</p>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-zinc-400 block">Hot Meals Ordered</span>
+          <p class="text-2xl sm:text-3xl font-black text-white mt-0.5 leading-none">{{ orders|length }}</p>
         </div>
-        <span class="mt-3 text-[11px] text-yellow-400 font-semibold block">Flame-Grilled Fresh in Khamasa</span>
+        <span class="mt-2.5 sm:mt-3 text-[10px] sm:text-[11px] text-yellow-400 font-semibold block leading-snug">
+          Flame-Grilled in Khamasa
+        </span>
       </div>
 
-      <!-- Silent ₹5,000+ Premium Astronaut Badge OR Member Perks Card (No ₹ Spent Displayed) -->
+      <!-- Silent ₹5,000+ Premium Astronaut Badge OR Member Perks Card -->
       {% if request.user.customer_profile.total_spent >= 5000 %}
-      <div class="qsr-card premium-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-xl overflow-hidden border-2 border-yellow-400 shrink-0 shadow-[0_0_16px_rgba(250,204,21,0.35)]">
+      <div class="qsr-card premium-card rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between">
+        <div class="flex items-start sm:items-center gap-2 sm:gap-3">
+          <div class="w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl overflow-hidden border border-yellow-400 shrink-0 shadow-[0_0_12px_rgba(250,204,21,0.3)]">
             <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
           </div>
-          <div>
-            <span class="px-2 py-0.5 rounded bg-yellow-400 text-black text-[9px] font-black uppercase tracking-wider">Unlocked</span>
-            <p class="text-sm font-black text-white mt-1 leading-tight">OTM Astronaut Premium</p>
+          <div class="min-w-0">
+            <span class="px-1.5 py-0.5 rounded bg-yellow-400 text-black text-[8px] sm:text-[9px] font-black uppercase tracking-wider inline-block">Unlocked</span>
+            <p class="text-xs sm:text-sm font-black text-white mt-0.5 leading-tight">OTM Premium</p>
           </div>
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-yellow-400">
-          <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span>
-          <span>Priority Grill Queue & Free Delivery</span>
+        <div class="mt-2.5 sm:mt-3 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-yellow-400 leading-snug">
+          <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse shrink-0"></span>
+          <span class="truncate">Priority Queue & Free Delivery</span>
         </div>
       </div>
       {% else %}
-      <div class="qsr-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+      <div class="qsr-card rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between">
         <div>
-          <span class="text-[11px] font-semibold text-zinc-400 block">Kitchen & Delivery Perks</span>
-          <p class="text-base sm:text-lg font-black text-emerald-400 mt-1">₹0 Delivery Fee</p>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-zinc-400 block">Member Perks</span>
+          <p class="text-base sm:text-lg font-black text-emerald-400 mt-0.5">₹0 Delivery</p>
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          <span>Separate Veg & Non-Veg Grills</span>
+        <div class="mt-2.5 sm:mt-3 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold text-zinc-400 leading-snug">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+          <span class="truncate">Separate Veg & Non-Veg Grills</span>
         </div>
       </div>
       {% endif %}
 
-      <!-- Saved Delivery Doorstep -->
-      <div class="qsr-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-        <div>
-          <span class="text-[11px] font-semibold text-zinc-400 block">Saved Delivery Doorstep</span>
-          <p class="text-xs font-semibold text-zinc-200 mt-1.5 line-clamp-2 leading-relaxed">
+      <!-- Saved Delivery Doorstep (Full-width sleek bar on mobile, 3rd col on desktop) -->
+      <div class="col-span-2 sm:col-span-1 qsr-card rounded-2xl p-3.5 sm:p-5 flex sm:flex-col items-center sm:items-start justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] sm:text-[11px] font-semibold text-zinc-400">Saved Doorstep</span>
+            <span class="sm:hidden text-[9px] font-bold uppercase tracking-wider text-yellow-400/90">• Khamasa Express</span>
+          </div>
+          <p class="text-xs font-semibold text-zinc-200 mt-1 line-clamp-1 sm:line-clamp-2 leading-relaxed">
             {{ request.user.customer_profile.address|default:"Saved automatically on your next home delivery order." }}
           </p>
         </div>
-        <span class="mt-2 text-[10px] font-bold uppercase tracking-wider text-yellow-400/90">
+        <span class="hidden sm:block mt-2 text-[10px] font-bold uppercase tracking-wider text-yellow-400/90">
           Khamasa Express Zone
         </span>
       </div>
     </section>
 
     <!-- Filter Tabs & Instant Search -->
-    <section class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.07] pb-3.5">
-      <div class="flex items-center gap-1 p-1 bg-[#09090C] rounded-xl border border-white/[0.07] overflow-x-auto no-scrollbar w-full md:w-auto">
-        <button type="button" onclick="filterOrders('ALL', this)" class="ord-tab shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-yellow-400 text-black transition">
-          All ({{ orders|length }})
-        </button>
-        <button type="button" onclick="filterOrders('ACTIVE', this)" class="ord-tab shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-ping"></span>
-          <span>Live Kitchen</span>
-        </button>
-        <button type="button" onclick="filterOrders('PAST', this)" class="ord-tab shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition">
-          Past Meals
-        </button>
-        <button type="button" onclick="filterOrders('VEG_ONLY', this)" class="ord-tab shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold text-emerald-400 hover:text-emerald-300 transition flex items-center gap-1">
-          <svg class="w-3 h-3"><use href="#veg-mark"/></svg>
-          <span>Pure Veg</span>
-        </button>
-        <button type="button" onclick="filterOrders('HAS_NONVEG', this)" class="ord-tab shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold text-red-400 hover:text-red-300 transition flex items-center gap-1">
-          <svg class="w-3 h-3"><use href="#nonveg-mark"/></svg>
-          <span>Non-Veg</span>
-        </button>
+    <section class="flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/[0.07] pb-3.5">
+      <div class="relative w-full md:w-auto">
+        <div class="flex items-center gap-1 p-1 bg-[#09090C] rounded-xl border border-white/[0.07] overflow-x-auto no-scrollbar">
+          <button type="button" onclick="filterOrders('ALL', this)" class="ord-tab shrink-0 whitespace-nowrap px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold bg-yellow-400 text-black transition">
+            All ({{ orders|length }})
+          </button>
+          <button type="button" onclick="filterOrders('ACTIVE', this)" class="ord-tab shrink-0 whitespace-nowrap px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-ping"></span>
+            <span>Live Kitchen</span>
+          </button>
+          <button type="button" onclick="filterOrders('PAST', this)" class="ord-tab shrink-0 whitespace-nowrap px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition">
+            Past Meals
+          </button>
+          <button type="button" onclick="filterOrders('VEG_ONLY', this)" class="ord-tab shrink-0 whitespace-nowrap px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold text-emerald-400 hover:text-emerald-300 transition flex items-center gap-1">
+            <svg class="w-3 h-3"><use href="#veg-mark"/></svg>
+            <span>Pure Veg</span>
+          </button>
+          <button type="button" onclick="filterOrders('HAS_NONVEG', this)" class="ord-tab shrink-0 whitespace-nowrap px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold text-red-400 hover:text-red-300 transition flex items-center gap-1">
+            <svg class="w-3 h-3"><use href="#nonveg-mark"/></svg>
+            <span>Non-Veg</span>
+          </button>
+        </div>
       </div>
 
       <div class="relative w-full md:w-64">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         <input id="orderSearch" oninput="applyOrderFilters()" type="text" placeholder="Search chicken, paneer, or order ID..."
-          class="pos-input w-full rounded-xl pl-9 pr-3.5 py-2 text-xs text-white placeholder-zinc-500">
+          class="pos-input w-full rounded-xl pl-9 pr-3.5 py-2.5 sm:py-2 text-xs text-white placeholder-zinc-500">
       </div>
     </section>
 
     <!-- Orders Feed -->
-    <section class="space-y-4">
+    <section class="space-y-3.5 sm:space-y-4">
       {% for o in orders %}
-      <div class="order-card qsr-card {% if o.status != 'DONE' and o.status != 'CANCELLED' %}live-order{% endif %} rounded-2xl p-5"
+      <div class="order-card qsr-card {% if o.status != 'DONE' and o.status != 'CANCELLED' %}live-order{% endif %} rounded-2xl p-4 sm:p-5"
            data-group="{% if o.status != 'DONE' and o.status != 'CANCELLED' %}ACTIVE{% else %}PAST{% endif %}"
            data-diets="{% for item in o.items.all %}{% if item.is_veg %}VEG {% else %}NONVEG {% endif %}{% endfor %}"
            data-search="{{ o.order_number|lower }} {% for item in o.items.all %}{{ item.item_name|lower }} {% endfor %}">
 
-        <!-- Top Order Bar -->
-        <div class="flex flex-wrap items-start justify-between gap-3 pb-3.5 border-b border-white/[0.07]">
-          <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-base font-black text-white tracking-tight">{{ o.order_number }}</span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-white/[0.06] text-zinc-300">{{ o.order_type }}</span>
-              <span class="card-diet-pill hidden px-2 py-0.5 rounded text-[10px] font-extrabold uppercase"></span>
-              {% if o.coupon_code %}
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
-                Saved ₹{{ o.discount_amount|floatformat:0 }} ({{ o.coupon_code }})
-              </span>
-              {% endif %}
+        <!-- Top Order Bar (Clean Mobile Alignment) -->
+        <div class="pb-3 border-b border-white/[0.07] space-y-2">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <span class="text-sm sm:text-base font-black text-white tracking-tight block truncate">{{ o.order_number }}</span>
+              <p class="text-[11px] font-medium text-zinc-400 mt-0.5">{{ o.created_at|date:"d M Y • h:i A" }}</p>
             </div>
-            <p class="text-xs font-medium text-zinc-400 mt-1">{{ o.created_at|date:"d M Y • h:i A" }}</p>
+
+            <span class="shrink-0 px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-extrabold rounded-lg uppercase tracking-wide
+              {% if o.status == 'DONE' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/25
+              {% elif o.status == 'CANCELLED' %}bg-red-500/10 text-red-400 border border-red-500/25
+              {% else %}bg-yellow-400 text-black{% endif %}">
+              {{ o.get_status_display }}
+            </span>
           </div>
 
-          <span class="px-3 py-1 text-[11px] font-extrabold rounded-lg uppercase tracking-wide
-            {% if o.status == 'DONE' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/25
-            {% elif o.status == 'CANCELLED' %}bg-red-500/10 text-red-400 border border-red-500/25
-            {% else %}bg-yellow-400 text-black{% endif %}">
-            {{ o.get_status_display }}
-          </span>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-white/[0.06] text-zinc-300">{{ o.order_type }}</span>
+            <span class="card-diet-pill hidden px-2 py-0.5 rounded text-[10px] font-extrabold uppercase"></span>
+            {% if o.coupon_code %}
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+              Saved ₹{{ o.discount_amount|floatformat:0 }} ({{ o.coupon_code }})
+            </span>
+            {% endif %}
+          </div>
         </div>
 
-        <!-- Ordered Items With FSSAI Veg/Non-Veg Marks & Order Bill -->
-        <div class="py-3.5 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <!-- Ordered Items & Bill Summary -->
+        <div class="py-3 sm:py-3.5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-center">
           <div class="md:col-span-8 space-y-1.5">
             {% for item in o.items.all %}
-            <div class="order-item-row flex items-center justify-between text-xs qsr-well px-3.5 py-2.5 rounded-xl"
+            <div class="order-item-row flex items-center justify-between text-xs qsr-well px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl"
                  data-name="{{ item.item_name }}"
                  data-qty="{{ item.quantity }}">
               <span class="font-bold text-white flex items-center gap-2 min-w-0">
@@ -299,39 +310,42 @@
             {% endfor %}
           </div>
 
-          <div class="md:col-span-4 flex flex-col justify-between md:items-end text-left md:text-right space-y-1">
+          <!-- Bill Box: Horizontal Bar on Mobile, Right-Aligned on Desktop -->
+          <div class="md:col-span-4 flex items-center justify-between md:flex-col md:items-end md:justify-center gap-2 pt-1 md:pt-0 text-left md:text-right">
             {% if o.delivery_address and o.order_type == 'DELIVERY' %}
-            <p class="text-[11px] text-zinc-400 line-clamp-1">
+            <p class="text-[11px] text-zinc-400 line-clamp-1 flex-1 md:flex-none">
               {{ o.delivery_address }}
             </p>
+            {% else %}
+            <span class="text-[11px] text-zinc-500 md:hidden">Total Paid</span>
             {% endif %}
-            <div>
-              <span class="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 block">Order Bill</span>
-              <span class="text-xl font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
+            <div class="shrink-0 text-right">
+              <span class="hidden md:block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Order Bill</span>
+              <span class="text-lg sm:text-xl font-black text-yellow-400">₹{{ o.total_amount|floatformat:0 }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Bottom Action Bar (1-Tap Reorder Craving Trigger + Live Track / Receipt) -->
-        <div class="pt-3.5 border-t border-white/[0.07] flex flex-wrap items-center justify-between gap-2.5">
-          <a href="tel:9904123420" class="text-xs font-semibold text-zinc-400 hover:text-white transition">
+        <!-- Bottom Action Bar (Thumb-Friendly 2-Col Grid on Mobile, Inline on Desktop) -->
+        <div class="pt-3 border-t border-white/[0.07] flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2.5">
+          <a href="tel:9904123420" class="text-[11px] sm:text-xs font-semibold text-zinc-400 hover:text-white transition text-center sm:text-left py-1 sm:py-0">
             Kitchen Helpline: <span class="text-zinc-200 font-bold">99041 23420</span>
           </a>
 
-          <div class="flex items-center gap-2 ml-auto">
+          <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto">
             <button type="button" onclick="reorderMeal(this)"
-              class="px-4 py-2 rounded-xl {% if o.status == 'DONE' %}bg-yellow-400 hover:bg-yellow-300 text-black shadow-md shadow-yellow-400/10{% else %}bg-white/[0.06] hover:bg-yellow-400 text-white hover:text-black{% endif %} text-xs font-extrabold transition active:scale-95 flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+              class="px-3 sm:px-4 py-2.5 sm:py-2 rounded-xl {% if o.status == 'DONE' %}bg-yellow-400 hover:bg-yellow-300 text-black shadow-md shadow-yellow-400/10{% else %}bg-white/[0.06] hover:bg-yellow-400 text-white hover:text-black{% endif %} text-xs font-extrabold transition active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
               <span>1-Tap Reorder</span>
             </button>
 
             {% if o.status != 'DONE' and o.status != 'CANCELLED' %}
-            <a href="{% url 'track_order' o.tracking_token %}" class="px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-black rounded-xl text-xs font-extrabold transition flex items-center gap-1.5">
+            <a href="{% url 'track_order' o.tracking_token %}" class="px-3 sm:px-4 py-2.5 sm:py-2 bg-yellow-400 hover:bg-yellow-300 text-black rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 whitespace-nowrap">
               <span class="w-1.5 h-1.5 rounded-full bg-black animate-ping"></span>
-              <span>Track Live Order</span>
+              <span>Track Live</span>
             </a>
             {% else %}
-            <a href="{% url 'track_order' o.tracking_token %}" class="px-3.5 py-2 rounded-xl bg-[#09090C] hover:bg-zinc-800 border border-white/10 text-zinc-300 text-xs font-semibold transition">
+            <a href="{% url 'track_order' o.tracking_token %}" class="px-3 sm:px-3.5 py-2.5 sm:py-2 rounded-xl bg-[#09090C] hover:bg-zinc-800 border border-white/10 text-zinc-300 text-xs font-semibold transition text-center whitespace-nowrap">
               View Receipt
             </a>
             {% endif %}
@@ -340,7 +354,7 @@
 
       </div>
       {% empty %}
-      <div class="text-center py-16 px-4 qsr-card rounded-2xl">
+      <div class="text-center py-14 sm:py-16 px-4 qsr-card rounded-2xl">
         <div class="w-14 h-14 rounded-2xl overflow-hidden border border-yellow-400/50 mx-auto mb-3.5">
           <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
         </div>
@@ -356,7 +370,7 @@
     </section>
 
     <!-- Studio Signature Footer -->
-    <footer class="pt-6 pb-4 border-t border-white/[0.07] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-500">
+    <footer class="pt-6 pb-4 border-t border-white/[0.07] flex flex-col sm:flex-row items-center justify-between gap-2.5 text-[11px] text-zinc-500 text-center sm:text-left">
       <span>© 2026 Over The Moon Burger • Khamasa, Ahmedabad</span>
       <a href="https://www.instagram.com/zyrac__/" target="_blank" rel="noopener noreferrer" class="hover:text-zinc-300 transition">
         Made by <strong class="text-zinc-300">ZYRAC</strong> • <span class="text-yellow-400 font-semibold">@zyrac__</span>
@@ -394,9 +408,9 @@
     function filterOrders(group, btn) {
       currentFilter = group;
       document.querySelectorAll('.ord-tab').forEach(b => {
-        b.className = "ord-tab shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5";
+        b.className = "ord-tab shrink-0 whitespace-nowrap px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5";
       });
-      btn.className = "ord-tab shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-yellow-400 text-black transition flex items-center justify-center gap-1.5";
+      btn.className = "ord-tab shrink-0 whitespace-nowrap px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold bg-yellow-400 text-black transition flex items-center justify-center gap-1.5";
       applyOrderFilters();
     }
 

@@ -2,10 +2,120 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Over The Moon Burger — Khamasa, Ahmedabad | Order Online</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Removed user-scalable=no so Google Lighthouse Accessibility scores 100 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Primary Local SEO Meta Tags -->
+  <title>Over The Moon Burger — Khamasa, Ahmedabad | Order Burgers Online (Free Delivery)</title>
+  <meta name="description" content="Order fresh flame-grilled burgers, molten Paneer Cheese Burst, Crispy Chicken Zingers, rolls & loaded fries online from Over The Moon Burger, Khamasa, Ahmedabad. Separate Pure Veg & Non-Veg grills. ₹0 delivery fee.">
+  <meta name="keywords" content="Over The Moon Burger, Khamasa burger, best burger in Old City Ahmedabad, order burger online Ahmedabad, pure veg burger Khamasa, chicken zinger burger Ahmedabad, Chef Ubedulla Mansuri, free delivery burgers Ahmedabad">
+  <meta name="author" content="Over The Moon Burger — Built by ZYRAC">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="theme-color" content="#08080A">
+
+  <!-- Geo Tags for Old City Ahmedabad Local Discovery -->
+  <meta name="geo.region" content="IN-GJ">
+  <meta name="geo.placename" content="Khamasa, Ahmedabad">
+  <meta name="geo.position" content="23.0205;72.5850">
+  <meta name="ICBM" content="23.0205, 72.5850">
+
+  <!-- Dynamic Canonical URL -->
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+  <!-- Inline Brand Favicon (Prevents /favicon.ico 404 in Google Search Console) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='%23FACC15'/%3E%3Ccircle cx='60' cy='52' r='32' fill='%23FFFFFF' stroke='%231E1B4B' stroke-width='6'/%3E%3Cellipse cx='60' cy='53' rx='24' ry='19' fill='%231E1B4B'/%3E%3C/svg%3E">
+
+  <!-- Open Graph (Rich Previews on WhatsApp, Facebook & Instagram) -->
+  <meta property="og:type" content="restaurant.menu">
+  <meta property="og:site_name" content="Over The Moon Burger">
+  <meta property="og:title" content="Over The Moon Burger — Khamasa, Ahmedabad | Order Hot Menu">
+  <meta property="og:description" content="Flame-grilled to order in Khamasa. Separate Pure Veg & Non-Veg grills, molten cheese burgers, crispy chicken & ₹0 direct delivery.">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:image" content="https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=1200">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Over The Moon Burger — Khamasa, Ahmedabad">
+  <meta name="twitter:description" content="Order fresh flame-grilled burgers & fries direct from our Khamasa kitchen with ₹0 delivery fee.">
+  <meta name="twitter:image" content="https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=1200">
+
+  <!-- Performance Preconnects -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Live Schema.org Restaurant + Dynamic Menu JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FastFoodRestaurant",
+    "name": "{{ shop_settings.brand_name|default:'Over The Moon Burger'|escapejs }}",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/",
+    "image": "https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "telephone": "+91-99041-23420",
+    "priceRange": "₹",
+    "servesCuisine": ["Burgers", "Fast Food", "Rolls", "Fries", "Beverages"],
+    "acceptsReservations": "False",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Khamasa",
+      "addressLocality": "Ahmedabad",
+      "addressRegion": "GJ",
+      "postalCode": "380001",
+      "addressCountry": "IN"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 23.0205,
+      "longitude": 72.5850
+    },
+    "potentialAction": {
+      "@type": "OrderAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "{{ request.scheme }}://{{ request.get_host }}/",
+        "actionPlatform": [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/MobileWebPlatform"
+        ]
+      },
+      "deliveryMethod": [
+        "http://purl.org/goodrelations/v1#DeliveryModeOwnFleet",
+        "http://purl.org/goodrelations/v1#DeliveryModePickUp"
+      ]
+    },
+    "hasMenu": {
+      "@type": "Menu",
+      "name": "Over The Moon Live Menu",
+      "hasMenuSection": [
+        {% for cat in categories %}
+        {
+          "@type": "MenuSection",
+          "name": "{{ cat.name|escapejs }}",
+          "hasMenuItem": [
+            {% for item in cat.items.all %}
+            {
+              "@type": "MenuItem",
+              "name": "{{ item.name|escapejs }}",
+              "description": "{{ item.description|default:'Freshly prepared to order at Over The Moon Burger, Khamasa.'|escapejs }}",
+              "offers": {
+                "@type": "Offer",
+                "price": "{{ item.price|floatformat:2 }}",
+                "priceCurrency": "INR",
+                "availability": "{% if item.is_available %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+              }
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          ]
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }
+  }
+  </script>
+
   <style>
     :root {
       --bg-canvas: #08080A;
@@ -59,7 +169,6 @@
       box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.12);
       outline: none;
     }
-    
   </style>
 </head>
 <body class="min-h-screen pb-28 lg:pb-12 relative overflow-x-hidden selection:bg-yellow-400 selection:text-black">
@@ -100,85 +209,135 @@
 
   <div class="fixed inset-0 hunger-glow pointer-events-none -z-10"></div>
 
-  <!-- 1. ULTRA-CLEAN STICKY HEADER -->
+<!-- 1. ANIMATED SIGNBOARD STICKY HEADER (OPEN GRILL vs. CLOSED MOON) -->
+  <style>
+    @keyframes flameFlicker {
+      0%, 100% { transform: scaleY(1) translateY(0); opacity: 0.95; }
+      45% { transform: scaleY(1.12) translateY(-1px); opacity: 1; }
+      75% { transform: scaleY(0.94) translateY(0.5px); opacity: 0.88; }
+    }
+    @keyframes sparkRise {
+      0% { transform: translateY(0) scale(1); opacity: 0.95; }
+      100% { transform: translateY(-11px) translateX(2px) scale(0.2); opacity: 0; }
+    }
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0px) rotate(-3deg); }
+      50% { transform: translateY(-2.5px) rotate(3deg); }
+    }
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.25; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .anim-flame { transform-origin: 50% 90%; animation: flameFlicker 1.25s ease-in-out infinite; will-change: transform, opacity; }
+    .anim-spark-1 { animation: sparkRise 1.6s ease-out infinite; will-change: transform, opacity; }
+    .anim-spark-2 { animation: sparkRise 2.1s ease-out 0.6s infinite; will-change: transform, opacity; }
+    .anim-moon { transform-origin: center; animation: moonFloat 3.6s ease-in-out infinite; will-change: transform; }
+    .anim-star { transform-origin: center; animation: starTwinkle 2.4s ease-in-out infinite; will-change: transform, opacity; }
+  </style>
+
   <header class="sticky top-0 z-30 nav-surface">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-      <a href="{% url 'public_menu' %}" class="flex items-center gap-3 min-w-0">
-        <div class="w-10 h-10 rounded-xl overflow-hidden border border-yellow-400/50 shrink-0 shadow-sm">
+    <!-- Top Status Accent Line -->
+    <div class="h-[2px] w-full {% if shop_settings.is_open %}bg-gradient-to-r from-transparent via-emerald-400/80 to-transparent{% else %}bg-gradient-to-r from-transparent via-amber-400/55 to-transparent{% endif %}"></div>
+
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3">
+      <!-- Brand + Astronaut Avatar -->
+      <a href="{% url 'public_menu' %}" class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border {% if shop_settings.is_open %}border-yellow-400/55 shadow-[0_0_16px_rgba(250,204,21,0.16)]{% else %}border-white/15 opacity-80{% endif %} shrink-0 transition">
           <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
         </div>
+
         <div class="min-w-0">
-          <h1 class="text-sm sm:text-base font-black text-white tracking-tight truncate">OVER THE MOON</h1>
-          <p class="text-[11px] text-zinc-400 font-medium truncate">Khamasa, Ahmedabad • Free Delivery</p>
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <h1 class="text-sm sm:text-base font-black text-white tracking-tight truncate leading-none">OVER THE MOON</h1>
+
+            {% if shop_settings.is_open %}
+            <!-- Animated Grill Live Signboard Graphic -->
+            <span class="inline-flex items-center gap-1.5 pl-1.5 pr-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/35 shrink-0">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" aria-hidden="true">
+                <circle class="anim-spark-1" cx="8" cy="10" r="1.3" fill="#FACC15"/>
+                <circle class="anim-spark-2" cx="16" cy="9" r="1.1" fill="#FB923C"/>
+                <path class="anim-flame" d="M12 4.5C9.5 8 7.5 10.5 7.5 14a4.5 4.5 0 009 0c0-2.4-1.3-4.2-2.5-5.5.1 1.6-.7 2.5-1.5 2.7.5-1.8.2-4.4-0.5-6.7z" fill="#F97316"/>
+                <path class="anim-flame" d="M12 10.5c-1.3 1.6-2.2 2.9-2.2 4.2a2.2 2.2 0 004.4 0c0-1.1-.6-2.2-2.2-4.2z" fill="#FACC15"/>
+              </svg>
+              <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-emerald-300 leading-none">Grill Open</span>
+            </span>
+            {% else %}
+            <!-- Animated Moon Rest Signboard Graphic -->
+            <span class="inline-flex items-center gap-1.5 pl-1.5 pr-2 py-0.5 rounded-full bg-red-500/15 border border-red-400/35 shrink-0">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" aria-hidden="true">
+                <circle class="anim-star" cx="18.5" cy="6" r="1.3" fill="#FACC15"/>
+                <path class="anim-moon" d="M14.5 4.5A7.5 7.5 0 1019.5 17a6 6 0 01-5-12.5z" fill="#FACC15"/>
+              </svg>
+              <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-red-300 leading-none">Closed</span>
+            </span>
+            {% endif %}
+          </div>
+
+          <p class="text-[10px] sm:text-[11px] text-zinc-400 font-medium truncate mt-0.5">
+            {% if shop_settings.is_open %}
+              Khamasa • Free Delivery • <span class="text-yellow-400 font-bold">25–35 mins</span>
+            {% else %}
+              Khamasa, Ahmedabad • Reopens <span class="text-yellow-400 font-bold">{{ shop_settings.reopen_time }}</span>
+            {% endif %}
+          </p>
         </div>
       </a>
 
-      <div class="flex items-center gap-2 shrink-0">
-        <div class="relative hidden md:block w-56 lg:w-64 mr-1">
+      <!-- Right Navigation Actions -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div class="relative hidden md:block w-48 lg:w-64 mr-0.5">
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           <input id="menuSearchInput" oninput="filterMenu()" type="text" placeholder="Search chicken, paneer, fries..."
             class="pos-input w-full rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-zinc-500">
         </div>
 
-        <a href="{% url 'about_page' %}" class="px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-bold text-zinc-200 transition">
-          Our Story
+        <a href="{% url 'about_page' %}" class="px-2.5 sm:px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-[11px] sm:text-xs font-bold text-zinc-200 transition whitespace-nowrap">
+          <span class="sm:hidden">Story</span>
+          <span class="hidden sm:inline">Our Story</span>
         </a>
 
         {% if request.user.is_authenticated and not request.user.is_staff %}
-        <a href="{% url 'customer_dashboard' %}" class="px-3.5 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black transition">
+        <a href="{% url 'customer_dashboard' %}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-[11px] sm:text-xs font-black transition whitespace-nowrap">
           My Orders
         </a>
         {% else %}
-        <button type="button" onclick="openAuthModal('login')" class="px-3.5 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black transition">
-          Sign In
-        </button>
+        <a href="{% url 'customer_auth_page' %}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-[11px] sm:text-xs font-black transition whitespace-nowrap">
+          {% if user.is_authenticated %}Account{% else %}Sign In{% endif %}
+        </a>
         {% endif %}
       </div>
     </div>
-  </header>
 
+    <!-- Attached Closed Strip (Only Renders When Shop Is Closed) -->
+    {% if not shop_settings.is_open %}
+    <div class="border-t border-amber-400/20 bg-gradient-to-r from-[#1A130A] via-[#121012] to-[#111115]">
+      <div class="max-w-7xl mx-auto px-3.5 sm:px-6 py-2 flex items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <svg viewBox="0 0 28 28" class="w-6 h-6 shrink-0" aria-hidden="true">
+            <circle cx="14" cy="14" r="12" fill="#FACC15" fill-opacity="0.12"/>
+            <path class="anim-moon" d="M16.5 6.5A8 8 0 1021.5 19a6.5 6.5 0 01-5-12.5z" fill="#FACC15"/>
+            <circle class="anim-star" cx="21" cy="7.5" r="1.4" fill="#FDE047"/>
+          </svg>
+          <p class="text-[11px] sm:text-xs font-semibold text-amber-100 truncate">
+            <strong class="text-white">{{ shop_settings.closed_reason|default:"Kitchen is resting right now" }}</strong>
+            <span class="text-zinc-400"> • Back at</span>
+            <strong class="text-yellow-400">{{ shop_settings.reopen_time }}</strong>
+            <span class="hidden md:inline text-zinc-400">— feel free to browse the menu &amp; plan your order.</span>
+          </p>
+        </div>
+
+        <a href="tel:9904123420" class="shrink-0 px-2.5 sm:px-3 py-1 rounded-lg bg-white/[0.08] hover:bg-white/[0.15] border border-white/10 text-[10px] sm:text-[11px] font-extrabold text-white transition whitespace-nowrap">
+          Call Shop
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </header>
   <!-- 2. BELOW HEADER: PROMO DEALS BAR + UNIQUE OPEN/CLOSED STATUS + FILTER PILLS -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3.5">
 
-    <!-- Unique Glassmorphic Open / Closed Kitchen Status Capsule -->
-    {% if shop_settings.is_open %}
-    <div class="rounded-2xl bg-gradient-to-r from-emerald-500/[0.10] via-[#111115] to-[#111115] border border-emerald-500/25 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center gap-2.5">
-        <span class="relative flex h-2.5 w-2.5 shrink-0">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
-        </span>
-        <span class="text-xs font-black text-emerald-400 uppercase tracking-wider">Grill Is Live</span>
-        <span class="text-zinc-600 hidden sm:inline">•</span>
-        <span class="text-xs text-zinc-300 font-medium hidden sm:inline">Accepting fresh orders now • Separate Veg &amp; Non-Veg prep zones</span>
-      </div>
-      <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-black text-emerald-300 uppercase tracking-wide">
-        25–35 Mins Delivery
-      </span>
-    </div>
-    {% else %}
-    <div class="rounded-2xl bg-gradient-to-r from-amber-500/[0.16] via-[#16120B] to-[#111115] border border-amber-400/35 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_12px_32px_-12px_rgba(245,158,11,0.2)]">
-      <div class="flex items-center gap-3.5">
-        <div class="w-10 h-10 rounded-xl bg-amber-400/15 border border-amber-400/35 text-amber-300 flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
-        </div>
-        <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-[10px] font-black uppercase tracking-widest text-amber-300">Kitchen Currently Resting</span>
-            <span class="px-2 py-0.5 rounded-md bg-yellow-400 text-black text-[10px] font-black uppercase tracking-wide">
-              Opens {{ shop_settings.reopen_time }}
-            </span>
-          </div>
-          <p class="text-xs sm:text-sm font-extrabold text-white mt-0.5">
-            {{ shop_settings.closed_reason|default:"Kitchen is resting" }} <span class="text-zinc-400 font-medium">— browse the menu &amp; build your tray now!</span>
-          </p>
-        </div>
-      </div>
-      <a href="tel:9904123420" class="shrink-0 px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-[11px] font-extrabold text-zinc-200 text-center transition">
-        Call Kitchen
-      </a>
-    </div>
-    {% endif %}
+ 
+
 
     <!-- Live Promo Deals Strip (Below Header) -->
     {% if coupons %}

@@ -26,11 +26,11 @@
     }
 
     .appetizing-glow {
-      background: radial-gradient(circle at 50% 0%, rgba(250, 204, 21, 0.10), rgba(245, 158, 11, 0.03) 45%, transparent 75%);
+      background: radial-gradient(circle at 50% 0%, rgba(250, 204, 21, 0.11), rgba(245, 158, 11, 0.03) 45%, transparent 75%);
     }
 
     .nav-surface {
-      background: rgba(11, 11, 14, 0.90);
+      background: rgba(11, 11, 14, 0.92);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-bottom: 1px solid var(--border-subtle);
@@ -40,12 +40,17 @@
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 14px 30px -12px rgba(0, 0, 0, 0.75);
-      transition: border-color 0.18s ease;
+      transition: border-color 0.18s ease, transform 0.18s ease;
+    }
+    @media (hover: hover) {
+      .qsr-card:hover {
+        border-color: rgba(255, 255, 255, 0.15);
+      }
     }
 
     .qsr-card.active-drop {
       border-color: rgba(250, 204, 21, 0.45);
-      background: linear-gradient(180deg, rgba(250, 204, 21, 0.04) 0%, #111115 100%);
+      background: linear-gradient(180deg, rgba(250, 204, 21, 0.045) 0%, #111115 100%);
     }
 
     .qsr-well {
@@ -65,7 +70,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen pb-14 flex flex-col relative overflow-x-hidden selection:bg-yellow-400 selection:text-black">
+<body class="min-h-screen pb-20 sm:pb-14 flex flex-col relative overflow-x-hidden selection:bg-yellow-400 selection:text-black">
 
   <!-- Reusable Brand + FSSAI Veg & Non-Veg SVG Symbols -->
   <svg class="hidden" aria-hidden="true">
@@ -104,65 +109,96 @@
   <div class="fixed inset-0 appetizing-glow pointer-events-none -z-10"></div>
 
   <!-- Sticky QSR Rider Header -->
-  <header class="sticky top-0 z-30 nav-surface px-4 sm:px-6 py-3.5">
-    <div class="max-w-7xl mx-auto flex flex-col gap-3.5">
-      
+  <header class="sticky top-0 z-30 nav-surface px-3.5 sm:px-6 py-3 sm:py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-col gap-3">
+
       <!-- Top Row: Rider Identity & Quick Actions -->
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
+      <div class="flex items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-yellow-400/50 shadow-sm">
             <svg class="w-full h-full"><use href="#otm-astronaut"/></svg>
           </div>
-          <div>
+          <div class="min-w-0">
             <div class="flex items-center gap-2">
-              <h1 class="text-base sm:text-lg font-black text-white leading-none tracking-tight">{{ request.user.username|title }}</h1>
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-bold text-emerald-400 uppercase">
+              <h1 class="text-sm sm:text-lg font-black text-white leading-none tracking-tight truncate">{{ request.user.username|title }}</h1>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase shrink-0">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> On Shift
               </span>
             </div>
-            <p class="text-[11px] text-zinc-400 font-medium mt-0.5">Over The Moon • Rider Dispatch</p>
+            <p class="text-[11px] text-zinc-400 font-medium mt-0.5 truncate">Over The Moon • Khamasa Rider Dispatch</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="window.location.reload()" class="p-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-zinc-300 transition" title="Refresh Queue">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <button type="button" onclick="window.location.reload()" class="p-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-zinc-300 transition active:scale-95" title="Refresh Queue">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           </button>
-          <a href="{% url 'crm_logout' %}" class="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 rounded-xl text-xs font-bold text-red-400 transition">
+          <a href="{% url 'crm_logout' %}" class="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 rounded-xl text-xs font-bold text-red-400 transition whitespace-nowrap">
             End Shift
           </a>
         </div>
       </div>
 
+      <!-- NEW: OWNER-TO-RIDER DIRECT MESSAGE BANNER (ONLY FOR THIS RIDER) -->
+      {% if rider_note %}
+      <div id="riderOwnerNoteBanner"
+           class="px-3.5 py-2.5 rounded-xl flex flex-wrap items-center justify-between gap-2.5 border {% if rider_note.read %}bg-[#09090C] border-white/[0.08]{% else %}bg-yellow-400/10 border-yellow-400/40{% endif %}">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shrink-0 {% if rider_note.read %}bg-white/[0.07] text-zinc-400{% else %}bg-yellow-400 text-black{% endif %}">
+            Owner Note
+          </span>
+          <p class="text-xs sm:text-sm font-extrabold text-white break-words">
+            {{ rider_note.message }}
+          </p>
+          <span class="text-[11px] text-zinc-400 font-medium shrink-0 hidden sm:inline">
+            • {{ rider_note.sent_at }}
+          </span>
+        </div>
+
+        <div class="shrink-0 ml-auto">
+          {% if rider_note.read %}
+          <span id="riderNoteStatusBadge" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-extrabold text-emerald-400">
+            ✓ Read at {{ rider_note.read_at }}
+          </span>
+          {% else %}
+          <button type="button" id="ackRiderNoteBtn" onclick="ackRiderNote()"
+            class="px-3 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black text-[11px] font-black transition active:scale-95">
+            Mark as Read
+          </button>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
       <!-- Rider Shift Cash vs. UPI & Drop Counter Strip -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <div class="qsr-well rounded-xl p-3">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+        <div class="qsr-well rounded-xl px-3 py-2.5">
           <span class="text-[10px] font-semibold text-zinc-400 block">Active Bags</span>
-          <span class="text-lg sm:text-xl font-black text-yellow-400 mt-0.5 block">{{ orders|length }}</span>
+          <span class="text-base sm:text-xl font-black text-yellow-400 mt-0.5 block leading-tight">{{ orders|length }}</span>
         </div>
-        <div class="qsr-well rounded-xl p-3">
+        <div class="qsr-well rounded-xl px-3 py-2.5">
           <span class="text-[10px] font-semibold text-zinc-400 block">To Collect</span>
-          <span id="pendingCashStat" class="text-lg sm:text-xl font-black text-white mt-0.5 block">₹0</span>
+          <span id="pendingCashStat" class="text-base sm:text-xl font-black text-white mt-0.5 block leading-tight">₹0</span>
         </div>
-        <div class="qsr-well rounded-xl p-3 border-emerald-500/20">
+        <div class="qsr-well rounded-xl px-3 py-2.5 border-emerald-500/20">
           <span class="text-[10px] font-semibold text-emerald-400 block">Physical Cash</span>
-          <span id="collectedCashStat" class="text-lg sm:text-xl font-black text-emerald-400 mt-0.5 block">₹0</span>
+          <span id="collectedCashStat" class="text-base sm:text-xl font-black text-emerald-400 mt-0.5 block leading-tight">₹0</span>
         </div>
-        <div class="qsr-well rounded-xl p-3 border-sky-500/20">
+        <div class="qsr-well rounded-xl px-3 py-2.5 border-sky-500/20">
           <span class="text-[10px] font-semibold text-sky-400 block">UPI Received</span>
-          <span id="collectedUpiStat" class="text-lg sm:text-xl font-black text-sky-400 mt-0.5 block">₹0</span>
+          <span id="collectedUpiStat" class="text-base sm:text-xl font-black text-sky-400 mt-0.5 block leading-tight">₹0</span>
         </div>
       </div>
 
       <!-- Segmented Tab Switcher (Active Drops vs Completed History) -->
       <div class="grid grid-cols-2 gap-1 p-1 bg-[#09090C] rounded-xl border border-white/[0.07]">
-        <button type="button" onclick="switchTab('active')" id="btn-active" class="py-2 rounded-lg text-xs font-extrabold bg-yellow-400 text-black transition flex items-center justify-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-          <span>Active Drops ({{ orders|length }})</span>
+        <button type="button" onclick="switchTab('active')" id="btn-active" class="py-2.5 sm:py-2 rounded-lg text-xs font-extrabold bg-yellow-400 text-black transition flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+          <span class="truncate">Active Drops ({{ orders|length }})</span>
         </button>
-        <button type="button" onclick="switchTab('history')" id="btn-history" class="py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <span>Delivered History ({{ history_orders|length }})</span>
+        <button type="button" onclick="switchTab('history')" id="btn-history" class="py-2.5 sm:py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="truncate">Delivered ({{ history_orders|length }})</span>
         </button>
       </div>
 
@@ -170,62 +206,74 @@
   </header>
 
   <!-- Main Workspace -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 pt-4 sm:pt-6">
 
     <!-- ========================================== -->
     <!-- VIEW 1: ACTIVE DELIVERY QUEUE              -->
     <!-- ========================================== -->
-    <div id="view-active" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    <div id="view-active" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
       {% for o in orders %}
-      <div class="active-rider-card qsr-card active-drop rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between"
+      <div class="active-rider-card qsr-card active-drop rounded-2xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between"
            data-amount="{{ o.total_amount }}"
            data-diets="{% for i in o.items.all %}{% if i.is_veg %}VEG {% else %}NONVEG {% endif %}{% endfor %}">
         <div class="absolute top-0 left-0 w-1.5 h-full bg-yellow-400"></div>
 
         <div>
           <!-- Top Order ID & Amount to Collect -->
-          <div class="flex justify-between items-start gap-3 pl-2 pb-3.5 mb-3.5 border-b border-white/[0.07]">
-            <div>
+          <div class="flex justify-between items-start gap-3 pl-2.5 pb-3.5 mb-3.5 border-b border-white/[0.07]">
+            <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-yellow-400 text-black">Out for Delivery</span>
                 <span class="rider-diet-badge hidden px-2 py-0.5 rounded text-[10px] font-extrabold uppercase"></span>
               </div>
-              <h2 class="text-base sm:text-lg font-black text-white mt-1.5 tracking-tight">{{ o.order_number }}</h2>
+              <h2 class="text-base sm:text-lg font-black text-white mt-1.5 tracking-tight truncate">{{ o.order_number }}</h2>
               <p class="text-[11px] text-zinc-500 font-medium mt-0.5">Picked up at {{ o.updated_at|date:"h:i A" }}</p>
             </div>
-            <div class="text-right">
-              <span class="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider block">Collect Amount</span>
-              <span class="text-2xl sm:text-3xl font-black text-yellow-400 tracking-tight mt-0.5 block">₹{{ o.total_amount|floatformat:0 }}</span>
+            <div class="text-right shrink-0">
+              <span class="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider block">Collect</span>
+              <span class="text-2xl sm:text-3xl font-black text-yellow-400 tracking-tight mt-0.5 block leading-none">₹{{ o.total_amount|floatformat:0 }}</span>
             </div>
           </div>
 
           <!-- Mixed Veg + Non-Veg Separate Bag Warning -->
-          <div class="rider-mixed-alert hidden ml-2 mb-3 px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-500/35 text-[11px] font-extrabold text-amber-300 flex items-center gap-2">
+          <div class="rider-mixed-alert hidden ml-2.5 mb-3 px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-500/35 text-[11px] font-extrabold text-amber-300 flex items-center gap-2">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
-            <span>MIXED BAG: Verify Veg & Non-Veg are in separate carry bags!</span>
+            <span>MIXED BAG: Verify Veg &amp; Non-Veg are in separate carry bags!</span>
           </div>
 
           <!-- Customer Name, Phone & Delivery Address -->
-          <div class="ml-2 qsr-well p-3.5 rounded-xl space-y-2.5 mb-3.5">
-            <div class="flex items-start gap-2.5">
-              <svg class="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
-              <div>
-                <p class="text-xs sm:text-sm font-extrabold text-white">{{ o.customer_name }}</p>
-                <a href="tel:{{ o.customer_phone }}" class="text-xs text-yellow-400 font-bold hover:underline">{{ o.customer_phone }}</a>
+          <div class="ml-2.5 qsr-well p-3.5 rounded-xl space-y-2.5 mb-3.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <svg class="w-4 h-4 text-yellow-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                <div class="min-w-0">
+                  <p class="text-xs sm:text-sm font-extrabold text-white truncate">{{ o.customer_name }}</p>
+                  <a href="tel:{{ o.customer_phone }}" class="text-xs text-yellow-400 font-bold hover:underline">{{ o.customer_phone }}</a>
+                </div>
               </div>
+              <a href="tel:{{ o.customer_phone }}" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-yellow-400/15 hover:bg-yellow-400/25 border border-yellow-400/30 text-[11px] font-extrabold text-yellow-300 transition">
+                Call
+              </a>
             </div>
 
             <div class="w-full h-px bg-white/[0.06]"></div>
 
-            <div class="flex items-start gap-2.5">
-              <svg class="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-              <p class="text-xs text-zinc-200 leading-relaxed font-semibold">{{ o.delivery_address|default:"Self Pickup / Ask Kitchen" }}</p>
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-start gap-2.5 min-w-0">
+                <svg class="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                <p class="rider-addr-text text-xs text-zinc-200 leading-relaxed font-semibold break-words">{{ o.delivery_address|default:"Self Pickup / Ask Kitchen" }}</p>
+              </div>
+              {% if o.delivery_address %}
+              <button type="button" onclick="copyRiderAddress(this)" class="shrink-0 px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.08] text-[10px] font-bold text-zinc-300 hover:text-white transition">
+                Copy
+              </button>
+              {% endif %}
             </div>
           </div>
 
           <!-- Order Bag Verification Checklist With Veg/Non-Veg Icons -->
-          <div class="ml-2 qsr-well p-3.5 rounded-xl mb-4">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-2">Check Bag Before Leaving ({{ o.items.count }} items)</p>
+          <div class="ml-2.5 qsr-well p-3.5 rounded-xl mb-4">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-2">Bag Checklist ({{ o.items.count }} items)</p>
             <div class="space-y-1.5 text-xs">
               {% for i in o.items.all %}
               <div class="flex justify-between items-center font-bold text-zinc-200 gap-2">
@@ -245,28 +293,29 @@
         </div>
 
         <!-- Bottom Action Buttons (Call, Maps, WhatsApp, Mark Delivered -> Cash/UPI Modal) -->
-        <div class="space-y-2 pl-2 pt-1">
-          <div class="grid grid-cols-2 gap-2">
-            <a href="tel:{{ o.customer_phone }}" class="py-3 bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.09] text-white rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 active:scale-[0.98]">
-              <svg class="w-3.5 h-3.5 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
-              <span>Call Guest</span>
+        <div class="space-y-2 pl-2.5 pt-1">
+          <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+            <a href="tel:{{ o.customer_phone }}" class="py-2.5 px-2 bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.09] text-white rounded-xl text-[11px] sm:text-xs font-extrabold transition flex items-center justify-center gap-1 active:scale-[0.98] whitespace-nowrap">
+              <svg class="w-3.5 h-3.5 text-yellow-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+              <span>Call</span>
             </a>
-            <a href="https://www.google.com/maps/search/?api=1&query={{ o.delivery_address|urlencode }}" target="_blank" rel="noopener" class="py-3 bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.09] text-white rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 active:scale-[0.98]">
-              <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
-              <span>Google Maps</span>
-            </a>
-          </div>
 
-          <button type="button"
-            data-phone="{{ o.customer_phone }}"
-            data-name="{{ o.customer_name }}"
-            data-ordernum="{{ o.order_number }}"
-            data-rider="{{ request.user.username|title }}"
-            data-trackurl="{% url 'track_order' o.tracking_token %}"
-            onclick="riderWhatsAppPing(this)"
-            class="w-full py-2.5 px-3.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-400 text-xs font-extrabold transition flex items-center justify-center gap-1.5 active:scale-[0.98]">
-            <span>WhatsApp Customer</span>
-          </button>
+            <a href="https://www.google.com/maps/search/?api=1&query={{ o.delivery_address|urlencode }}" target="_blank" rel="noopener" class="py-2.5 px-2 bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.09] text-white rounded-xl text-[11px] sm:text-xs font-extrabold transition flex items-center justify-center gap-1 active:scale-[0.98] whitespace-nowrap">
+              <svg class="w-3.5 h-3.5 text-sky-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
+              <span>Maps</span>
+            </a>
+
+            <button type="button"
+              data-phone="{{ o.customer_phone }}"
+              data-name="{{ o.customer_name }}"
+              data-ordernum="{{ o.order_number }}"
+              data-rider="{{ request.user.username|title }}"
+              data-trackurl="{% url 'track_order' o.tracking_token %}"
+              onclick="riderWhatsAppPing(this)"
+              class="py-2.5 px-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-400 text-[11px] sm:text-xs font-extrabold transition flex items-center justify-center gap-1 active:scale-[0.98] whitespace-nowrap">
+              <span>WhatsApp</span>
+            </button>
+          </div>
 
           <button type="button"
             data-id="{{ o.id }}"
@@ -275,7 +324,7 @@
             data-amount="{{ o.total_amount|floatformat:0 }}"
             onclick="openDeliverModal(this)"
             class="w-full py-3.5 bg-emerald-400 hover:bg-emerald-300 text-black rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-emerald-400/15 transition flex items-center justify-center gap-2 active:scale-[0.98]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
             <span>Mark Delivered (Cash / UPI)</span>
           </button>
         </div>
@@ -298,13 +347,13 @@
     <!-- VIEW 2: RIDER COMPLETED HISTORY TAB        -->
     <!-- ========================================== -->
     <div id="view-history" class="hidden space-y-4">
-      <div class="qsr-card rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+      <div class="qsr-card rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 class="text-base font-extrabold text-white">Completed Deliveries ({{ history_orders|length }})</h2>
           <p class="text-xs text-zinc-400 mt-0.5">All past orders delivered with Cash vs. UPI settlement breakdown</p>
         </div>
         <input id="riderHistSearch" oninput="filterRiderHistory()" type="text" placeholder="Search order ID, guest, or phone..."
-          class="pos-input w-full sm:w-64 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500">
+          class="pos-input w-full sm:w-72 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500">
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -316,8 +365,8 @@
           <div class="absolute top-0 left-0 w-1 h-full {% if o.payment_mode == 'UPI' %}bg-sky-400/70{% else %}bg-emerald-500/60{% endif %}"></div>
           <div class="pl-1.5">
             <div class="flex items-center justify-between gap-2">
-              <span class="text-sm font-black text-white">{{ o.order_number }}</span>
-              <div class="flex items-center gap-1.5">
+              <span class="text-sm font-black text-white truncate">{{ o.order_number }}</span>
+              <div class="flex items-center gap-1.5 shrink-0">
                 {% if o.payment_mode == 'UPI' %}
                 <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-sky-500/15 text-sky-400 border border-sky-500/30">UPI</span>
                 {% else %}
@@ -358,7 +407,7 @@
     </div>
 
     <!-- Minimal Studio Credit Footer -->
-    <footer class="mt-10 pt-5 border-t border-white/[0.07] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-500">
+    <footer class="mt-10 pt-5 border-t border-white/[0.07] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-500 text-center sm:text-left">
       <span>© 2026 Over The Moon Burger • Rider Dispatch</span>
       <a href="https://www.instagram.com/zyrac__/" target="_blank" rel="noopener noreferrer" class="hover:text-zinc-300 transition">
         Made by <strong class="text-zinc-300">ZYRAC</strong> • <span class="text-yellow-400 font-semibold">@zyrac__</span>
@@ -417,6 +466,37 @@
       return '';
     }
 
+    // NEW: Acknowledge Owner Note for This Logged-In Rider
+    async function ackRiderNote() {
+      const btn = document.getElementById('ackRiderNoteBtn');
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch("{% url 'api_ack_staff_note' %}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ target: "RIDER:{{ request.user.id }}" })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          if (btn) btn.disabled = false;
+          return;
+        }
+        const banner = document.getElementById('riderOwnerNoteBanner');
+        if (banner) {
+          banner.className = "px-3.5 py-2.5 rounded-xl flex flex-wrap items-center justify-between gap-2.5 border bg-[#09090C] border-white/[0.08]";
+        }
+        if (btn) {
+          const badge = document.createElement('span');
+          badge.id = 'riderNoteStatusBadge';
+          badge.className = 'px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-extrabold text-emerald-400';
+          badge.textContent = `✓ Read at ${data.note.read_at || 'Just now'}`;
+          btn.replaceWith(badge);
+        }
+      } catch (e) {
+        if (btn) btn.disabled = false;
+      }
+    }
+
     // Calculate Pending Amount, Physical Cash, UPI Received & Highlight Mixed Veg/Non-Veg Bags
     let pendingCash = 0;
     document.querySelectorAll('.active-rider-card').forEach(el => {
@@ -458,12 +538,12 @@
       document.getElementById('view-history').classList.toggle('hidden', tab !== 'history');
 
       document.getElementById('btn-active').className = tab === 'active'
-        ? "py-2 rounded-lg text-xs font-extrabold bg-yellow-400 text-black transition flex items-center justify-center gap-1.5"
-        : "py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5";
+        ? "py-2.5 sm:py-2 rounded-lg text-xs font-extrabold bg-yellow-400 text-black transition flex items-center justify-center gap-1.5"
+        : "py-2.5 sm:py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5";
 
       document.getElementById('btn-history').className = tab === 'history'
-        ? "py-2 rounded-lg text-xs font-extrabold bg-yellow-400 text-black transition flex items-center justify-center gap-1.5"
-        : "py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5";
+        ? "py-2.5 sm:py-2 rounded-lg text-xs font-extrabold bg-yellow-400 text-black transition flex items-center justify-center gap-1.5"
+        : "py-2.5 sm:py-2 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white transition flex items-center justify-center gap-1.5";
     }
 
     function filterRiderHistory() {
@@ -471,6 +551,20 @@
       document.querySelectorAll('.rider-hist-card').forEach(card => {
         card.style.display = card.dataset.search.includes(q) ? 'flex' : 'none';
       });
+    }
+
+    function copyRiderAddress(btn) {
+      const box = btn.closest('.flex');
+      const addr = (box?.querySelector('.rider-addr-text')?.textContent || '').trim();
+      if (!addr) return;
+      navigator.clipboard?.writeText(addr).catch(() => {});
+      const prev = btn.textContent;
+      btn.textContent = 'Copied';
+      btn.classList.add('text-emerald-400', 'border-emerald-500/30');
+      setTimeout(() => {
+        btn.textContent = prev;
+        btn.classList.remove('text-emerald-400', 'border-emerald-500/30');
+      }, 1500);
     }
 
     function riderWhatsAppPing(btn) {
@@ -518,11 +612,12 @@
       }
     }
 
-    // Auto-refresh only when Active tab is open and Payment Modal is closed
-   setInterval(() => {
+    // Auto-refresh only when Active tab is open, Payment Modal is closed, and user isn't typing
+    setInterval(() => {
       const isModalOpen = !document.getElementById('deliverModal').classList.contains('hidden');
       const isActiveTab = !document.getElementById('view-active').classList.contains('hidden');
-      if (isActiveTab && !isModalOpen) {
+      const isTyping = document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
+      if (isActiveTab && !isModalOpen && !isTyping) {
         window.location.reload();
       }
     }, 15000);

@@ -57,7 +57,7 @@
 
   <!-- Responsive Sidebar Navigation -->
   <aside class="w-full lg:w-68 xl:w-72 apple-glass border-b lg:border-b-0 lg:border-r border-white/[0.07] shrink-0 flex flex-col z-20">
-    
+
     <!-- Top Brand & Quick Links -->
     <div class="p-4 sm:p-5 border-b border-white/[0.07] flex flex-col gap-3.5">
       <div class="flex items-center justify-between">
@@ -87,7 +87,7 @@
       </div>
     </div>
 
-    <!-- All 5 Sidebar Tabs -->
+    <!-- All Sidebar Tabs -->
     <nav class="p-3 lg:p-4 flex lg:flex-col gap-1.5 overflow-x-auto no-scrollbar">
       <button type="button" id="nav-btn-analytics" onclick="openTab('tab-analytics', this)" class="tab-btn active shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-black text-left bg-yellow-400 text-black flex items-center justify-between gap-2.5 transition">
         <span class="flex items-center gap-2.5">
@@ -134,6 +134,15 @@
           <span>Team & Riders</span>
         </span>
         <span id="navStaffCount" data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/15 text-sky-400" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/15 text-sky-400">{{ staff_members|length }}</span>
+      </button>
+
+      <!-- NEW: Owner-to-Kitchen & Rider Dispatch Chat Tab -->
+      <button type="button" id="nav-btn-chat" onclick="openTab('tab-chat', this)" class="tab-btn shrink-0 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-semibold text-left text-zinc-400 hover:text-white hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+          <span>Dispatch Chat</span>
+        </span>
+        <span data-default="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-400/15 text-amber-300" class="tab-count px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-400/15 text-amber-300">Live</span>
       </button>
     </nav>
 
@@ -382,7 +391,7 @@
     <!-- TAB 2: ALL ORDERS HISTORY (WITH VEG & NON-VEG VISIBILITY) -->
     <!-- ========================================================= -->
     <div id="tab-history" class="tab-content space-y-5">
-      
+
       <div class="apple-card rounded-2xl p-5 sm:p-6 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -441,7 +450,7 @@
              data-amount="{{ o.total_amount }}"
              data-diets="{% for i in o.items.all %}{% if i.is_veg %}VEG {% else %}NONVEG {% endif %}{% endfor %}"
              data-search="{{ o.order_number|lower }} {{ o.customer_name|lower }} {{ o.customer_phone }} {{ o.order_type|lower }} {% if o.delivery_boy %}{{ o.delivery_boy.username|lower }}{% endif %} {% for i in o.items.all %}{{ i.item_name|lower }} {% endfor %}">
-          
+
           <div>
             <div class="flex items-start justify-between gap-2 pb-3 border-b border-white/[0.07]">
               <div>
@@ -684,7 +693,7 @@
         <!-- Add New Dish Form -->
         <div class="xl:col-span-4 apple-card rounded-2xl p-5 sm:p-6 h-fit space-y-3.5">
           <h3 class="text-sm font-black text-yellow-400 uppercase tracking-wider">Add New Dish</h3>
-          
+
           <div>
             <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">Dietary Classification</label>
             <div class="grid grid-cols-2 gap-2 p-1 apple-well rounded-xl">
@@ -724,14 +733,14 @@
             <div class="owner-menu-row rounded-2xl apple-well p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                  data-diet="{% if item.is_veg %}VEG{% else %}NONVEG{% endif %}"
                  data-search="{{ item.name|lower }} {{ item.category.name|lower }}">
-              
+
               <div class="flex items-start gap-3 min-w-0">
                 <svg class="diet-svg w-4 h-4 shrink-0 mt-1"><use href="{% if item.is_veg %}#veg-mark{% else %}#nonveg-mark{% endif %}"/></svg>
                 <div class="min-w-0">
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-[10px] uppercase font-black tracking-widest text-yellow-400">{{ item.category.name }}</span>
                     <span class="diet-label text-[10px] font-bold {% if item.is_veg %}text-emerald-400{% else %}text-red-400{% endif %}">
-                      • {% if item.is_veg %}Pure Veg{% else %}Non-Veg{% endif %}
+- {% if item.is_veg %}Pure Veg{% else %}Non-Veg{% endif %}
                     </span>
                   </div>
                   <h4 class="font-extrabold text-white text-sm mt-0.5 truncate">{{ item.name }}</h4>
@@ -818,6 +827,7 @@
         </div>
       </div>
     </div>
+
     <!-- ========================================================= -->
     <!-- TAB 6: TEAM & RIDERS (CREATE / DELETE RIDER & KITCHEN)    -->
     <!-- ========================================================= -->
@@ -895,6 +905,105 @@
       </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- TAB 7: OWNER DISPATCH CHAT (KITCHEN & RIDERS + READ RECEIPT) -->
+    <!-- ========================================================= -->
+    <div id="tab-chat" class="tab-content space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.07] pb-4">
+        <div>
+          <h2 class="text-xl font-black text-white">Kitchen &amp; Rider Dispatch Chat</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Send direct notes to Kitchen or a specific logged-in rider and see when they read it</p>
+        </div>
+        <button type="button" onclick="window.location.reload()"
+          class="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-bold text-zinc-200 transition">
+          Refresh Read Receipts
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <!-- Send Message Box -->
+        <div class="xl:col-span-5 apple-card rounded-2xl p-5 sm:p-6 h-fit space-y-4">
+          <h3 class="text-sm font-black text-yellow-400 uppercase tracking-wider">Send Direct Message</h3>
+
+          <div>
+            <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">Recipient</label>
+            <select id="chatTargetSelect" class="w-full apple-well rounded-xl px-4 py-3 text-xs sm:text-sm font-bold text-white focus:border-yellow-400 outline-none">
+              <option value="KITCHEN">Kitchen (All KDS Screens)</option>
+              {% for rn in rider_notes %}
+              <option value="RIDER:{{ rn.id }}">Rider: {{ rn.username|title }}</option>
+              {% endfor %}
+              {% if not rider_notes %}
+                {% for r in riders %}
+                <option value="RIDER:{{ r.id }}">Rider: {{ r.username|title }}</option>
+                {% endfor %}
+              {% endif %}
+            </select>
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">Message</label>
+            <textarea id="chatMessageInput" rows="3" maxlength="240"
+              placeholder="e.g. Hold non-veg packets 2 mins, or collect exact ₹420 cash at Khamasa gate..."
+              class="w-full apple-well rounded-xl px-4 py-3 text-xs sm:text-sm text-white placeholder-zinc-500 focus:border-yellow-400 outline-none"></textarea>
+          </div>
+
+          <button type="button" id="sendOwnerChatBtn" onclick="sendOwnerChatMessage()"
+            class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs sm:text-sm font-black transition active:scale-[0.99]">
+            Send Message
+          </button>
+        </div>
+
+        <!-- Live Read-Receipt Status Cards -->
+        <div class="xl:col-span-7 space-y-3">
+          <!-- Kitchen Receipt Card -->
+          <div id="receipt-card-KITCHEN" class="apple-card rounded-2xl p-4 sm:p-5 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-black uppercase tracking-wider text-yellow-400">Kitchen KDS</span>
+              <span id="receipt-status-KITCHEN" class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold {% if kitchen_note and kitchen_note.read %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% elif kitchen_note %}bg-amber-500/15 text-amber-300 border border-amber-500/30{% else %}bg-white/[0.06] text-zinc-400{% endif %}">
+                {% if kitchen_note and kitchen_note.read %}
+                  ✓ Read at {{ kitchen_note.read_at }}
+                {% elif kitchen_note %}
+                  Unread (Pending)
+                {% else %}
+                  No message sent
+                {% endif %}
+              </span>
+            </div>
+            <p id="receipt-msg-KITCHEN" class="text-xs sm:text-sm font-bold text-white">
+              {{ kitchen_note.message|default:"No active message for Kitchen." }}
+            </p>
+            <p id="receipt-meta-KITCHEN" class="text-[11px] text-zinc-500">
+              {% if kitchen_note %}Sent at {{ kitchen_note.sent_at }} by {{ kitchen_note.sent_by }}{% else %}—{% endif %}
+            </p>
+          </div>
+
+          <!-- Per-Rider Receipt Cards -->
+          {% for rn in rider_notes %}
+          <div id="receipt-card-RIDER_{{ rn.id }}" class="apple-card rounded-2xl p-4 sm:p-5 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-black uppercase tracking-wider text-sky-400">Rider: {{ rn.username|title }}</span>
+              <span id="receipt-status-RIDER_{{ rn.id }}" class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold {% if rn.note and rn.note.read %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30{% elif rn.note %}bg-amber-500/15 text-amber-300 border border-amber-500/30{% else %}bg-white/[0.06] text-zinc-400{% endif %}">
+                {% if rn.note and rn.note.read %}
+                  ✓ Read at {{ rn.note.read_at }}
+                {% elif rn.note %}
+                  Unread (Pending)
+                {% else %}
+                  No message sent
+                {% endif %}
+              </span>
+            </div>
+            <p id="receipt-msg-RIDER_{{ rn.id }}" class="text-xs sm:text-sm font-bold text-white">
+              {{ rn.note.message|default:"No active message for this rider." }}
+            </p>
+            <p id="receipt-meta-RIDER_{{ rn.id }}" class="text-[11px] text-zinc-500">
+              {% if rn.note %}Sent at {{ rn.note.sent_at }} by {{ rn.note.sent_by }}{% else %}—{% endif %}
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- Instant Zero-Refresh Toast Notification -->
@@ -938,6 +1047,48 @@
       toast.classList.remove('hidden');
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => toast.classList.add('hidden'), 2400);
+    }
+
+    // NEW: Send Direct Message to Kitchen or Rider
+    async function sendOwnerChatMessage() {
+      const target = document.getElementById('chatTargetSelect')?.value || 'KITCHEN';
+      const msgInput = document.getElementById('chatMessageInput');
+      const message = (msgInput?.value || '').trim();
+      if (!message) return showToast('Type a message first.', true);
+
+      const btn = document.getElementById('sendOwnerChatBtn');
+      if (btn) btn.disabled = true;
+
+      try {
+        const res = await fetch("{% url 'api_owner_send_note' %}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ target, message })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          return showToast(data.error || 'Could not send message.', true);
+        }
+
+        const safeKey = target.replace(':', '_');
+        const statusEl = document.getElementById(`receipt-status-${safeKey}`);
+        const msgEl = document.getElementById(`receipt-msg-${safeKey}`);
+        const metaEl = document.getElementById(`receipt-meta-${safeKey}`);
+
+        if (statusEl) {
+          statusEl.className = "px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-500/15 text-amber-300 border border-amber-500/30";
+          statusEl.textContent = "Unread (Pending)";
+        }
+        if (msgEl) msgEl.textContent = data.note.message;
+        if (metaEl) metaEl.textContent = `Sent at ${data.note.sent_at} by ${data.note.sent_by}`;
+
+        if (msgInput) msgInput.value = '';
+        showToast('Message sent!');
+      } catch (e) {
+        showToast('Network error sending message.', true);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     }
 
     // Zero-Refresh Shop Open / Closed Master Switch
@@ -1614,6 +1765,7 @@
         btn.disabled = false;
       }
     }
+
     // Zero-Refresh Create Rider / Kitchen Staff
     async function createStaff() {
       const roleRadio = document.querySelector('input[name="newStaffRole"]:checked');

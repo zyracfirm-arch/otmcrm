@@ -52,4 +52,11 @@ urlpatterns = [
 
     path('otm-vault-9921/staff/create/', views.api_create_staff, name='api_create_staff'),
     path('otm-vault-9921/staff/<int:user_id>/delete/', views.api_delete_staff, name='api_delete_staff'),
+
+    path('account/', views.customer_auth_page, name='customer_auth_page'),
+    path('api/customer/change-password/', views.api_customer_change_password, name='api_customer_change_password'),
+
+    path('otm-vault-9921/api/note/send/', views.api_owner_send_note, name='api_owner_send_note'),
+    path('otm-vault-9921/api/note/ack/', views.api_ack_staff_note, name='api_ack_staff_note'),
+
 ]

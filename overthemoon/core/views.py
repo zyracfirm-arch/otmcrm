@@ -1,21 +1,26 @@
 import json
+import re
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.models import User, Group
+from django.core.cache import cache
 from django.db import transaction
+from django.db.models import Q
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.db.models import Q
-from django.contrib.auth.models import User, Group
+from django_ratelimit.decorators import ratelimit
+
 from .models import Category, MenuItem, Customer, Coupon, Order, OrderItem, ShopSettings
 from .security import shop_device_and_login_required
+from django.core.cache import cache
 
+from django.http import JsonResponse, Http404, HttpResponse
 
 # ==========================================
 # 1. PUBLIC WEBSITE VIEWS (Open to Customers)
@@ -276,6 +281,7 @@ def crm_orders_inbox(request):
     orders = Order.objects.exclude(status__in=['DONE', 'CANCELLED']).select_related('delivery_boy').prefetch_related('items').order_by('created_at')
     history_orders = Order.objects.filter(status__in=['DONE', 'CANCELLED']).select_related('delivery_boy').prefetch_related('items').order_by('-updated_at')[:500]
     riders = User.objects.filter(is_staff=True, is_superuser=False).exclude(username='kitchen')
+    kitchen_note = cache.get('otm_staff_note:KITCHEN')
 
     return render(request, 'crm_dashboard.html', {
         'orders': orders,
@@ -283,8 +289,8 @@ def crm_orders_inbox(request):
         'today_str': today.strftime('%Y-%m-%d'),
         'riders': riders,
         'is_owner': request.user.is_superuser,
+        'kitchen_note': kitchen_note,
     })
-
 
 @shop_device_and_login_required(owner_only=False)
 @require_POST
@@ -315,11 +321,13 @@ def delivery_dashboard(request):
         status='DONE'
     ).prefetch_related('items').order_by('-updated_at')[:100]
 
+    rider_note = cache.get(f'otm_staff_note:RIDER:{request.user.id}')
+
     return render(request, 'delivery_dashboard.html', {
         'orders': orders,
         'history_orders': history_orders,
+        'rider_note': rider_note,
     })
-
 
 @shop_device_and_login_required(owner_only=False)
 @require_POST
@@ -411,6 +419,7 @@ def crm_owner_portal(request):
     # Fetch Riders & Kitchen Staff (exclude owner/superusers)
     staff_users = User.objects.filter(is_staff=True, is_superuser=False).prefetch_related('groups').order_by('-date_joined')
     staff_members = []
+    rider_notes = []
     for u in staff_users:
         group_names = [g.name.lower() for g in u.groups.all()]
         role = 'RIDER' if ('rider' in group_names or 'delivery' in group_names) else 'KITCHEN'
@@ -420,6 +429,14 @@ def crm_owner_portal(request):
             'role': role,
             'joined': timezone.localtime(u.date_joined).strftime('%d %b %Y'),
         })
+        if role == 'RIDER':
+            rider_notes.append({
+                'id': u.id,
+                'username': u.username,
+                'note': cache.get(f'otm_staff_note:RIDER:{u.id}'),
+            })
+
+    kitchen_note = cache.get('otm_staff_note:KITCHEN')
 
     return render(request, 'crm_owner.html', {
         'orders_json': json.dumps(orders_data),
@@ -436,6 +453,8 @@ def crm_owner_portal(request):
         'coupons': Coupon.objects.all(),
         'shop_settings': ShopSettings.get_solo(),
         'staff_members': staff_members,
+        'kitchen_note': kitchen_note,
+        'rider_notes': rider_notes,
     })
 
 
@@ -620,54 +639,121 @@ def crm_logout(request):
     return redirect('public_menu')
 
 
+import re
+from django.core.cache import cache
+from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+
+WEAK_PINS = {
+    '000000', '111111', '222222', '333333', '444444', '555555',
+    '666666', '777777', '888888', '999999', '123456', '654321',
+    '123123', '112233', '0000', '1111', '1234', 'password', 'qwerty'
+}
+
+def _get_client_ip(request):
+    xff = request.META.get('HTTP_X_FORWARDED_FOR')
+    if xff:
+        return xff.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', 'unknown')
+
+def _normalize_phone(raw_phone):
+    digits = re.sub(r'\D', '', raw_phone or '')
+    if len(digits) == 12 and digits.startswith('91'):
+        digits = digits[2:]
+    elif len(digits) == 11 and digits.startswith('0'):
+        digits = digits[1:]
+    return digits
+
+@ratelimit(key='ip', rate='5/m', method='POST', block=False)
 @require_POST
 def api_customer_auth(request):
+    if getattr(request, 'limited', False):
+        return JsonResponse({
+            'success': False,
+            'error': 'Too many requests. Please wait a minute and try again.'
+        }, status=429)
+
     try:
-        data = json.loads(request.body)
+        data = json.loads(request.body or '{}')
     except Exception:
         return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
 
-    phone = (data.get('phone') or '').strip()
+    phone = _normalize_phone(data.get('phone'))
     pin = (data.get('pin') or '').strip()
-    name = (data.get('name') or '').strip()
-    action = data.get('action')
+    name = (data.get('name') or '').strip()[:60]
+    action = (data.get('action') or '').strip().lower()
+    ip = _get_client_ip(request)
 
-    if not phone or not pin:
-        return JsonResponse({'success': False, 'error': 'Phone and PIN are required.'})
+    # 1. Validate 10-digit Indian mobile number
+    if len(phone) != 10:
+        return JsonResponse({'success': False, 'error': 'Enter a valid 10-digit mobile number.'}, status=400)
+
+    if not pin:
+        return JsonResponse({'success': False, 'error': 'Phone and Password/PIN are required.'}, status=400)
+
+    # 2. Brute-force protection (lockout after 5 failed tries for 15 mins)
+    lock_key = f"otm_auth_lock:{ip}:{phone}"
+    ip_burst_key = f"otm_auth_ip:{ip}"
+
+    if cache.get(lock_key, 0) >= 5 or cache.get(ip_burst_key, 0) >= 20:
+        return JsonResponse({
+            'success': False,
+            'error': 'Too many attempts. Please wait 15 minutes and try again.'
+        }, status=429)
 
     if action == 'signup':
+        # Enforce stronger password/PIN (min 6 chars, no obvious sequences)
+        if len(pin) < 6:
+            return JsonResponse({
+                'success': False,
+                'error': 'Use at least 6 characters (letters or numbers) for your password.'
+            }, status=400)
+
+        if pin.lower() in WEAK_PINS or pin == phone or len(set(pin)) <= 2:
+            return JsonResponse({
+                'success': False,
+                'error': 'That password is too easy to guess. Pick a stronger one.'
+            }, status=400)
+
         if User.objects.filter(username=phone).exists():
-            return JsonResponse({'success': False, 'error': 'Number already registered. Please login.'})
-        
+            return JsonResponse({'success': False, 'error': 'Number already registered. Please login.'}, status=400)
+
         with transaction.atomic():
             user = User.objects.create_user(username=phone, password=pin)
-            customer = Customer.objects.filter(phone=phone).first()
+            customer = Customer.objects.filter(phone=phone, user__isnull=True).first()
             if customer:
                 customer.user = user
                 if name:
                     customer.name = name
-                customer.save()
-                login(request, user)
-                return JsonResponse({'success': True, 'name': customer.name})
+                customer.save(update_fields=['user', 'name'])
             else:
                 guest_name = name or 'Guest'
-                Customer.objects.create(user=user, phone=phone, name=guest_name)
-                login(request, user)
-                return JsonResponse({'success': True, 'name': guest_name})
+                customer = Customer.objects.create(user=user, phone=phone, name=guest_name)
+
+            login(request, user)
+            cache.delete(lock_key)
+            return JsonResponse({'success': True, 'name': customer.name})
 
     elif action == 'login':
         user = authenticate(request, username=phone, password=pin)
         if user is not None and not user.is_staff:
             login(request, user)
+            cache.delete(lock_key)  # Reset lockout counter on success
             customer, _ = Customer.objects.get_or_create(
                 user=user,
                 defaults={'phone': phone, 'name': user.first_name or 'Guest'}
             )
             return JsonResponse({'success': True, 'name': customer.name})
-        return JsonResponse({'success': False, 'error': 'Invalid Phone Number or PIN.'})
+
+        # Record failed attempt for both (IP + Phone) and IP-wide burst
+        cache.set(lock_key, cache.get(lock_key, 0) + 1, timeout=900)        # 15 min
+        cache.set(ip_burst_key, cache.get(ip_burst_key, 0) + 1, timeout=900)
+        return JsonResponse({'success': False, 'error': 'Invalid Phone Number or Password.'}, status=401)
 
     return JsonResponse({'success': False, 'error': 'Invalid authentication action.'}, status=400)
-
 
 def customer_dashboard(request):
     if not request.user.is_authenticated or request.user.is_staff:
@@ -691,3 +777,127 @@ def api_kds_poll(request):
         'new_count': live_orders.filter(status='NEW').count(),
         'live_count': live_orders.count(),
     })
+
+
+
+
+def customer_auth_page(request):
+    """Dedicated branded Login, Signup & Change Password page for customers."""
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('crm_orders_inbox')
+
+    customer = None
+    if request.user.is_authenticated:
+        customer = Customer.objects.filter(user=request.user).first()
+
+    return render(request, 'customer_auth.html', {
+        'customer': customer,
+        'shop_whatsapp': '919825000000',  # Replace with Chef Ubedullah's WhatsApp number (with 91)
+    })
+
+
+@ratelimit(key='ip', rate='5/m', method='POST', block=False)
+@require_POST
+def api_customer_change_password(request):
+    """Allows a logged-in customer to securely change their password."""
+    if getattr(request, 'limited', False):
+        return JsonResponse({'success': False, 'error': 'Too many attempts. Wait a minute.'}, status=429)
+
+    if not request.user.is_authenticated or request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Please sign in first.'}, status=401)
+
+    try:
+        data = json.loads(request.body or '{}')
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
+
+    current_pw = (data.get('current_password') or '').strip()
+    new_pw = (data.get('new_password') or '').strip()
+
+    if not current_pw or not new_pw:
+        return JsonResponse({'success': False, 'error': 'Both current and new passwords are required.'}, status=400)
+
+    if not request.user.check_password(current_pw):
+        return JsonResponse({'success': False, 'error': 'Current password is incorrect.'}, status=400)
+
+    if len(new_pw) < 6:
+        return JsonResponse({'success': False, 'error': 'New password must be at least 6 characters.'}, status=400)
+
+    if new_pw.lower() in WEAK_PINS or new_pw == request.user.username or len(set(new_pw)) <= 2:
+        return JsonResponse({'success': False, 'error': 'New password is too easy to guess. Pick a stronger one.'}, status=400)
+
+    request.user.set_password(new_pw)
+    request.user.save()
+    update_session_auth_hash(request, request.user)  # Keeps customer logged in after password change
+
+    return JsonResponse({'success': True, 'message': 'Password updated successfully!'})
+
+
+
+@shop_device_and_login_required(owner_only=True)
+@require_POST
+def api_owner_send_note(request):
+    try:
+        data = json.loads(request.body or '{}')
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
+
+    target = (data.get('target') or 'KITCHEN').strip().upper()  # 'KITCHEN' or 'RIDER:<user_id>'
+    message = (data.get('message') or '').strip()[:240]
+
+    if not message:
+        return JsonResponse({'success': False, 'error': 'Message cannot be empty.'}, status=400)
+
+    if target != 'KITCHEN':
+        if not target.startswith('RIDER:'):
+            return JsonResponse({'success': False, 'error': 'Invalid recipient.'}, status=400)
+        rider_id = target.split(':', 1)[1]
+        if not User.objects.filter(id=rider_id, is_staff=True).exists():
+            return JsonResponse({'success': False, 'error': 'Rider not found.'}, status=404)
+
+    payload = {
+        'id': int(timezone.now().timestamp() * 1000),
+        'target': target,
+        'message': message,
+        'sent_by': request.user.username,
+        'sent_at': timezone.localtime(timezone.now()).strftime('%I:%M %p'),
+        'read': False,
+        'read_at': None,
+    }
+
+    cache.set(f"otm_staff_note:{target}", payload, timeout=86400)
+    return JsonResponse({'success': True, 'note': payload})
+
+
+@shop_device_and_login_required(owner_only=False)
+@require_POST
+def api_ack_staff_note(request):
+    try:
+        data = json.loads(request.body or '{}')
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid request.'}, status=400)
+
+    target = (data.get('target') or '').strip().upper()
+
+    # Enforce strict per-user / role access
+    if target == 'KITCHEN':
+        if not request.user.is_staff:
+            return JsonResponse({'success': False, 'error': 'Unauthorized.'}, status=403)
+    elif target == f"RIDER:{request.user.id}":
+        pass
+    elif not request.user.is_superuser:
+        return JsonResponse({'success': False, 'error': 'You can only mark your own message as read.'}, status=403)
+
+    cache_key = f"otm_staff_note:{target}"
+    note = cache.get(cache_key)
+    if not note:
+        return JsonResponse({'success': False, 'error': 'No active message found.'}, status=404)
+
+    if not note.get('read'):
+        note['read'] = True
+        note['read_at'] = timezone.localtime(timezone.now()).strftime('%I:%M %p')
+        cache.set(cache_key, note, timeout=86400)
+
+    return JsonResponse({'success': True, 'note': note})
+
+

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Member Access — Over The Moon</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #070709; color: #f4f4f5; -webkit-font-smoothing: antialiased; }
+    .otm-card { background: #101014; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset, 0 24px 60px -20px rgba(0, 0, 0, 0.9); }
+    .otm-input { background: #09090C; border: 1px solid rgba(255, 255, 255, 0.09); transition: border-color 0.15s; }
+    .otm-input:focus { border-color: #FACC15; outline: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-yellow-400 selection:text-black">
+
+  <!-- Brand Header -->
+  <div class="w-full max-w-md mb-6 flex items-center justify-between">
+    <a href="{% url 'public_menu' %}" class="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition">
+      <span>← Back to Menu</span>
+    </a>
+    <span class="text-[10px] font-black uppercase tracking-widest text-yellow-400/90">Khamasa, Ahmedabad</span>
+  </div>
+
+  <!-- Main Card -->
+  <div class="w-full max-w-md otm-card rounded-3xl p-6 sm:p-8 space-y-6">
+    <!-- Logo & Title -->
+    <div class="flex flex-col items-center text-center">
+      <div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-yellow-400/60 shadow-[0_0_24px_rgba(250,204,21,0.18)] mb-3.5">
+        <svg viewBox="0 0 120 120" class="w-full h-full">
+          <rect width="120" height="120" rx="28" fill="#FACC15"/>
+          <circle cx="60" cy="46" r="34" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4.5"/>
+          <ellipse cx="60" cy="47" rx="26" ry="22" fill="#1E1B4B"/>
+          <path d="M40 36 C47 29, 60 29, 68 33" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.9"/>
+          <path d="M35 76 C35 66, 85 66, 85 76 L90 100 C90 106, 30 106, 30 100 Z" fill="#FFFFFF" stroke="#1E1B4B" stroke-width="4"/>
+          <path d="M38 72 C38 57, 82 57, 82 72 Z" fill="#F59E0B" stroke="#1E1B4B" stroke-width="3.5"/>
+          <rect x="38" y="77" width="44" height="7" rx="3.5" fill="#78350F" stroke="#1E1B4B" stroke-width="3"/>
+          <rect x="40" y="84" width="40" height="7" rx="3.5" fill="#F59E0B" stroke="#1E1B4B" stroke-width="3.5"/>
+        </svg>
+      </div>
+      <h1 class="text-xl font-black text-white tracking-tight">OVER THE MOON</h1>
+      <p class="text-xs text-zinc-400 mt-1">
+        {% if user.is_authenticated %}
+          Signed in as <strong class="text-yellow-400">{{ customer.name|default:user.username }}</strong>
+        {% else %}
+          Sign in for faster checkout, order tracking &amp; VIP rewards
+        {% endif %}
+      </p>
+    </div>
+
+    {% if user.is_authenticated %}
+    <!-- ================================================= -->
+    <!-- LOGGED-IN VIEW: CHANGE PASSWORD & QUICK ACTIONS   -->
+    <!-- ================================================= -->
+    <div class="space-y-4">
+      <div class="p-3.5 rounded-2xl bg-[#09090C] border border-white/[0.06] flex items-center justify-between text-xs">
+        <span class="text-zinc-400 font-semibold">Registered Mobile</span>
+        <span class="font-black text-white">{{ user.username }}</span>
+      </div>
+
+      <div class="pt-2 border-t border-white/[0.07] space-y-3">
+        <h2 class="text-xs font-black uppercase tracking-wider text-yellow-400">Change Password</h2>
+
+        <input id="curPw" type="password" placeholder="Current Password"
+          class="otm-input w-full rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500">
+        <input id="newPw" type="password" placeholder="New Password (min 6 characters)"
+          class="otm-input w-full rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500">
+        <input id="confirmPw" type="password" placeholder="Confirm New Password"
+          class="otm-input w-full rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500">
+
+        <p id="pwMsg" class="hidden text-xs font-bold"></p>
+
+        <button type="button" id="changePwBtn" onclick="submitChangePassword()"
+          class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition active:scale-[0.99]">
+          Update Password
+        </button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 pt-2">
+        <a href="{% url 'public_menu' %}" class="py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-center text-xs font-bold text-white transition">
+          Menu
+        </a>
+        <a href="{% url 'customer_dashboard' %}" class="py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-center text-xs font-bold text-white transition">
+          My Orders
+        </a>
+        <a href="{% url 'crm_logout' %}" class="py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-center text-xs font-bold text-red-400 transition">
+          Sign Out
+        </a>
+      </div>
+    </div>
+
+    {% else %}
+    <!-- ================================================= -->
+    <!-- GUEST VIEW: LOGIN / SIGNUP + FORGOT PASSWORD      -->
+    <!-- ================================================= -->
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-1.5 p-1 bg-[#09090C] rounded-xl border border-white/[0.08]">
+        <button type="button" id="tabLogin" onclick="switchMode('login')" class="py-2.5 rounded-lg text-xs font-black bg-yellow-400 text-black transition">Sign In</button>
+        <button type="button" id="tabSignup" onclick="switchMode('signup')" class="py-2.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition">Create Account</button>
+      </div>
+
+      <div id="nameWrap" class="hidden">
+        <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1">Full Name</label>
+        <input id="authName" type="text" placeholder="e.g. Ayaan Shaikh"
+          class="otm-input w-full rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500">
+      </div>
+
+      <div>
+        <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1">Mobile Number</label>
+        <input id="authPhone" type="tel" maxlength="10" placeholder="10-Digit Mobile Number"
+          class="otm-input w-full rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500">
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Password</label>
+          <button type="button" id="forgotBtn" onclick="requestPasswordReset()" class="text-[11px] font-bold text-yellow-400 hover:underline">
+            Forgot Password?
+          </button>
+        </div>
+        <div class="relative">
+          <input id="authPin" type="password" placeholder="Enter your password"
+            class="otm-input w-full rounded-xl pl-4 pr-12 py-3 text-sm text-white placeholder-zinc-500">
+          <button type="button" id="togglePwBtn" onclick="togglePwVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-zinc-400 hover:text-white">
+            Show
+          </button>
+        </div>
+        <p id="pwHint" class="hidden text-[11px] text-zinc-500 mt-1.5">Use at least 6 characters (avoid 123456 or your phone number).</p>
+      </div>
+
+      <p id="authError" class="hidden text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-2.5"></p>
+
+      <button type="button" id="authSubmitBtn" onclick="submitAuth()"
+        class="w-full py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-black transition active:scale-[0.99]">
+        Sign In
+      </button>
+    </div>
+    {% endif %}
+  </div>
+
+  <p class="mt-6 text-[11px] text-zinc-500 font-medium">
+    Secured by <strong class="text-zinc-300">Over The Moon</strong> • Khamasa, Ahmedabad
+  </p>
+
+  {% csrf_token %}
+
+  <script>
+    let authMode = 'login';
+    const SHOP_WHATSAPP = "{{ shop_whatsapp }}";
+
+    function getCsrf() {
+      const el = document.querySelector('[name=csrfmiddlewaretoken]');
+      return el ? el.value : '';
+    }
+
+    function switchMode(mode) {
+      authMode = mode;
+      const isSignup = mode === 'signup';
+      document.getElementById('tabLogin').className = !isSignup
+        ? "py-2.5 rounded-lg text-xs font-black bg-yellow-400 text-black transition"
+        : "py-2.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition";
+      document.getElementById('tabSignup').className = isSignup
+        ? "py-2.5 rounded-lg text-xs font-black bg-yellow-400 text-black transition"
+        : "py-2.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white transition";
+
+      document.getElementById('nameWrap').classList.toggle('hidden', !isSignup);
+      document.getElementById('pwHint').classList.toggle('hidden', !isSignup);
+      document.getElementById('forgotBtn').classList.toggle('hidden', isSignup);
+      document.getElementById('authPin').placeholder = isSignup ? "Create Password (min 6 chars)" : "Enter your password";
+      document.getElementById('authSubmitBtn').textContent = isSignup ? "Create Account" : "Sign In";
+      document.getElementById('authError').classList.add('hidden');
+    }
+
+    function togglePwVisibility() {
+      const inp = document.getElementById('authPin');
+      const btn = document.getElementById('togglePwBtn');
+      const show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      if (btn) btn.textContent = show ? 'Hide' : 'Show';
+    }
+
+    function requestPasswordReset() {
+      const phone = (document.getElementById('authPhone')?.value || '').trim();
+      const msg = phone
+        ? `Hi Over The Moon! I forgot my account password for mobile number ${phone}. Please help me reset it.`
+        : `Hi Over The Moon! I forgot my account password. Please help me reset it.`;
+      window.open(`https://wa.me/${SHOP_WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+    }
+
+    async function submitAuth() {
+      const errEl = document.getElementById('authError');
+      const btn = document.getElementById('authSubmitBtn');
+      errEl.classList.add('hidden');
+
+      const payload = {
+        action: authMode,
+        phone: document.getElementById('authPhone').value.trim(),
+        pin: document.getElementById('authPin').value.trim(),
+        name: document.getElementById('authName') ? document.getElementById('authName').value.trim() : ''
+      };
+
+      btn.disabled = true;
+      btn.textContent = 'Please wait...';
+      try {
+        const res = await fetch("{% url 'customer_auth' %}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          errEl.textContent = data.error || 'Authentication failed.';
+          errEl.classList.remove('hidden');
+          return;
+        }
+        window.location.href = "{% url 'public_menu' %}";
+      } catch (e) {
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = authMode === 'signup' ? 'Create Account' : 'Sign In';
+      }
+    }
+
+    async function submitChangePassword() {
+      const msgEl = document.getElementById('pwMsg');
+      const btn = document.getElementById('changePwBtn');
+      const curPw = document.getElementById('curPw').value.trim();
+      const newPw = document.getElementById('newPw').value.trim();
+      const confirmPw = document.getElementById('confirmPw').value.trim();
+
+      msgEl.classList.add('hidden');
+      if (newPw !== confirmPw) {
+        msgEl.className = "text-xs font-bold text-red-400";
+        msgEl.textContent = "New passwords do not match.";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Updating...';
+      try {
+        const res = await fetch("{% url 'api_customer_change_password' %}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+          body: JSON.stringify({ current_password: curPw, new_password: newPw })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          msgEl.className = "text-xs font-bold text-red-400";
+          msgEl.textContent = data.error || 'Could not update password.';
+          return;
+        }
+        msgEl.className = "text-xs font-bold text-emerald-400";
+        msgEl.textContent = data.message || 'Password updated!';
+        ['curPw', 'newPw', 'confirmPw'].forEach(id => document.getElementById(id).value = '');
+      } catch (e) {
+        msgEl.className = "text-xs font-bold text-red-400";
+        msgEl.textContent = 'Network error. Please try again.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Update Password';
+      }
+    }
+  </script>
+</body>
+</html>

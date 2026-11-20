@@ -136,7 +136,7 @@
   <!-- Sticky Kitchen Header -->
   <header class="sticky top-0 shrink-0 z-30 nav-surface px-4 sm:px-6 py-3">
     <div class="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-3">
-      
+
       <!-- Left Brand & Live Status -->
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-yellow-400/50">
@@ -150,7 +150,7 @@
             </span>
           </div>
           <p class="text-[11px] font-medium text-zinc-400 mt-1">
-            Chef Ubedulla Mansuri • <strong class="text-yellow-400">{{ orders|length }} Active</strong> • Separate Veg & Non-Veg Grills
+            Chef Ubedulla Mansuri • <strong class="text-yellow-400">{{ orders|length }} Active</strong> • Separate Veg &amp; Non-Veg Grills
           </p>
         </div>
       </div>
@@ -204,6 +204,37 @@
         </a>
       </div>
     </div>
+
+    <!-- NEW: OWNER-TO-KITCHEN MESSAGE STRIP (ONLY VISIBLE WHEN OWNER SENT A NOTE) -->
+    {% if kitchen_note %}
+    <div id="kitchenOwnerNoteBanner"
+         class="max-w-[1800px] mx-auto mt-2.5 px-3.5 py-2.5 rounded-xl flex flex-wrap items-center justify-between gap-3 border {% if kitchen_note.read %}bg-[#09090C] border-white/[0.08]{% else %}bg-yellow-400/10 border-yellow-400/40{% endif %}">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shrink-0 {% if kitchen_note.read %}bg-white/[0.07] text-zinc-400{% else %}bg-yellow-400 text-black{% endif %}">
+          Owner Note
+        </span>
+        <p class="text-xs sm:text-sm font-extrabold text-white truncate sm:whitespace-normal">
+          {{ kitchen_note.message }}
+        </p>
+        <span class="text-[11px] text-zinc-400 font-medium shrink-0 hidden md:inline">
+          • {{ kitchen_note.sent_by|title }} ({{ kitchen_note.sent_at }})
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0 ml-auto">
+        {% if kitchen_note.read %}
+        <span id="kitchenNoteStatusBadge" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-extrabold text-emerald-400">
+          ✓ Read at {{ kitchen_note.read_at }}
+        </span>
+        {% else %}
+        <button type="button" id="ackKitchenNoteBtn" onclick="ackKitchenNote()"
+          class="px-3 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black text-[11px] font-black transition active:scale-95">
+          Mark as Read
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
   </header>
 
   <!-- NEW: Live Incoming Order Alert Banner -->
@@ -258,7 +289,7 @@
             <!-- Auto-Injected Mixed Veg + Non-Veg Warning Banner -->
             <div class="mixed-alert hidden mt-2.5 ml-2 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/35 text-[11px] font-extrabold text-amber-300 flex items-center gap-1.5">
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
-              <span>MIXED ORDER: Pack Veg & Non-Veg in Separate Bags</span>
+              <span>MIXED ORDER: Pack Veg &amp; Non-Veg in Separate Bags</span>
             </div>
 
             {% if o.delivery_address and o.order_type == 'DELIVERY' %}
@@ -290,7 +321,7 @@
                 Decline
               </button>
               <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'PREP')" class="py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black transition active:scale-[0.98]">
-                Accept & Grill →
+                Accept &amp; Grill →
               </button>
             </div>
 
@@ -353,7 +384,7 @@
 
             <div class="mixed-alert hidden mt-2.5 ml-2 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/35 text-[11px] font-extrabold text-amber-300 flex items-center gap-1.5">
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
-              <span>MIXED ORDER: Separate Veg & Non-Veg Bags</span>
+              <span>MIXED ORDER: Separate Veg &amp; Non-Veg Bags</span>
             </div>
 
             <div class="mt-2.5 ml-2 p-3 rounded-xl qsr-well text-xs sm:text-sm space-y-1.5">
@@ -378,7 +409,7 @@
                 {% for r in riders %}<option value="{{ r.id }}">{{ r.username|title }}</option>{% endfor %}
               </select>
               <button type="button" data-id="{{ o.id }}" onclick="dispatchOrder(this.dataset.id)" class="w-full py-3 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition active:scale-[0.98]">
-                Assign Rider & Dispatch →
+                Assign Rider &amp; Dispatch →
               </button>
               {% else %}
               <button type="button" data-id="{{ o.id }}" onclick="setStatus(this.dataset.id, 'OUT')" class="w-full py-3 rounded-xl bg-sky-400 hover:bg-sky-300 text-black text-xs font-black transition active:scale-[0.98]">
@@ -512,7 +543,7 @@
 
       <!-- Top Control & Multi-Filter Bar -->
       <div class="qsr-ticket rounded-2xl p-5 space-y-4">
-        
+
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 class="text-base sm:text-xl font-black text-white">Complete Kitchen Order Archive</h2>
@@ -533,7 +564,7 @@
 
         <!-- Search + Date Picker + Dietary & Status Filter Pills -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-3 border-t border-white/[0.08]">
-          
+
           <div class="lg:col-span-4 relative">
             <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <input id="historySearch" oninput="applyHistoryFilters()" type="text" placeholder="Search Order ID, Customer, Phone, Burger, or Rider..."
@@ -572,7 +603,7 @@
              data-amount="{{ o.total_amount }}"
              data-diets="{% for i in o.items.all %}{% if i.is_veg %}VEG {% else %}NONVEG {% endif %}{% endfor %}"
              data-search="{{ o.order_number|lower }} {{ o.customer_name|lower }} {{ o.customer_phone }} {{ o.order_type|lower }} {% if o.delivery_boy %}{{ o.delivery_boy.username|lower }}{% endif %} {% for i in o.items.all %}{{ i.item_name|lower }} {% endfor %}">
-          
+
           <div>
             <div class="flex items-start justify-between gap-2 pb-3 border-b border-white/[0.07]">
               <div>
@@ -666,6 +697,24 @@
     let activeHistFilter = 'ALL';
     let kanbanDiet = 'ALL';
     let knownLatestId = null;
+    let otmKitchenAudioCtx = null;
+
+    function unlockKitchenAudio() {
+      try {
+        if (!otmKitchenAudioCtx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) otmKitchenAudioCtx = new AudioCtx();
+        }
+        if (otmKitchenAudioCtx && otmKitchenAudioCtx.state === 'suspended') {
+          otmKitchenAudioCtx.resume().catch(() => {});
+        }
+      } catch (e) {}
+      return otmKitchenAudioCtx;
+    }
+
+    // Unlock audio on the kitchen screen's first pointer/key interaction
+    document.addEventListener('pointerdown', unlockKitchenAudio, { once: true });
+    document.addEventListener('keydown', unlockKitchenAudio, { once: true });
 
     async function checkNewOrders() {
       if (document.getElementById('view-kanban').classList.contains('hidden')) return;
@@ -694,15 +743,48 @@
       } catch (e) {}
     }
 
-    // Grab baseline immediately on load, then poll every 30 seconds
+    // Grab baseline immediately on load, then poll every 10 seconds
     checkNewOrders();
-    setInterval(checkNewOrders, 30000);
+    setInterval(checkNewOrders, 10000);
 
     function getCookie(name) {
       let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
       if (v) return v[2];
       const inp = document.querySelector('[name=csrfmiddlewaretoken]');
       return inp ? inp.value : '';
+    }
+
+    // =========================================================
+    // NEW: ACKNOWLEDGE OWNER NOTE (READ RECEIPT FOR OWNER)
+    // =========================================================
+    async function ackKitchenNote() {
+      const btn = document.getElementById('ackKitchenNoteBtn');
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch("{% url 'api_ack_staff_note' %}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ target: 'KITCHEN' })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          if (btn) btn.disabled = false;
+          return;
+        }
+        const banner = document.getElementById('kitchenOwnerNoteBanner');
+        if (banner) {
+          banner.className = "max-w-[1800px] mx-auto mt-2.5 px-3.5 py-2.5 rounded-xl flex flex-wrap items-center justify-between gap-3 border bg-[#09090C] border-white/[0.08]";
+        }
+        if (btn) {
+          const badge = document.createElement('span');
+          badge.id = 'kitchenNoteStatusBadge';
+          badge.className = 'px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-extrabold text-emerald-400';
+          badge.textContent = `✓ Read at ${data.note.read_at || 'Just now'}`;
+          btn.replaceWith(badge);
+        }
+      } catch (e) {
+        if (btn) btn.disabled = false;
+      }
     }
 
     // Highlight mixed Veg + Non-Veg orders automatically on load
@@ -843,29 +925,55 @@
     }
 
     // =========================================================
-    // NEW: LOUD 3-TONE KITCHEN CHIME + 12s SMART POLLING
+    // WARM MARIMBA-BELL KITCHEN CHIME (CLEAR & NON-IRRITATING)
     // =========================================================
     function playKitchenChime() {
       try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const ctx = new AudioCtx();
-        const notes = [880, 1108.73, 1318.51];
-        notes.forEach((freq, idx) => {
+        const ctx = unlockKitchenAudio();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2400, now);
+
+        const masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(0.0001, now);
+        masterGain.gain.exponentialRampToValueAtTime(0.45, now + 0.02);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.15);
+
+        filter.connect(masterGain);
+        masterGain.connect(ctx.destination);
+
+        // Warm ascending marimba-bell chord: C5 + G5 -> E5 + B5
+        const notes = [
+          { freq: 523.25, start: 0.00, dur: 0.42, amp: 0.55 },
+          { freq: 783.99, start: 0.02, dur: 0.45, amp: 0.35 },
+          { freq: 659.25, start: 0.22, dur: 0.65, amp: 0.60 },
+          { freq: 987.77, start: 0.24, dur: 0.72, amp: 0.35 },
+        ];
+
+        notes.forEach(({ freq, start, dur, amp }) => {
           const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
+          const noteGain = ctx.createGain();
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.14);
-          gain.gain.setValueAtTime(0.32, ctx.currentTime + idx * 0.14);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.14 + 0.55);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(ctx.currentTime + idx * 0.14);
-          osc.stop(ctx.currentTime + idx * 0.14 + 0.6);
+          osc.frequency.setValueAtTime(freq, now + start);
+
+          noteGain.gain.setValueAtTime(0.0001, now + start);
+          noteGain.gain.linearRampToValueAtTime(amp, now + start + 0.015);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, now + start + dur);
+
+          osc.connect(noteGain);
+          noteGain.connect(filter);
+
+          osc.start(now + start);
+          osc.stop(now + start + dur + 0.03);
         });
       } catch (e) {}
     }
 
     function toggleKitchenBell() {
+      unlockKitchenAudio();
       playKitchenChime();
     }
 
@@ -875,26 +983,6 @@
       playKitchenChime();
     }
     sessionStorage.setItem('otm_new_count', newCount);
-
-    // Smart 12-Second Poll (Plays Chime & Auto-Refreshes Only When Safe)
-    setInterval(async () => {
-      if (document.getElementById('view-kanban').classList.contains('hidden')) return;
-      try {
-        const res = await fetch('/otm-vault-9921/api/kds-poll/');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.latest_id > knownLatestId) {
-          knownLatestId = data.latest_id;
-          playKitchenChime();
-          const banner = document.getElementById('newOrderBanner');
-          if (banner) banner.classList.remove('hidden');
-          const activeEl = document.querySelector('input:focus, select:focus');
-          if (!activeEl) {
-            setTimeout(() => window.location.reload(), 1200);
-          }
-        }
-      } catch (e) {}
-    }, 10000);
 
     // =========================================================
     // NEW: 1-TAP 58mm/80mm THERMAL KOT PRINTER
@@ -959,7 +1047,7 @@
       const rider = btn.dataset.rider || 'our rider';
       const trackUrl = `${window.location.origin}${btn.dataset.trackurl}`;
 
-     let msg = '';
+      let msg = '';
       if (status === 'OUT') {
         msg = `Hello ${name}! Your Over The Moon order (${orderNum}) is OUT FOR DELIVERY with ${rider} and will reach you piping hot soon! Track live: ${trackUrl}`;
       } else if (status === 'READY') {
